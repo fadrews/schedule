@@ -1,0 +1,882 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Lab Scheduling</title>
+  <style>
+    :root{
+      --bg:#0b1020;
+      --panel:#111a33;
+      --panel2:#0f1730;
+      --text:#e7ecff;
+      --muted:#b8c0e0;
+      --line:#22305e;
+      --accent:#7aa2ff;
+      --good:#35d07f;
+      --warn:#ffcc66;
+      --bad:#ff5c7a;
+      --chip:#1b2650;
+      --shadow: 0 12px 30px rgba(0,0,0,.35);
+      --radius:14px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:var(--sans);
+      background: radial-gradient(1200px 800px at 20% 0%, #1a2a66 0%, var(--bg) 60%),
+                  radial-gradient(1200px 800px at 90% 20%, #3b1a66 0%, var(--bg) 55%);
+      color:var(--text);
+    }
+    header{
+      padding:18px 18px 0;
+      max-width:1400px;
+      margin:0 auto;
+    }
+    .titlebar{
+      display:flex;
+      gap:12px;
+      align-items:flex-end;
+      justify-content:space-between;
+      flex-wrap:wrap;
+    }
+    h1{
+      margin:0;
+      font-size:18px;
+      font-weight:700;
+      letter-spacing:.2px;
+    }
+    .subtitle{
+      margin:6px 0 0;
+      font-size:13px;
+      color:var(--muted);
+      line-height:1.35;
+      max-width:860px;
+    }
+
+    main{
+      padding:14px 18px 24px;
+      max-width:1400px;
+      margin:0 auto;
+    }
+
+    .panel{
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      border:1px solid rgba(255,255,255,.08);
+      box-shadow:var(--shadow);
+      border-radius:var(--radius);
+      padding:14px;
+    }
+    .row{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      align-items:stretch;
+    }
+    .row > .panel{flex:1}
+    .controls{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+    }
+    .leftControls, .rightControls{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+    .tabs{
+      display:inline-flex;
+      background:rgba(0,0,0,.22);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:999px;
+      padding:4px;
+      gap:4px;
+    }
+    .tab{
+      border:0;
+      color:var(--muted);
+      background:transparent;
+      padding:7px 10px;
+      border-radius:999px;
+      font-size:12px;
+      cursor:pointer;
+      user-select:none;
+    }
+    .tab.active{
+      background:rgba(122,162,255,.18);
+      color:var(--text);
+      box-shadow: inset 0 0 0 1px rgba(122,162,255,.25);
+    }
+
+    .btn{
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(0,0,0,.18);
+      color:var(--text);
+      padding:8px 10px;
+      border-radius:10px;
+      cursor:pointer;
+      font-size:12px;
+    }
+    .btn:hover{border-color:rgba(255,255,255,.18)}
+    .btn.primary{
+      background:rgba(122,162,255,.18);
+      border-color:rgba(122,162,255,.25);
+    }
+    .btn.danger{
+      background:rgba(255,92,122,.12);
+      border-color:rgba(255,92,122,.28);
+    }
+
+    .field{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    input[type="text"]{
+      background:rgba(0,0,0,.22);
+      color:var(--text);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:10px;
+      padding:8px 10px;
+      font-size:12px;
+      min-width:220px;
+      outline:none;
+    }
+    input[type="text"]::placeholder{color:rgba(184,192,224,.75)}
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      background:rgba(0,0,0,.18);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:999px;
+      padding:6px 10px;
+      font-size:12px;
+      color:var(--muted);
+    }
+    .chip strong{color:var(--text); font-weight:700}
+    .note{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:10px;
+      line-height:1.35;
+    }
+
+    .gridWrap{
+      overflow:auto;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.08);
+      margin-top:12px;
+      background:rgba(0,0,0,.12);
+    }
+    table{
+      border-collapse:separate;
+      border-spacing:0;
+      min-width:980px;
+      width:100%;
+      font-size:12px;
+    }
+    thead th{
+      position:sticky;
+      top:0;
+      z-index:5;
+      background:rgba(10,14,30,.92);
+      backdrop-filter: blur(6px);
+      border-bottom:1px solid rgba(255,255,255,.10);
+      padding:10px 8px;
+      text-align:left;
+      color:var(--muted);
+      font-weight:700;
+      white-space:nowrap;
+    }
+    thead th:first-child{left:0; z-index:6;}
+    tbody th{
+      position:sticky;
+      left:0;
+      z-index:4;
+      background:rgba(10,14,30,.92);
+      backdrop-filter: blur(6px);
+      border-right:1px solid rgba(255,255,255,.10);
+      color:var(--muted);
+      font-weight:700;
+      padding:10px 8px;
+      white-space:nowrap;
+      font-family:var(--mono);
+    }
+    td{
+      border-bottom:1px solid rgba(255,255,255,.07);
+      border-right:1px solid rgba(255,255,255,.07);
+      padding:8px;
+      vertical-align:top;
+      min-width:180px;
+      background:rgba(17,26,51,.35);
+    }
+    tr:last-child td{border-bottom:0}
+    td:last-child{border-right:0}
+
+    .slot{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      min-height:90px;
+    }
+    select{
+      width:100%;
+      background:rgba(0,0,0,.22);
+      color:var(--text);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:10px;
+      padding:7px 8px;
+      font-size:12px;
+      outline:none;
+    }
+    .slotTop{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      justify-content:space-between;
+    }
+    .who{
+      font-weight:700;
+      color:var(--text);
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      max-width:120px;
+    }
+    .smallBtn{
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(0,0,0,.18);
+      color:var(--text);
+      padding:6px 8px;
+      border-radius:10px;
+      font-size:11px;
+      cursor:pointer;
+    }
+    .smallBtn:hover{border-color:rgba(255,255,255,.18)}
+    .smallBtn.clear{color:rgba(255,255,255,.9)}
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      border-radius:999px;
+      padding:5px 8px;
+      font-size:11px;
+      background:rgba(0,0,0,.18);
+      border:1px solid rgba(255,255,255,.08);
+      color:var(--muted);
+      width:max-content;
+    }
+    .badge.bad{background:rgba(255,92,122,.12); border-color:rgba(255,92,122,.25); color:var(--text)}
+    .badge.good{background:rgba(53,208,127,.12); border-color:rgba(53,208,127,.22); color:var(--text)}
+    .inline{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    label{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      cursor:pointer;
+      user-select:none;
+      color:var(--muted);
+    }
+    input[type="checkbox"]{
+      width:15px; height:15px;
+      accent-color: var(--accent);
+    }
+
+    .twoCol{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+      margin-top:12px;
+    }
+    @media (max-width: 1050px){
+      .twoCol{grid-template-columns:1fr}
+      table{min-width:920px}
+    }
+
+    .hidden{display:none !important}
+
+    .toast{
+      position:fixed;
+      bottom:16px;
+      right:16px;
+      background:rgba(0,0,0,.35);
+      border:1px solid rgba(255,255,255,.12);
+      backdrop-filter: blur(10px);
+      box-shadow:var(--shadow);
+      padding:10px 12px;
+      border-radius:12px;
+      font-size:12px;
+      color:var(--text);
+      max-width:min(520px, calc(100vw - 32px));
+      display:none;
+    }
+    .toast.show{display:block}
+    .toast strong{color:var(--accent)}
+    .kpi{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+  </style>
+</head>
+
+<body>
+<header>
+  <div class="titlebar">
+    <div>
+      <h1>Lab Scheduling (GitHub Pages-friendly)</h1>
+      <p class="subtitle">
+        Sign up for 1-hour slots. Weekdays are <strong>Mon–Fri, 9:00–17:00</strong>. Weekend scheduling is available in a separate tab.
+        Each person can hold <strong>only one slot per context</strong> (ABC Lab or HF Project).
+        Use “Participant arriving” to flag slots where the signer must be present.
+      </p>
+    </div>
+    <div class="kpi">
+      <span class="chip">Storage: <strong>Local browser</strong></span>
+      <span class="chip">Share: <strong>Export / Import JSON</strong></span>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="panel">
+    <div class="controls">
+      <div class="leftControls">
+        <div class="tabs" role="tablist" aria-label="Schedule range">
+          <button class="tab active" id="tab-weekdays" type="button">Weekdays</button>
+          <button class="tab" id="tab-weekend" type="button">Weekend</button>
+        </div>
+
+        <div class="tabs" role="tablist" aria-label="Context display">
+          <button class="tab active" id="view-both" type="button">Both</button>
+          <button class="tab" id="view-abc" type="button">ABC only</button>
+          <button class="tab" id="view-hf" type="button">HF only</button>
+        </div>
+      </div>
+
+      <div class="rightControls">
+        <div class="field">
+          <input id="nameInput" type="text" placeholder="Add person (e.g., Jane Doe) and press Enter" />
+          <button class="btn primary" id="addNameBtn" type="button">Add</button>
+        </div>
+        <button class="btn" id="exportBtn" type="button">Export</button>
+        <button class="btn" id="importBtn" type="button">Import</button>
+        <button class="btn danger" id="resetBtn" type="button">Reset</button>
+      </div>
+    </div>
+
+    <p class="note">
+      Notes:
+      <br>• Names are shared across both contexts.
+      <br>• A person can book <strong>one</strong> slot in ABC Lab and <strong>one</strong> slot in HF Project (max) — booking a second slot in the same context is blocked.
+      <br>• Data persists in <strong>this browser</strong>. Use Export/Import to share or move schedules.
+    </p>
+  </div>
+
+  <div class="twoCol" style="margin-top:12px;">
+    <section class="panel" id="panelABC">
+      <div class="inline" style="justify-content:space-between;">
+        <div class="inline">
+          <span class="chip">Context: <strong>ABC Lab</strong></span>
+          <span class="chip">Rule: <strong>1 slot/person</strong></span>
+        </div>
+        <span class="badge" id="abcSummary">0 filled</span>
+      </div>
+      <div class="gridWrap" id="gridWrapABC"></div>
+    </section>
+
+    <section class="panel" id="panelHF">
+      <div class="inline" style="justify-content:space-between;">
+        <div class="inline">
+          <span class="chip">Context: <strong>HF Project</strong></span>
+          <span class="chip">Rule: <strong>1 slot/person</strong></span>
+        </div>
+        <span class="badge" id="hfSummary">0 filled</span>
+      </div>
+      <div class="gridWrap" id="gridWrapHF"></div>
+    </section>
+  </div>
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+  const STORAGE_KEY = "lab_scheduler_v1";
+
+  const CONTEXTS = [
+    { id: "ABC", label: "ABC Lab" },
+    { id: "HF",  label: "HF Project" }
+  ];
+
+  const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri"];
+  const WEEKEND  = ["Sat", "Sun"];
+
+  // 9:00–17:00 => 8 one-hour slots: 09-10 ... 16-17
+  const TIMES = [];
+  for (let h = 9; h < 17; h++) {
+    const pad = (n) => String(n).padStart(2, "0");
+    TIMES.push(`${pad(h)}:00–${pad(h+1)}:00`);
+  }
+
+  const el = (id) => document.getElementById(id);
+
+  const ui = {
+    tabWeekdays: el("tab-weekdays"),
+    tabWeekend:  el("tab-weekend"),
+
+    viewBoth: el("view-both"),
+    viewABC:  el("view-abc"),
+    viewHF:   el("view-hf"),
+
+    panelABC: el("panelABC"),
+    panelHF:  el("panelHF"),
+
+    nameInput: el("nameInput"),
+    addNameBtn: el("addNameBtn"),
+
+    exportBtn: el("exportBtn"),
+    importBtn: el("importBtn"),
+    resetBtn: el("resetBtn"),
+
+    gridWrapABC: el("gridWrapABC"),
+    gridWrapHF: el("gridWrapHF"),
+
+    abcSummary: el("abcSummary"),
+    hfSummary: el("hfSummary"),
+
+    toast: el("toast")
+  };
+
+  function toast(msg, kind="info"){
+    ui.toast.innerHTML = msg;
+    ui.toast.classList.add("show");
+    ui.toast.style.borderColor = kind === "bad"
+      ? "rgba(255,92,122,.35)"
+      : kind === "good"
+        ? "rgba(53,208,127,.28)"
+        : "rgba(255,255,255,.14)";
+    window.clearTimeout(toast._t);
+    toast._t = window.setTimeout(() => ui.toast.classList.remove("show"), 3000);
+  }
+
+  function defaultState(){
+    // slots[range][context][day][time] = { person: "", participant: false }
+    const makeSlots = (days) => {
+      const dayObj = {};
+      for (const d of days) {
+        dayObj[d] = {};
+        for (const t of TIMES) dayObj[d][t] = { person: "", participant: false };
+      }
+      return dayObj;
+    };
+
+    const slots = {
+      weekdays: { ABC: makeSlots(WEEKDAYS), HF: makeSlots(WEEKDAYS) },
+      weekend:  { ABC: makeSlots(WEEKEND),  HF: makeSlots(WEEKEND)  }
+    };
+
+    return {
+      version: 1,
+      names: [],
+      slots
+    };
+  }
+
+  function loadState(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return defaultState();
+      const parsed = JSON.parse(raw);
+
+      // Minimal forward compatibility
+      if(!parsed || typeof parsed !== "object") return defaultState();
+      if(!parsed.slots || !parsed.names) return defaultState();
+
+      return parsed;
+    }catch{
+      return defaultState();
+    }
+  }
+
+  function saveState(){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+
+  let state = loadState();
+
+  let activeRange = "weekdays"; // "weekdays" | "weekend"
+  let activeView  = "both";     // "both" | "ABC" | "HF"
+
+  function setActiveTab(buttonOn, buttonOff){
+    buttonOn.classList.add("active");
+    buttonOff.classList.remove("active");
+  }
+
+  function setRange(range){
+    activeRange = range;
+    setActiveTab(range === "weekdays" ? ui.tabWeekdays : ui.tabWeekend,
+                 range === "weekdays" ? ui.tabWeekend  : ui.tabWeekdays);
+    renderAll();
+  }
+
+  function setView(view){
+    activeView = view;
+
+    // Buttons
+    ui.viewBoth.classList.toggle("active", view === "both");
+    ui.viewABC.classList.toggle("active",  view === "ABC");
+    ui.viewHF.classList.toggle("active",   view === "HF");
+
+    // Panels
+    ui.panelABC.classList.toggle("hidden", view === "HF");
+    ui.panelHF.classList.toggle("hidden",  view === "ABC");
+  }
+
+  function normalizeName(name){
+    return name.trim().replace(/\s+/g, " ");
+  }
+
+  function addName(name){
+    const n = normalizeName(name);
+    if(!n) return;
+
+    const exists = state.names.some(x => x.toLowerCase() === n.toLowerCase());
+    if(exists){
+      toast(`Name already exists: <strong>${escapeHtml(n)}</strong>`, "bad");
+      return;
+    }
+
+    state.names.push(n);
+    state.names.sort((a,b) => a.localeCompare(b));
+    saveState();
+    renderAll();
+    toast(`Added <strong>${escapeHtml(n)}</strong>`, "good");
+  }
+
+  function escapeHtml(s){
+    return String(s)
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  function slotKey(range, ctx, day, time){
+    return `${range}::${ctx}::${day}::${time}`;
+  }
+
+  function getAllAssignments(range, ctx){
+    const out = new Map(); // personLower -> slotKey
+    const days = Object.keys(state.slots[range][ctx]);
+    for(const d of days){
+      const times = Object.keys(state.slots[range][ctx][d]);
+      for(const t of times){
+        const p = state.slots[range][ctx][d][t].person;
+        if(p){
+          out.set(p.toLowerCase(), slotKey(range, ctx, d, t));
+        }
+      }
+    }
+    return out;
+  }
+
+  function countFilled(range, ctx){
+    let filled = 0;
+    let flagged = 0;
+    const days = Object.keys(state.slots[range][ctx]);
+    for(const d of days){
+      for(const t of Object.keys(state.slots[range][ctx][d])){
+        const s = state.slots[range][ctx][d][t];
+        if(s.person) filled++;
+        if(s.participant) flagged++;
+      }
+    }
+    return { filled, flagged };
+  }
+
+  function renderSummary(){
+    const a = countFilled(activeRange, "ABC");
+    const h = countFilled(activeRange, "HF");
+
+    ui.abcSummary.className = "badge";
+    ui.hfSummary.className = "badge";
+
+    ui.abcSummary.textContent = `${a.filled} filled • ${a.flagged} participant`;
+    ui.hfSummary.textContent  = `${h.filled} filled • ${h.flagged} participant`;
+
+    if(a.flagged) ui.abcSummary.classList.add("bad");
+    if(h.flagged) ui.hfSummary.classList.add("bad");
+  }
+
+  function renderContext(ctxId, wrapEl){
+    const days = activeRange === "weekdays" ? WEEKDAYS : WEEKEND;
+
+    const assigned = getAllAssignments(activeRange, ctxId);
+
+    const table = document.createElement("table");
+    table.setAttribute("aria-label", `${ctxId} schedule table`);
+
+    const thead = document.createElement("thead");
+    const hr = document.createElement("tr");
+
+    const th0 = document.createElement("th");
+    th0.textContent = "Time";
+    hr.appendChild(th0);
+
+    for(const d of days){
+      const th = document.createElement("th");
+      th.textContent = d;
+      hr.appendChild(th);
+    }
+    thead.appendChild(hr);
+    table.appendChild(thead);
+
+    const tbody = document.createElement("tbody");
+
+    for(const time of TIMES){
+      const tr = document.createElement("tr");
+
+      const th = document.createElement("th");
+      th.textContent = time;
+      tr.appendChild(th);
+
+      for(const day of days){
+        const td = document.createElement("td");
+        const s = state.slots[activeRange][ctxId][day][time];
+
+        const slot = document.createElement("div");
+        slot.className = "slot";
+
+        // Top row: current name + clear
+        const top = document.createElement("div");
+        top.className = "slotTop";
+
+        const who = document.createElement("div");
+        who.className = "who";
+        who.title = s.person || "Unassigned";
+        who.textContent = s.person || "—";
+
+        const clearBtn = document.createElement("button");
+        clearBtn.className = "smallBtn clear";
+        clearBtn.type = "button";
+        clearBtn.textContent = "Clear";
+        clearBtn.disabled = !s.person && !s.participant;
+        clearBtn.addEventListener("click", () => {
+          state.slots[activeRange][ctxId][day][time] = { person: "", participant: false };
+          saveState();
+          renderAll();
+        });
+
+        top.appendChild(who);
+        top.appendChild(clearBtn);
+
+        // Dropdown
+        const sel = document.createElement("select");
+        const opt0 = document.createElement("option");
+        opt0.value = "";
+        opt0.textContent = "Select person…";
+        sel.appendChild(opt0);
+
+        for(const name of state.names){
+          const opt = document.createElement("option");
+          opt.value = name;
+          opt.textContent = name;
+
+          // Disable if name already booked in this context elsewhere
+          // (but keep enabled if it's the current selection for this slot)
+          const bookedElsewhere = assigned.has(name.toLowerCase()) && name !== s.person;
+          if(bookedElsewhere) opt.disabled = true;
+
+          sel.appendChild(opt);
+        }
+
+        sel.value = s.person || "";
+        sel.addEventListener("change", () => {
+          const next = sel.value;
+
+          // If selecting a new person, enforce 1-slot/person in this context.
+          if(next){
+            const key = assigned.get(next.toLowerCase());
+            if(key && next !== s.person){
+              toast(
+                `Blocked: <strong>${escapeHtml(next)}</strong> already has a slot in <strong>${ctxId}</strong> (${escapeHtml(key.split("::").slice(2,4).join(" • "))}).`,
+                "bad"
+              );
+              sel.value = s.person || "";
+              return;
+            }
+          }
+
+          // Update
+          state.slots[activeRange][ctxId][day][time].person = next;
+          saveState();
+          renderAll();
+        });
+
+        // Participant arriving toggle
+        const inline = document.createElement("div");
+        inline.className = "inline";
+
+        const label = document.createElement("label");
+        const cb = document.createElement("input");
+        cb.type = "checkbox";
+        cb.checked = !!s.participant;
+        cb.addEventListener("change", () => {
+          state.slots[activeRange][ctxId][day][time].participant = cb.checked;
+          saveState();
+          renderAll();
+        });
+
+        const span = document.createElement("span");
+        span.textContent = "Participant arriving";
+
+        label.appendChild(cb);
+        label.appendChild(span);
+
+        inline.appendChild(label);
+
+        // Badge status
+        const badge = document.createElement("div");
+        badge.className = "badge";
+        if(s.participant){
+          badge.classList.add("bad");
+          badge.textContent = "⚠ Must be present (participant)";
+        }else if(s.person){
+          badge.classList.add("good");
+          badge.textContent = "Scheduled";
+        }else{
+          badge.textContent = "Open";
+        }
+
+        slot.appendChild(top);
+        slot.appendChild(sel);
+        slot.appendChild(inline);
+        slot.appendChild(badge);
+
+        td.appendChild(slot);
+        tr.appendChild(td);
+      }
+
+      tbody.appendChild(tr);
+    }
+
+    table.appendChild(tbody);
+
+    wrapEl.innerHTML = "";
+    wrapEl.appendChild(table);
+  }
+
+  function renderAll(){
+    renderContext("ABC", ui.gridWrapABC);
+    renderContext("HF", ui.gridWrapHF);
+    renderSummary();
+    setView(activeView); // re-apply panel visibility
+  }
+
+  // Export / Import
+  function downloadText(filename, text){
+    const blob = new Blob([text], {type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  function exportState(){
+    const payload = {
+      ...state,
+      exportedAt: new Date().toISOString()
+    };
+    downloadText("lab-schedule-export.json", JSON.stringify(payload, null, 2));
+    toast("Exported JSON.", "good");
+  }
+
+  async function importState(){
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "application/json";
+    input.addEventListener("change", async () => {
+      const file = input.files && input.files[0];
+      if(!file) return;
+
+      try{
+        const text = await file.text();
+        const parsed = JSON.parse(text);
+
+        // Minimal validation
+        if(!parsed || typeof parsed !== "object" || !parsed.slots || !parsed.names){
+          toast("Import failed: JSON missing expected fields (names, slots).", "bad");
+          return;
+        }
+
+        state = parsed;
+        saveState();
+        renderAll();
+        toast("Imported JSON.", "good");
+      }catch(e){
+        toast("Import failed: invalid JSON.", "bad");
+      }
+    });
+    input.click();
+  }
+
+  function resetAll(){
+    const ok = confirm("Reset everything (names + schedules) in this browser?");
+    if(!ok) return;
+    state = defaultState();
+    saveState();
+    renderAll();
+    toast("Reset complete.", "good");
+  }
+
+  // Wire UI
+  ui.tabWeekdays.addEventListener("click", () => setRange("weekdays"));
+  ui.tabWeekend.addEventListener("click", () => setRange("weekend"));
+
+  ui.viewBoth.addEventListener("click", () => setView("both"));
+  ui.viewABC.addEventListener("click",  () => setView("ABC"));
+  ui.viewHF.addEventListener("click",   () => setView("HF"));
+
+  ui.addNameBtn.addEventListener("click", () => {
+    addName(ui.nameInput.value);
+    ui.nameInput.value = "";
+    ui.nameInput.focus();
+  });
+
+  ui.nameInput.addEventListener("keydown", (e) => {
+    if(e.key === "Enter"){
+      addName(ui.nameInput.value);
+      ui.nameInput.value = "";
+    }
+  });
+
+  ui.exportBtn.addEventListener("click", exportState);
+  ui.importBtn.addEventListener("click", importState);
+  ui.resetBtn.addEventListener("click", resetAll);
+
+  // Initial render
+  renderAll();
+})();
+</script>
+</body>
+</html>
