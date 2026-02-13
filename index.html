@@ -733,17 +733,6 @@
     }
   }
 
- (function autoAdvanceOnOpen(){
-    const nowISO = toISODate(mondayOfWeek(new Date()));
-    if(state.settings.weekStartISO !== nowISO){
-    // Only advance automatically if the stored week is in the past
-       if(parseISODate(state.settings.weekStartISO) < parseISODate(nowISO)){
-         state.settings.weekStartISO = toISODate(clampWeekStartToTerm(parseISODate(nowISO), state.settings.year, state.settings.term));
-         saveCache();
-        }
-    }
-})();
-
   function saveCache(){
     localStorage.setItem(LOCAL_CACHE_KEY, JSON.stringify(state));
   }
@@ -757,6 +746,17 @@
     const { year, term, weekStartISO } = state.settings;
     return `${year}::${term}::${weekStartISO}`;
   }
+
+ (function autoAdvanceOnOpen(){
+    const nowISO = toISODate(mondayOfWeek(new Date()));
+    if(state.settings.weekStartISO !== nowISO){
+    // Only advance automatically if the stored week is in the past
+       if(parseISODate(state.settings.weekStartISO) < parseISODate(nowISO)){
+         state.settings.weekStartISO = toISODate(clampWeekStartToTerm(parseISODate(nowISO), state.settings.year, state.settings.term));
+         saveCache();
+        }
+    }
+})();
 
   function ensureLocalScopeStructure(scope){
     if(state.cacheSlotsByScope[scope]) return;
