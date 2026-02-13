@@ -305,9 +305,6 @@
       text-align:center;
     }
 
-.hidden{display:none !important}
-input[type="checkbox"]{width:15px;height:15px;accent-color:var(--accent);}
-
     .hidden{display:none !important}
 
     .toast{
@@ -356,7 +353,8 @@ input[type="checkbox"]{width:15px;height:15px;accent-color:var(--accent);}
       border-color: rgba(255,107,147,.34);
       background: linear-gradient(180deg, rgba(255,107,147,.12), rgba(255,255,255,.03));
     }
-    /* 1) Strong “alert” styling when a participant is scheduled */
+
+    /* Strong “alert” styling when a participant is scheduled */
     .slot.participant{
       border: 1px solid rgba(255,107,147,.55);
       background: linear-gradient(180deg, rgba(255,107,147,.18), rgba(0,0,0,.10));
@@ -365,7 +363,7 @@ input[type="checkbox"]{width:15px;height:15px;accent-color:var(--accent);}
       box-shadow: 0 0 0 1px rgba(255,107,147,.25) inset;
     }
 
-    /* 2) Make the checkbox row more prominent in that state */
+    /* Make the checkbox row more prominent in that state */
     .slot.participant label{
       color: var(--text);
       font-weight: 900;
@@ -374,7 +372,7 @@ input[type="checkbox"]{width:15px;height:15px;accent-color:var(--accent);}
       transform: scale(1.15);
     }
 
-    /* 3) Make the badge unmistakable */
+    /* Make the badge unmistakable */
     .badge.bad{
       font-weight: 900;
       letter-spacing: .2px;
@@ -565,29 +563,6 @@ input[type="checkbox"]{width:15px;height:15px;accent-color:var(--accent);}
     TIMES.push(`${pad(h)}:00–${pad(h+1)}:00`);
   }
 
-  // Multi-RA encoding in the single "person" field (stored in Sheets)
-  const PERSON_DELIM = "; ";
-
-  function splitPeople(personStr){
-    return String(personStr || "")
-      .split(";")
-      .map(s => s.trim())
-      .filter(Boolean);
-  }
-
-  function joinPeople(arr){
-    const seen = new Set();
-    const out = [];
-    for (const x of (arr || [])) {
-      const v = String(x || "").trim();
-      if (!v) continue;
-      if (seen.has(v)) continue;
-      seen.add(v);
-      out.push(v);
-    }
-    return out.join(PERSON_DELIM);
-  }
-
   const el = (id) => document.getElementById(id);
 
   const ui = {
@@ -655,6 +630,27 @@ input[type="checkbox"]{width:15px;height:15px;accent-color:var(--accent);}
         : "rgba(255,255,255,.18)";
     clearTimeout(toast._t);
     toast._t = setTimeout(() => ui.toast.classList.remove("show"), 3000);
+  }
+
+  // =============================
+  // People parsing (2 RAs max)
+  // Stored as: "Name1 / Name2" in the Sheet
+  // =============================
+  const PEOPLE_DELIM = " / ";
+  function splitPeople(s){
+    const raw = String(s || "").trim();
+    if(!raw) return [];
+    return raw.split(PEOPLE_DELIM).map(x => x.trim()).filter(Boolean).slice(0,2);
+  }
+  function joinPeople(arr){
+    const clean = (arr || []).map(x => String(x||"").trim()).filter(Boolean);
+    // de-dupe while preserving order
+    const out = [];
+    for(const n of clean){
+      if(!out.includes(n)) out.push(n);
+      if(out.length >= 2) break;
+    }
+    return out.join(PEOPLE_DELIM);
   }
 
   // =============================
@@ -977,6 +973,10 @@ input[type="checkbox"]{width:15px;height:15px;accent-color:var(--accent);}
         const td = document.createElement("td");
         const s = slots[day][time];
 
+        const people = splitPeople(s.person);
+        const p1 = people[0] || "";
+        const p2 = people[1] || "";
+
         const slot = document.createElement("div");
         slot.className = "slot" + (s.participantScheduled ? " participant" : "");
 
@@ -986,7 +986,7 @@ input[type="checkbox"]{width:15px;height:15px;accent-color:var(--accent);}
         const who = document.createElement("div");
         who.className = "who";
         who.title = s.person || "Unassigned";
-        who.textContent = splitPeople(s.person).join(" + ") || "—";
+        who.textContent = s.person || "—";
 
         const clearBtn = document.createElement("button");
         clearBtn.className = "smallBtn";
@@ -1003,15 +1003,10 @@ input[type="checkbox"]{width:15px;height:15px;accent-color:var(--accent);}
         top.appendChild(who);
         top.appendChild(clearBtn);
 
-        // --- Multi-RA controls: primary select + "+" reveals 2nd select ---
-        const people = splitPeople(s.person);
-        const p1 = people[0] || "";
-        const p2 = people[1] || "";
-
+        // --- RA row: sel1 + +/- + (optional) sel2 on same line
         const selRow = document.createElement("div");
         selRow.className = "selRow";
 
-        // selects
         const sel1 = document.createElement("select");
         {
           const opt0 = document.createElement("option");
@@ -1019,7 +1014,7 @@ input[type="checkbox"]{width:15px;height:15px;accent-color:var(--accent);}
           opt0.textContent = "Select RA";
           sel1.appendChild(opt0);
 
-          for (const name of state.names) {
+          for(const name of state.names){
             const opt = document.createElement("option");
             opt.value = name;
             opt.textContent = name;
@@ -1035,7 +1030,7 @@ input[type="checkbox"]{width:15px;height:15px;accent-color:var(--accent);}
           opt0.textContent = "Select 2nd RA";
           sel2.appendChild(opt0);
 
-          for (const name of state.names) {
+          for(const name of state.names){
             const opt = document.createElement("option");
             opt.value = name;
             opt.textContent = name;
@@ -1044,7 +1039,6 @@ input[type="checkbox"]{width:15px;height:15px;accent-color:var(--accent);}
         }
         sel2.value = p2;
 
-        // +/- button
         const addBtn = document.createElement("button");
         addBtn.type = "button";
         addBtn.className = "smallBtn addBtn";
@@ -1065,12 +1059,10 @@ input[type="checkbox"]{width:15px;height:15px;accent-color:var(--accent);}
           }, { optimistic: true });
         }
 
-        // initial visibility/layout
         if (p2) sel2.classList.remove("hidden");
         else sel2.classList.add("hidden");
         updateRowLayout();
 
-        // wire events
         addBtn.addEventListener("click", async () => {
           if (sel2.classList.contains("hidden")) {
             sel2.classList.remove("hidden");
@@ -1079,93 +1071,6 @@ input[type="checkbox"]{width:15px;height:15px;accent-color:var(--accent);}
             sel2.value = "";
             sel2.classList.add("hidden");
             updateRowLayout();
-            await commitPeople(sel1.value, "");
-          }
-        });
-
-        sel1.addEventListener("change", async () => {
-          if (sel1.value && sel1.value === sel2.value) sel2.value = "";
-          await commitPeople(sel1.value, sel2.value);
-        });
-
-        sel2.addEventListener("change", async () => {
-          if (sel2.value && sel2.value === sel1.value) {
-            toast("Same RA already selected.", "bad");
-            sel2.value = "";
-            return;
-          }
-          await commitPeople(sel1.value, sel2.value);
-        });
-
-        // assemble in-row: sel1 | +/- | sel2
-        selRow.appendChild(sel1);
-        selRow.appendChild(addBtn);
-        selRow.appendChild(sel2);
-
-
-        const sel1 = document.createElement("select");
-        {
-          const opt0 = document.createElement("option");
-          opt0.value = "";
-          opt0.textContent = "Select RA";
-          sel1.appendChild(opt0);
-
-          for(const name of state.names){
-            const opt = document.createElement("option");
-            opt.value = name;
-            opt.textContent = name;
-            sel1.appendChild(opt);
-          }
-        }
-        sel1.value = p1;
-
-        const sel2 = document.createElement("select");
-        sel2.classList.add("hidden");
-        {
-          const opt0 = document.createElement("option");
-          opt0.value = "";
-          opt0.textContent = "Select 2nd RA";
-          sel2.appendChild(opt0);
-
-          for(const name of state.names){
-            const opt = document.createElement("option");
-            opt.value = name;
-            opt.textContent = name;
-            sel2.appendChild(opt);
-          }
-        }
-        sel2.value = p2;
-
-        const addBtn = document.createElement("button");
-        addBtn.type = "button";
-        addBtn.className = "smallBtn";
-        addBtn.textContent = p2 ? "−" : "+";
-        addBtn.title = p2 ? "Remove second RA" : "Add second RA";
-
-        function commitPeople(newP1, newP2){
-          const combined = joinPeople([newP1, newP2]);
-          return saveSlotToBackend({
-            range: activeRange, context: ctxId, day, time,
-            person: combined,
-            participantScheduled: !!slots[day][time].participantScheduled
-          }, { optimistic: true });
-        }
-
-        if(p2){
-          sel2.classList.remove("hidden");
-          addBtn.textContent = "−";
-        }
-
-        addBtn.addEventListener("click", async () => {
-          if (sel2.classList.contains("hidden")) {
-            sel2.classList.remove("hidden");
-            addBtn.textContent = "−";
-            addBtn.title = "Remove second RA";
-          } else {
-            sel2.value = "";
-            sel2.classList.add("hidden");
-            addBtn.textContent = "+";
-            addBtn.title = "Add second RA";
             await commitPeople(sel1.value, "");
           }
         });
@@ -1328,6 +1233,8 @@ input[type="checkbox"]{width:15px;height:15px;accent-color:var(--accent);}
   function jumpToCurrentWeek(){
     const now = new Date();
     const { year, term } = state.settings;
+
+    // Keep the current Year/Term selection, but jump weekStart to "now" clamped into that term.
     const wsNow = clampWeekStartToTerm(mondayOfWeek(now), year, term);
     state.settings.weekStartISO = toISODate(wsNow);
     saveCache();
@@ -1497,7 +1404,6 @@ input[type="checkbox"]{width:15px;height:15px;accent-color:var(--accent);}
   ui.viewHF.addEventListener("click",   () => setView("HF"));
   ui.currentWeekBtn.addEventListener("click", jumpToCurrentWeek);
   ui.prevWeekBtn.addEventListener("click", () => shiftWeek(-1));
-
   ui.nextWeekBtn.addEventListener("click", () => shiftWeek(1));
   ui.refreshBtn.addEventListener("click", () => loadWeekFromBackend().catch(e => toast(`Refresh failed: ${e.message}`, "bad")));
 
