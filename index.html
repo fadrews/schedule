@@ -3,14 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Lab Scheduling</title>
+  <title>ABC Lab Schedule</title>
   <style>
     :root{
       --bg:#0b1020;
-      --panel:#111a33;
       --text:#e7ecff;
       --muted:#b8c0e0;
-      --line:#22305e;
       --accent:#7aa2ff;
       --good:#35d07f;
       --bad:#ff5c7a;
@@ -27,31 +25,12 @@
                   radial-gradient(1200px 800px at 90% 20%, #3b1a66 0%, var(--bg) 55%);
       color:var(--text);
     }
-    header{
-      padding:18px 18px 0;
-      max-width:1400px;
-      margin:0 auto;
-    }
-    .titlebar{
-      display:flex;
-      gap:12px;
-      align-items:flex-end;
-      justify-content:space-between;
-      flex-wrap:wrap;
-    }
+    header{padding:18px 18px 0;max-width:1400px;margin:0 auto;}
+    .titlebar{display:flex;gap:12px;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;}
     h1{margin:0;font-size:18px;font-weight:700;letter-spacing:.2px}
-    .subtitle{
-      margin:6px 0 0;
-      font-size:13px;
-      color:var(--muted);
-      line-height:1.35;
-      max-width:920px;
-    }
-    main{
-      padding:14px 18px 24px;
-      max-width:1400px;
-      margin:0 auto;
-    }
+    .subtitle{margin:6px 0 0;font-size:13px;color:var(--muted);line-height:1.35;max-width:980px;}
+
+    main{padding:14px 18px 24px;max-width:1400px;margin:0 auto;}
     .panel{
       background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
       border:1px solid rgba(255,255,255,.08);
@@ -59,202 +38,85 @@
       border-radius:var(--radius);
       padding:14px;
     }
-    .controls{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      align-items:center;
-      justify-content:space-between;
-    }
-    .leftControls, .rightControls{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      align-items:center;
-    }
+    .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;}
+    .leftControls,.rightControls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
 
     .tabs{
-      display:inline-flex;
-      background:rgba(0,0,0,.22);
-      border:1px solid rgba(255,255,255,.08);
-      border-radius:999px;
-      padding:4px;
-      gap:4px;
+      display:inline-flex;background:rgba(0,0,0,.22);
+      border:1px solid rgba(255,255,255,.08);border-radius:999px;
+      padding:4px;gap:4px;
     }
     .tab{
-      border:0;
-      color:var(--muted);
-      background:transparent;
-      padding:7px 10px;
-      border-radius:999px;
-      font-size:12px;
-      cursor:pointer;
-      user-select:none;
+      border:0;color:var(--muted);background:transparent;
+      padding:7px 10px;border-radius:999px;font-size:12px;cursor:pointer;user-select:none;
     }
     .tab.active{
-      background:rgba(122,162,255,.18);
-      color:var(--text);
+      background:rgba(122,162,255,.18);color:var(--text);
       box-shadow: inset 0 0 0 1px rgba(122,162,255,.25);
     }
 
     .btn{
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(0,0,0,.18);
-      color:var(--text);
-      padding:8px 10px;
-      border-radius:10px;
-      cursor:pointer;
-      font-size:12px;
+      border:1px solid rgba(255,255,255,.10);background:rgba(0,0,0,.18);color:var(--text);
+      padding:8px 10px;border-radius:10px;cursor:pointer;font-size:12px;
     }
     .btn:hover{border-color:rgba(255,255,255,.18)}
-    .btn.primary{
-      background:rgba(122,162,255,.18);
-      border-color:rgba(122,162,255,.25);
-    }
-    .btn.danger{
-      background:rgba(255,92,122,.12);
-      border-color:rgba(255,92,122,.28);
-    }
+    .btn.primary{background:rgba(122,162,255,.18);border-color:rgba(122,162,255,.25);}
+    .btn.danger{background:rgba(255,92,122,.12);border-color:rgba(255,92,122,.28);}
 
-    .field{
-      display:flex;
-      gap:8px;
-      align-items:center;
-      flex-wrap:wrap;
+    .field{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+    input[type="text"], input[type="password"]{
+      background:rgba(0,0,0,.22);color:var(--text);
+      border:1px solid rgba(255,255,255,.10);border-radius:10px;
+      padding:8px 10px;font-size:12px;min-width:240px;outline:none;
     }
-    input[type="text"]{
-      background:rgba(0,0,0,.22);
-      color:var(--text);
-      border:1px solid rgba(255,255,255,.10);
-      border-radius:10px;
-      padding:8px 10px;
-      font-size:12px;
-      min-width:240px;
-      outline:none;
-    }
-    input[type="text"]::placeholder{color:rgba(184,192,224,.75)}
+    input[type="text"]::placeholder, input[type="password"]::placeholder{color:rgba(184,192,224,.75)}
+
     .chip{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      background:rgba(0,0,0,.18);
-      border:1px solid rgba(255,255,255,.08);
-      border-radius:999px;
-      padding:6px 10px;
-      font-size:12px;
-      color:var(--muted);
+      display:inline-flex;align-items:center;gap:8px;background:rgba(0,0,0,.18);
+      border:1px solid rgba(255,255,255,.08);border-radius:999px;padding:6px 10px;
+      font-size:12px;color:var(--muted);
     }
     .chip strong{color:var(--text); font-weight:700}
-    .note{
-      font-size:12px;
-      color:var(--muted);
-      margin-top:10px;
-      line-height:1.35;
-    }
+    .note{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.35;}
 
     .gridWrap{
-      overflow:auto;
-      border-radius:12px;
-      border:1px solid rgba(255,255,255,.08);
-      margin-top:12px;
-      background:rgba(0,0,0,.12);
+      overflow:auto;border-radius:12px;border:1px solid rgba(255,255,255,.08);
+      margin-top:12px;background:rgba(0,0,0,.12);
     }
-    table{
-      border-collapse:separate;
-      border-spacing:0;
-      min-width:980px;
-      width:100%;
-      font-size:12px;
-    }
+    table{border-collapse:separate;border-spacing:0;min-width:980px;width:100%;font-size:12px;}
     thead th{
-      position:sticky;
-      top:0;
-      z-index:5;
-      background:rgba(10,14,30,.92);
-      backdrop-filter: blur(6px);
-      border-bottom:1px solid rgba(255,255,255,.10);
-      padding:10px 8px;
-      text-align:left;
-      color:var(--muted);
-      font-weight:700;
-      white-space:nowrap;
+      position:sticky;top:0;z-index:5;background:rgba(10,14,30,.92);backdrop-filter: blur(6px);
+      border-bottom:1px solid rgba(255,255,255,.10);padding:10px 8px;text-align:left;color:var(--muted);
+      font-weight:700;white-space:nowrap;
     }
     thead th:first-child{left:0; z-index:6;}
     tbody th{
-      position:sticky;
-      left:0;
-      z-index:4;
-      background:rgba(10,14,30,.92);
-      backdrop-filter: blur(6px);
-      border-right:1px solid rgba(255,255,255,.10);
-      color:var(--muted);
-      font-weight:700;
-      padding:10px 8px;
-      white-space:nowrap;
-      font-family:var(--mono);
+      position:sticky;left:0;z-index:4;background:rgba(10,14,30,.92);backdrop-filter: blur(6px);
+      border-right:1px solid rgba(255,255,255,.10);color:var(--muted);font-weight:700;padding:10px 8px;
+      white-space:nowrap;font-family:var(--mono);
     }
     td{
-      border-bottom:1px solid rgba(255,255,255,.07);
-      border-right:1px solid rgba(255,255,255,.07);
-      padding:8px;
-      vertical-align:top;
-      min-width:190px;
-      background:rgba(17,26,51,.35);
+      border-bottom:1px solid rgba(255,255,255,.07);border-right:1px solid rgba(255,255,255,.07);
+      padding:8px;vertical-align:top;min-width:190px;background:rgba(17,26,51,.35);
     }
     tr:last-child td{border-bottom:0}
     td:last-child{border-right:0}
 
-    .slot{
-      display:flex;
-      flex-direction:column;
-      gap:6px;
-      min-height:92px;
-    }
+    .slot{display:flex;flex-direction:column;gap:6px;min-height:92px;}
     select{
-      width:100%;
-      background:rgba(0,0,0,.22);
-      color:var(--text);
-      border:1px solid rgba(255,255,255,.10);
-      border-radius:10px;
-      padding:7px 8px;
-      font-size:12px;
-      outline:none;
+      width:100%;background:rgba(0,0,0,.22);color:var(--text);
+      border:1px solid rgba(255,255,255,.10);border-radius:10px;padding:7px 8px;font-size:12px;outline:none;
     }
-    .slotTop{
-      display:flex;
-      gap:8px;
-      align-items:center;
-      justify-content:space-between;
-    }
-    .who{
-      font-weight:700;
-      color:var(--text);
-      overflow:hidden;
-      text-overflow:ellipsis;
-      white-space:nowrap;
-      max-width:140px;
-    }
+    .slotTop{display:flex;gap:8px;align-items:center;justify-content:space-between;}
+    .who{font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:140px;}
     .smallBtn{
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(0,0,0,.18);
-      color:var(--text);
-      padding:6px 8px;
-      border-radius:10px;
-      font-size:11px;
-      cursor:pointer;
+      border:1px solid rgba(255,255,255,.10);background:rgba(0,0,0,.18);color:var(--text);
+      padding:6px 8px;border-radius:10px;font-size:11px;cursor:pointer;
     }
     .smallBtn:hover{border-color:rgba(255,255,255,.18)}
     .badge{
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-      border-radius:999px;
-      padding:5px 8px;
-      font-size:11px;
-      background:rgba(0,0,0,.18);
-      border:1px solid rgba(255,255,255,.08);
-      color:var(--muted);
-      width:max-content;
+      display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:5px 8px;font-size:11px;
+      background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.08);color:var(--muted);width:max-content;
     }
     .badge.bad{background:rgba(255,92,122,.12); border-color:rgba(255,92,122,.25); color:var(--text)}
     .badge.good{background:rgba(53,208,127,.12); border-color:rgba(53,208,127,.22); color:var(--text)}
@@ -262,69 +124,37 @@
     label{display:flex; gap:8px; align-items:center; cursor:pointer; user-select:none; color:var(--muted);}
     input[type="checkbox"]{width:15px;height:15px;accent-color:var(--accent);}
 
-    .twoCol{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:12px;
-      margin-top:12px;
-    }
-    @media (max-width: 1050px){
-      .twoCol{grid-template-columns:1fr}
-      table{min-width:920px}
-    }
+    .twoCol{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;}
+    @media (max-width: 1050px){.twoCol{grid-template-columns:1fr}table{min-width:920px}}
     .hidden{display:none !important}
 
     .toast{
-      position:fixed;
-      bottom:16px;
-      right:16px;
-      background:rgba(0,0,0,.35);
-      border:1px solid rgba(255,255,255,.12);
-      backdrop-filter: blur(10px);
-      box-shadow:var(--shadow);
-      padding:10px 12px;
-      border-radius:12px;
-      font-size:12px;
-      color:var(--text);
-      max-width:min(560px, calc(100vw - 32px));
-      display:none;
+      position:fixed;bottom:16px;right:16px;background:rgba(0,0,0,.35);
+      border:1px solid rgba(255,255,255,.12);backdrop-filter: blur(10px);box-shadow:var(--shadow);
+      padding:10px 12px;border-radius:12px;font-size:12px;color:var(--text);
+      max-width:min(560px, calc(100vw - 32px));display:none;
     }
     .toast.show{display:block}
 
     /* Admin dropdown */
     .menuWrap{position:relative; display:inline-block;}
     .menu{
-      position:absolute;
-      right:0;
-      top:42px;
-      width:min(360px, calc(100vw - 24px));
-      background:rgba(10,14,30,.96);
-      border:1px solid rgba(255,255,255,.12);
-      border-radius:14px;
-      box-shadow:var(--shadow);
-      padding:12px;
-      z-index:50;
-      display:none;
+      position:absolute;right:0;top:42px;width:min(400px, calc(100vw - 24px));
+      background:rgba(10,14,30,.96);border:1px solid rgba(255,255,255,.12);
+      border-radius:14px;box-shadow:var(--shadow);padding:12px;z-index:50;display:none;
     }
     .menu.show{display:block}
-    .menu h3{
-      margin:0 0 10px 0;
-      font-size:13px;
-      color:var(--text);
-    }
-    .menuRow{
-      display:flex;
-      gap:10px;
-      align-items:center;
-      flex-wrap:wrap;
-      margin-bottom:10px;
-    }
-    .menuRow .chip{flex:1}
-    .menuRow select, .menuRow input{
-      flex:1;
-      min-width:140px;
-    }
+    .menu h3{margin:0 0 10px 0;font-size:13px;color:var(--text);}
+    .menuRow{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:10px;}
+    .menuRow > div{flex:1;min-width:160px;}
     .menu small{color:var(--muted); display:block; line-height:1.35;}
+    .statusDot{
+      display:inline-block;width:9px;height:9px;border-radius:999px;background:rgba(255,255,255,.25);
+      box-shadow:0 0 0 2px rgba(0,0,0,.18) inset;
+      margin-right:6px;
+    }
+    .dotGood{background:rgba(53,208,127,.85)}
+    .dotBad{background:rgba(255,92,122,.85)}
   </style>
 </head>
 
@@ -332,13 +162,14 @@
 <header>
   <div class="titlebar">
     <div>
-      <h1>Lab Scheduling</h1>
+      <h1>ABC Lab Schedule</h1>
       <p class="subtitle">
-        1-hour slots. Weekdays are <strong>Mon–Fri, 09:00–17:00</strong>. Weekend scheduling is in a separate tab.
-        Schedules are scoped to <strong>Year + Term + Week</strong>.
+        Shared schedule backed by Google Sheets. 1-hour slots. Weekdays: <strong>Mon–Fri, 09:00–17:00</strong>. Weekend scheduling is separate.
+        Scope: <strong>Year + Term + Week</strong>.
       </p>
     </div>
     <div class="inline" style="align-items:center;">
+      <span class="chip" id="connChip"><span class="statusDot" id="connDot"></span>Backend: <strong id="connLabel">—</strong></span>
       <span class="chip" id="termChip">Term: <strong>—</strong></span>
       <span class="chip" id="weekChip">Week: <strong>—</strong></span>
       <div class="menuWrap">
@@ -346,16 +177,22 @@
         <div class="menu" id="adminMenu" aria-label="Admin menu">
           <h3>Admin</h3>
           <div class="menuRow">
-            <div style="flex:1;">
+            <div>
               <small>Year</small>
               <select id="yearSelect"></select>
             </div>
-            <div style="flex:1;">
+            <div>
               <small>Term</small>
               <select id="termSelect">
                 <option value="Spring">Jan–Apr (Spring)</option>
                 <option value="Fall">Sep–Dec (Fall)</option>
               </select>
+            </div>
+          </div>
+          <div class="menuRow">
+            <div style="flex:1;min-width:220px;">
+              <small>Admin key (only needed for reset if enabled in Apps Script)</small>
+              <input id="adminKeyInput" type="password" placeholder="Admin key (optional)" />
             </div>
           </div>
           <div class="menuRow">
@@ -366,8 +203,8 @@
             <button class="btn danger" id="resetAllBtn" type="button">Reset ALL data</button>
           </div>
           <small style="margin-top:10px;">
-            Reset this week clears only the currently displayed week (both contexts, weekdays+weekend) for the selected Year/Term.
-            Reset ALL wipes names and all schedules stored in this browser.
+            Reset this week clears only the current week (both contexts, weekdays+weekend) for the selected Year/Term.
+            Reset ALL wipes names and all schedules in the shared Sheet.
           </small>
         </div>
       </div>
@@ -393,6 +230,7 @@
         <div class="inline">
           <button class="btn" id="prevWeekBtn" type="button">◀ Prev week</button>
           <button class="btn" id="nextWeekBtn" type="button">Next week ▶</button>
+          <button class="btn" id="refreshBtn" type="button">Refresh</button>
         </div>
       </div>
 
@@ -408,6 +246,7 @@
 
     <p class="note" id="termNote">
       Term limits: Jan–Apr (Spring) and Sep–Dec (Fall). Week navigation is constrained to the active term.
+      Use <strong>Refresh</strong> to pull the latest updates from other users.
     </p>
   </div>
 
@@ -438,12 +277,16 @@
 
 <script>
 (() => {
-  const STORAGE_KEY = "lab_scheduler_v2";
+  // =============================
+  // CONFIG
+  // =============================
+  const API_URL = "https://script.google.com/macros/s/AKfycbwfNCwtEJmeWsP9bTaa6xXYTLSRWCuXb86An5EemgP1SIAnTYiJLx55MP92m2fArwXv5A/exec";
+  const LOCAL_CACHE_KEY = "abc_lab_schedule_cache_v1"; // optional cache (not authoritative)
 
   const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri"];
   const WEEKEND  = ["Sat", "Sun"];
 
-  // 9:00–17:00 => 8 one-hour slots: 09-10 ... 16-17
+  // 9:00–17:00 => 8 one-hour slots
   const TIMES = [];
   for (let h = 9; h < 17; h++) {
     const pad = (n) => String(n).padStart(2, "0");
@@ -462,6 +305,7 @@
 
     prevWeekBtn: el("prevWeekBtn"),
     nextWeekBtn: el("nextWeekBtn"),
+    refreshBtn:  el("refreshBtn"),
 
     panelABC: el("panelABC"),
     panelHF:  el("panelHF"),
@@ -482,12 +326,15 @@
 
     termChip: el("termChip"),
     weekChip: el("weekChip"),
-    termNote: el("termNote"),
+
+    connDot: el("connDot"),
+    connLabel: el("connLabel"),
 
     adminBtn: el("adminBtn"),
     adminMenu: el("adminMenu"),
     yearSelect: el("yearSelect"),
     termSelect: el("termSelect"),
+    adminKeyInput: el("adminKeyInput"),
     applyTermBtn: el("applyTermBtn"),
     resetWeekBtn: el("resetWeekBtn"),
     resetAllBtn: el("resetAllBtn"),
@@ -505,22 +352,52 @@
     toast._t = setTimeout(() => ui.toast.classList.remove("show"), 3000);
   }
 
-  function escapeHtml(s){
-    return String(s)
-      .replaceAll("&","&amp;")
-      .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;")
-      .replaceAll('"',"&quot;")
-      .replaceAll("'","&#039;");
+  // =============================
+  // API
+  // =============================
+  async function apiPost(action, payload = {}) {
+  const body = JSON.stringify({ action, ...payload });
+
+  const res = await fetch(API_URL, {
+    method: "POST",
+    // IMPORTANT: text/plain avoids CORS preflight; Apps Script can still read e.postData.contents
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body
+  });
+
+  const txt = await res.text();
+  let data;
+  try { data = JSON.parse(txt); }
+  catch { data = { ok:false, error:"Non-JSON response from backend." }; }
+
+  if (!data.ok) throw new Error(data.error || "Backend error");
+  return data;
+}
+
+
+  async function backendPing() {
+    try {
+      const data = await apiPost("ping", {});
+      setBackendStatus(true);
+      return data;
+    } catch (e) {
+      setBackendStatus(false);
+      throw e;
+    }
   }
 
-  // Date helpers (local time, Monday as week start)
-  function pad2(n){ return String(n).padStart(2,"0"); }
-  function toISODate(d){
-    return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+  function setBackendStatus(ok) {
+    ui.connDot.classList.remove("dotGood","dotBad");
+    ui.connDot.classList.add(ok ? "dotGood" : "dotBad");
+    ui.connLabel.textContent = ok ? "Connected" : "Offline";
   }
+
+  // =============================
+  // Date helpers (local time)
+  // =============================
+  function pad2(n){ return String(n).padStart(2,"0"); }
+  function toISODate(d){ return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`; }
   function parseISODate(s){
-    // expects YYYY-MM-DD
     const [y,m,dd] = s.split("-").map(Number);
     return new Date(y, (m-1), dd);
   }
@@ -532,21 +409,17 @@
   function mondayOfWeek(d){
     const x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
     const day = x.getDay(); // Sun=0..Sat=6
-    const diff = (day === 0 ? -6 : 1 - day); // move to Monday
+    const diff = (day === 0 ? -6 : 1 - day);
     x.setDate(x.getDate() + diff);
     x.setHours(0,0,0,0);
     return x;
   }
-
   function termBounds(year, term){
-    // inclusive bounds
     if(term === "Spring"){
       return { start: new Date(year, 0, 1), end: new Date(year, 3, 30) };   // Jan 1 .. Apr 30
     }
-    // Fall
     return { start: new Date(year, 8, 1), end: new Date(year, 11, 31) };    // Sep 1 .. Dec 31
   }
-
   function clampWeekStartToTerm(weekStart, year, term){
     const { start, end } = termBounds(year, term);
     const minWeek = mondayOfWeek(start);
@@ -555,50 +428,53 @@
     if(weekStart > maxWeek) return maxWeek;
     return weekStart;
   }
+  function dayDateLabel(dayAbbrev, weekStartISO){
+    const ws = parseISODate(weekStartISO);
+    const map = { Mon:0, Tue:1, Wed:2, Thu:3, Fri:4, Sat:5, Sun:6 };
+    const d = addDays(ws, map[dayAbbrev]);
+    return `${dayAbbrev} (${toISODate(d)})`;
+  }
 
+  // =============================
+  // State (authoritative on backend)
+  // =============================
   function defaultState(){
-    // Structure:
-    // {
-    //   version: 2,
-    //   names: [],
-    //   settings: { year: 2026, term: "Spring", weekStartISO: "YYYY-MM-DD" },
-    //   schedules: { [scopeKey]: { weekdays:{ABC:{...},HF:{...}}, weekend:{...} } }
-    // }
     const now = new Date();
     const year = now.getFullYear();
     const termGuess = (now.getMonth() <= 3) ? "Spring" : (now.getMonth() >= 8 ? "Fall" : "Fall");
     const ws = clampWeekStartToTerm(mondayOfWeek(now), year, termGuess);
-
     return {
-      version: 2,
+      version: 1,
       names: [],
-      settings: { year, term: termGuess, weekStartISO: toISODate(ws) },
-      schedules: {}
+      settings: {
+        year,
+        term: termGuess,
+        weekStartISO: toISODate(ws)
+      },
+      cacheSlotsByScope: {} // local cache only
     };
   }
 
-  function loadState(){
+  function loadCache(){
     try{
-      const raw = localStorage.getItem(STORAGE_KEY);
+      const raw = localStorage.getItem(LOCAL_CACHE_KEY);
       if(!raw) return defaultState();
       const parsed = JSON.parse(raw);
-      if(!parsed || typeof parsed !== "object") return defaultState();
-      if(!parsed.settings || !parsed.schedules || !Array.isArray(parsed.names)) return defaultState();
-      // upgrade guard: ensure required fields exist
-      if(!parsed.settings.year || !parsed.settings.term || !parsed.settings.weekStartISO) return defaultState();
+      if(!parsed || typeof parsed !== "object" || !parsed.settings) return defaultState();
+      if(!parsed.cacheSlotsByScope) parsed.cacheSlotsByScope = {};
+      if(!Array.isArray(parsed.names)) parsed.names = [];
       return parsed;
     }catch{
       return defaultState();
     }
   }
 
-  function saveState(){
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  function saveCache(){
+    localStorage.setItem(LOCAL_CACHE_KEY, JSON.stringify(state));
   }
 
-  let state = loadState();
+  let state = loadCache();
 
-  // View state
   let activeRange = "weekdays"; // "weekdays" | "weekend"
   let activeView  = "both";     // "both" | "ABC" | "HF"
 
@@ -607,10 +483,8 @@
     return `${year}::${term}::${weekStartISO}`;
   }
 
-  function ensureScopeData(){
-    const key = scopeKey();
-    if(state.schedules[key]) return;
-
+  function ensureLocalScopeStructure(scope){
+    if(state.cacheSlotsByScope[scope]) return;
     const makeSlots = (days) => {
       const dayObj = {};
       for (const d of days) {
@@ -619,18 +493,56 @@
       }
       return dayObj;
     };
-
-    state.schedules[key] = {
+    state.cacheSlotsByScope[scope] = {
       weekdays: { ABC: makeSlots(WEEKDAYS), HF: makeSlots(WEEKDAYS) },
       weekend:  { ABC: makeSlots(WEEKEND),  HF: makeSlots(WEEKEND)  }
     };
   }
 
-  function currentSlots(){
-    ensureScopeData();
-    return state.schedules[scopeKey()];
+  function currentLocalSlots(){
+    const s = scopeKey();
+    ensureLocalScopeStructure(s);
+    return state.cacheSlotsByScope[s];
   }
 
+  // Apply backend week payload (flat key map) into local structure
+  function applyWeekFromBackend(data){
+    const sKey = data.scopeKey;
+    ensureLocalScopeStructure(sKey);
+
+    const slotsStruct = state.cacheSlotsByScope[sKey];
+    // reset to defaults first
+    const resetStruct = () => {
+      const makeSlots = (days) => {
+        const dayObj = {};
+        for (const d of days) {
+          dayObj[d] = {};
+          for (const t of TIMES) dayObj[d][t] = { person: "", participantScheduled: false };
+        }
+        return dayObj;
+      };
+      slotsStruct.weekdays.ABC = makeSlots(WEEKDAYS);
+      slotsStruct.weekdays.HF  = makeSlots(WEEKDAYS);
+      slotsStruct.weekend.ABC  = makeSlots(WEEKEND);
+      slotsStruct.weekend.HF   = makeSlots(WEEKEND);
+    };
+    resetStruct();
+
+    const flat = data.slots || {};
+    for(const k of Object.keys(flat)){
+      const [range, ctx, day, time] = k.split("::");
+      if(!slotsStruct[range] || !slotsStruct[range][ctx] || !slotsStruct[range][ctx][day] || !slotsStruct[range][ctx][day][time]) continue;
+      slotsStruct[range][ctx][day][time] = {
+        person: flat[k].person || "",
+        participantScheduled: !!flat[k].participantScheduled
+      };
+    }
+    saveCache();
+  }
+
+  // =============================
+  // Rendering
+  // =============================
   function setRange(range){
     activeRange = range;
     ui.tabWeekdays.classList.toggle("active", range === "weekdays");
@@ -640,41 +552,26 @@
 
   function setView(view){
     activeView = view;
-
     ui.viewBoth.classList.toggle("active", view === "both");
     ui.viewABC.classList.toggle("active",  view === "ABC");
     ui.viewHF.classList.toggle("active",   view === "HF");
-
     ui.panelABC.classList.toggle("hidden", view === "HF");
     ui.panelHF.classList.toggle("hidden",  view === "ABC");
   }
 
-  function normalizeName(name){
-    return name.trim().replace(/\s+/g, " ");
-  }
-
-  function addName(name){
-    const n = normalizeName(name);
-    if(!n) return;
-
-    const exists = state.names.some(x => x.toLowerCase() === n.toLowerCase());
-    if(exists){
-      toast(`Name already exists: <strong>${escapeHtml(n)}</strong>`, "bad");
-      return;
-    }
-
-    state.names.push(n);
-    state.names.sort((a,b) => a.localeCompare(b));
-    saveState();
-    renderAll();
-    toast(`Added <strong>${escapeHtml(n)}</strong>`, "good");
+  function renderTopChips(){
+    const { year, term, weekStartISO } = state.settings;
+    const ws = parseISODate(weekStartISO);
+    const we = addDays(ws, 6);
+    const label = term === "Spring" ? "Jan–Apr (Spring)" : "Sep–Dec (Fall)";
+    ui.termChip.innerHTML = `Term: <strong>${year} • ${label}</strong>`;
+    ui.weekChip.innerHTML = `Week: <strong>${toISODate(ws)} → ${toISODate(we)}</strong>`;
   }
 
   function countFilled(){
-    const slots = currentSlots()[activeRange];
+    const slots = currentLocalSlots()[activeRange];
     const countFor = (ctx) => {
-      let filled = 0;
-      let flagged = 0;
+      let filled = 0, flagged = 0;
       const days = Object.keys(slots[ctx]);
       for(const d of days){
         for(const t of Object.keys(slots[ctx][d])){
@@ -688,41 +585,22 @@
     return { ABC: countFor("ABC"), HF: countFor("HF") };
   }
 
-  function renderTopChips(){
-    const { year, term, weekStartISO } = state.settings;
-    const ws = parseISODate(weekStartISO);
-    const we = addDays(ws, 6);
-    const label = term === "Spring" ? "Jan–Apr (Spring)" : "Sep–Dec (Fall)";
-    ui.termChip.innerHTML = `Term: <strong>${escapeHtml(String(year))} • ${escapeHtml(label)}</strong>`;
-    ui.weekChip.innerHTML = `Week: <strong>${escapeHtml(toISODate(ws))} → ${escapeHtml(toISODate(we))}</strong>`;
-  }
-
-  function dayDateLabel(dayAbbrev){
-    const ws = parseISODate(state.settings.weekStartISO);
-    const map = { Mon:0, Tue:1, Wed:2, Thu:3, Fri:4, Sat:5, Sun:6 };
-    const d = addDays(ws, map[dayAbbrev]);
-    return `${dayAbbrev} (${toISODate(d)})`;
-  }
-
   function renderSummary(){
     const c = countFilled();
     ui.abcSummary.className = "badge";
     ui.hfSummary.className = "badge";
-
     ui.abcSummary.textContent = `${c.ABC.filled} filled • ${c.ABC.flagged} participant`;
     ui.hfSummary.textContent  = `${c.HF.filled} filled • ${c.HF.flagged} participant`;
-
     if(c.ABC.flagged) ui.abcSummary.classList.add("bad");
     if(c.HF.flagged)  ui.hfSummary.classList.add("bad");
   }
 
   function renderContext(ctxId, wrapEl){
     const days = activeRange === "weekdays" ? WEEKDAYS : WEEKEND;
-    const slots = currentSlots()[activeRange][ctxId];
+    const slots = currentLocalSlots()[activeRange][ctxId];
+    const weekStartISO = state.settings.weekStartISO;
 
     const table = document.createElement("table");
-    table.setAttribute("aria-label", `${ctxId} schedule table`);
-
     const thead = document.createElement("thead");
     const hr = document.createElement("tr");
 
@@ -732,7 +610,7 @@
 
     for(const d of days){
       const th = document.createElement("th");
-      th.textContent = dayDateLabel(d);
+      th.textContent = dayDateLabel(d, weekStartISO);
       hr.appendChild(th);
     }
     thead.appendChild(hr);
@@ -767,10 +645,11 @@
         clearBtn.type = "button";
         clearBtn.textContent = "Clear";
         clearBtn.disabled = !s.person && !s.participantScheduled;
-        clearBtn.addEventListener("click", () => {
-          slots[day][time] = { person: "", participantScheduled: false };
-          saveState();
-          renderAll();
+        clearBtn.addEventListener("click", async () => {
+          await saveSlotToBackend({
+            range: activeRange, context: ctxId, day, time,
+            person: "", participantScheduled: false
+          }, { optimistic: true });
         });
 
         top.appendChild(who);
@@ -789,10 +668,11 @@
           sel.appendChild(opt);
         }
         sel.value = s.person || "";
-        sel.addEventListener("change", () => {
-          slots[day][time].person = sel.value;
-          saveState();
-          renderAll();
+        sel.addEventListener("change", async () => {
+          await saveSlotToBackend({
+            range: activeRange, context: ctxId, day, time,
+            person: sel.value, participantScheduled: !!slots[day][time].participantScheduled
+          }, { optimistic: true });
         });
 
         const inline = document.createElement("div");
@@ -802,10 +682,12 @@
         const cb = document.createElement("input");
         cb.type = "checkbox";
         cb.checked = !!s.participantScheduled;
-        cb.addEventListener("change", () => {
-          slots[day][time].participantScheduled = cb.checked;
-          saveState();
-          renderAll();
+        cb.addEventListener("change", async () => {
+          await saveSlotToBackend({
+            range: activeRange, context: ctxId, day, time,
+            person: slots[day][time].person || "",
+            participantScheduled: cb.checked
+          }, { optimistic: true });
         });
 
         const span = document.createElement("span");
@@ -845,7 +727,6 @@
   }
 
   function renderAll(){
-    ensureScopeData();
     renderTopChips();
     renderContext("ABC", ui.gridWrapABC);
     renderContext("HF", ui.gridWrapHF);
@@ -853,18 +734,155 @@
     setView(activeView);
   }
 
-  // Week navigation constrained to term
+  // =============================
+  // Backend-backed operations
+  // =============================
+  async function loadNamesFromBackend(){
+    const data = await apiPost("listNames", {});
+    state.names = Array.isArray(data.names) ? data.names : [];
+    saveCache();
+  }
+
+  async function addNameToBackend(nameRaw){
+    const name = String(nameRaw || "").trim().replace(/\s+/g," ");
+    if(!name) return;
+    await apiPost("addName", { name });
+    await loadNamesFromBackend();
+    toast(`Added <strong>${name}</strong>`, "good");
+    renderAll();
+  }
+
+  async function loadWeekFromBackend(){
+    const { year, term, weekStartISO } = state.settings;
+    const data = await apiPost("loadWeek", { year, term, weekStartISO });
+    applyWeekFromBackend(data.data);
+    renderAll();
+    toast("Refreshed from shared Sheet.", "good");
+  }
+
+  async function saveSlotToBackend(slot, { optimistic } = { optimistic: true }){
+    const { year, term, weekStartISO } = state.settings;
+    const payload = {
+      year, term, weekStartISO,
+      range: slot.range,
+      context: slot.context,
+      day: slot.day,
+      time: slot.time,
+      person: slot.person || "",
+      participantScheduled: !!slot.participantScheduled,
+      updatedBy: "" // optional: you can add a "Your name" field later if desired
+    };
+
+    // optimistic local update
+    if(optimistic){
+      const s = currentLocalSlots();
+      s[slot.range][slot.context][slot.day][slot.time] = {
+        person: payload.person,
+        participantScheduled: payload.participantScheduled
+      };
+      saveCache();
+      renderAll();
+    }
+
+    try{
+      await apiPost("saveSlot", payload);
+      setBackendStatus(true);
+    }catch(e){
+      setBackendStatus(false);
+      toast(`Save failed: ${e.message}. (Your view may be out of sync; hit Refresh.)`, "bad");
+    }
+  }
+
+  // =============================
+  // Week navigation (term constrained)
+  // =============================
   function shiftWeek(deltaWeeks){
     const { year, term } = state.settings;
     let ws = parseISODate(state.settings.weekStartISO);
     ws = addDays(ws, deltaWeeks * 7);
     ws = clampWeekStartToTerm(mondayOfWeek(ws), year, term);
     state.settings.weekStartISO = toISODate(ws);
-    saveState();
-    renderAll();
+    saveCache();
+    // load from backend for new week
+    loadWeekFromBackend().catch(e => toast(`Load failed: ${e.message}`, "bad"));
   }
 
-  // Export / Import
+  // =============================
+  // Admin
+  // =============================
+  function toggleAdminMenu(force){
+    const show = (typeof force === "boolean") ? force : !ui.adminMenu.classList.contains("show");
+    ui.adminMenu.classList.toggle("show", show);
+  }
+
+  function populateYearSelect(){
+    const now = new Date().getFullYear();
+    ui.yearSelect.innerHTML = "";
+    for(let y = now - 2; y <= now + 4; y++){
+      const opt = document.createElement("option");
+      opt.value = String(y);
+      opt.textContent = String(y);
+      ui.yearSelect.appendChild(opt);
+    }
+  }
+
+  function syncAdminFields(){
+    ui.yearSelect.value = String(state.settings.year);
+    ui.termSelect.value = state.settings.term;
+    ui.adminKeyInput.value = state.settings.adminKey || "";
+  }
+
+  function applyYearTerm(){
+    const year = Number(ui.yearSelect.value);
+    const term = ui.termSelect.value;
+
+    state.settings.year = year;
+    state.settings.term = term;
+    state.settings.adminKey = ui.adminKeyInput.value || "";
+
+    let ws = parseISODate(state.settings.weekStartISO);
+    ws = clampWeekStartToTerm(mondayOfWeek(ws), year, term);
+    state.settings.weekStartISO = toISODate(ws);
+
+    saveCache();
+    renderAll();
+    loadWeekFromBackend().catch(e => toast(`Load failed: ${e.message}`, "bad"));
+    toast(`Applied <strong>${year}</strong> • <strong>${term}</strong>.`, "good");
+  }
+
+  async function resetWeek(){
+    const ok = confirm("Reset ONLY the current week for this Year/Term (both contexts, weekdays + weekend) in the shared Sheet?");
+    if(!ok) return;
+
+    const { year, term, weekStartISO } = state.settings;
+    const adminKey = ui.adminKeyInput.value || state.settings.adminKey || "";
+    try{
+      await apiPost("resetWeek", { year, term, weekStartISO, adminKey });
+      await loadWeekFromBackend();
+      toast("Reset current week (shared).", "good");
+    }catch(e){
+      toast(`Reset failed: ${e.message}`, "bad");
+    }
+  }
+
+  async function resetAll(){
+    const ok = confirm("Reset ALL data (names + all schedules) in the shared Sheet?");
+    if(!ok) return;
+
+    const adminKey = ui.adminKeyInput.value || state.settings.adminKey || "";
+    try{
+      await apiPost("resetAll", { adminKey });
+      await loadNamesFromBackend();
+      await loadWeekFromBackend();
+      toast("Reset ALL data (shared).", "good");
+    }catch(e){
+      toast(`Reset failed: ${e.message}`, "bad");
+    }
+  }
+
+  // =============================
+  // Export / Import (local cache)
+  // =============================
   function downloadText(filename, text){
     const blob = new Blob([text], {type:"application/json"});
     const url = URL.createObjectURL(blob);
@@ -877,117 +895,54 @@
     URL.revokeObjectURL(url);
   }
 
-  function exportState(){
+  function exportLocal(){
     const payload = {
-      ...state,
-      exportedAt: new Date().toISOString()
+      exportedAt: new Date().toISOString(),
+      names: state.names,
+      settings: state.settings,
+      cachedScope: scopeKey(),
+      cachedSlots: currentLocalSlots()
     };
-    downloadText("lab-schedule-export.json", JSON.stringify(payload, null, 2));
-    toast("Exported JSON.", "good");
+    downloadText("abc-lab-schedule-local-export.json", JSON.stringify(payload, null, 2));
+    toast("Exported local snapshot.", "good");
   }
 
-  async function importState(){
+  async function importLocal(){
     const input = document.createElement("input");
     input.type = "file";
     input.accept = "application/json";
     input.addEventListener("change", async () => {
       const file = input.files && input.files[0];
       if(!file) return;
-
       try{
         const text = await file.text();
         const parsed = JSON.parse(text);
+        if(!parsed || typeof parsed !== "object") throw new Error("Invalid JSON.");
+        if(!Array.isArray(parsed.names) || !parsed.settings) throw new Error("Missing names/settings.");
 
-        if(!parsed || typeof parsed !== "object" || !parsed.settings || !parsed.schedules || !Array.isArray(parsed.names)){
-          toast("Import failed: JSON missing expected fields (settings, names, schedules).", "bad");
-          return;
+        // import into local cache only
+        state.names = parsed.names;
+        state.settings = { ...state.settings, ...parsed.settings };
+        if(parsed.cachedScope && parsed.cachedSlots){
+          state.cacheSlotsByScope[parsed.cachedScope] = parsed.cachedSlots;
         }
-
-        state = parsed;
-
-        // normalize current week to term bounds
-        const { year, term } = state.settings;
-        let ws = parseISODate(state.settings.weekStartISO);
-        ws = clampWeekStartToTerm(mondayOfWeek(ws), year, term);
-        state.settings.weekStartISO = toISODate(ws);
-
-        saveState();
+        saveCache();
         renderAll();
-        toast("Imported JSON.", "good");
-      }catch{
-        toast("Import failed: invalid JSON.", "bad");
+
+        // then refresh from backend to sync real data
+        await loadNamesFromBackend();
+        await loadWeekFromBackend();
+        toast("Imported local snapshot and refreshed from backend.", "good");
+      }catch(e){
+        toast(`Import failed: ${e.message}`, "bad");
       }
     });
     input.click();
   }
 
-  // Admin menu behavior
-  function toggleAdminMenu(force){
-    const show = (typeof force === "boolean") ? force : !ui.adminMenu.classList.contains("show");
-    ui.adminMenu.classList.toggle("show", show);
-  }
-
-  function populateYearSelect(){
-    const now = new Date().getFullYear();
-    const years = [];
-    for(let y = now - 2; y <= now + 4; y++) years.push(y);
-    ui.yearSelect.innerHTML = "";
-    for(const y of years){
-      const opt = document.createElement("option");
-      opt.value = String(y);
-      opt.textContent = String(y);
-      ui.yearSelect.appendChild(opt);
-    }
-  }
-
-  function syncAdminFields(){
-    ui.yearSelect.value = String(state.settings.year);
-    ui.termSelect.value = state.settings.term;
-  }
-
-  function applyYearTerm(){
-    const year = Number(ui.yearSelect.value);
-    const term = ui.termSelect.value;
-
-    state.settings.year = year;
-    state.settings.term = term;
-
-    // reset weekStart into the chosen term if out of bounds
-    let ws = parseISODate(state.settings.weekStartISO);
-    ws = clampWeekStartToTerm(mondayOfWeek(ws), year, term);
-    state.settings.weekStartISO = toISODate(ws);
-
-    saveState();
-    renderAll();
-    toast(`Applied <strong>${year}</strong> • <strong>${escapeHtml(term)}</strong>.`, "good");
-  }
-
-  function resetThisWeek(){
-    const ok = confirm("Reset ONLY the current week for this Year/Term (both contexts, weekdays + weekend)?");
-    if(!ok) return;
-
-    ensureScopeData();
-    const key = scopeKey();
-    delete state.schedules[key];
-    ensureScopeData();
-
-    saveState();
-    renderAll();
-    toast("Reset current week.", "good");
-  }
-
-  function resetAll(){
-    const ok = confirm("Reset ALL data (names + all schedules) in this browser?");
-    if(!ok) return;
-    state = defaultState();
-    saveState();
-    populateYearSelect();
-    syncAdminFields();
-    renderAll();
-    toast("Reset ALL data.", "good");
-  }
-
+  // =============================
   // Wire UI
+  // =============================
   ui.tabWeekdays.addEventListener("click", () => setRange("weekdays"));
   ui.tabWeekend.addEventListener("click",  () => setRange("weekend"));
 
@@ -997,21 +952,27 @@
 
   ui.prevWeekBtn.addEventListener("click", () => shiftWeek(-1));
   ui.nextWeekBtn.addEventListener("click", () => shiftWeek(1));
+  ui.refreshBtn.addEventListener("click", () => loadWeekFromBackend().catch(e => toast(`Refresh failed: ${e.message}`, "bad")));
 
-  ui.addNameBtn.addEventListener("click", () => {
-    addName(ui.nameInput.value);
+  ui.addNameBtn.addEventListener("click", async () => {
+    const v = ui.nameInput.value;
     ui.nameInput.value = "";
     ui.nameInput.focus();
+    try { await addNameToBackend(v); }
+    catch(e){ toast(`Add failed: ${e.message}`, "bad"); }
   });
-  ui.nameInput.addEventListener("keydown", (e) => {
+
+  ui.nameInput.addEventListener("keydown", async (e) => {
     if(e.key === "Enter"){
-      addName(ui.nameInput.value);
+      const v = ui.nameInput.value;
       ui.nameInput.value = "";
+      try { await addNameToBackend(v); }
+      catch(err){ toast(`Add failed: ${err.message}`, "bad"); }
     }
   });
 
-  ui.exportBtn.addEventListener("click", exportState);
-  ui.importBtn.addEventListener("click", importState);
+  ui.exportBtn.addEventListener("click", exportLocal);
+  ui.importBtn.addEventListener("click", importLocal);
 
   ui.adminBtn.addEventListener("click", () => {
     syncAdminFields();
@@ -1019,28 +980,38 @@
   });
 
   ui.applyTermBtn.addEventListener("click", () => applyYearTerm());
-  ui.resetWeekBtn.addEventListener("click", () => resetThisWeek());
+  ui.resetWeekBtn.addEventListener("click", () => resetWeek());
   ui.resetAllBtn.addEventListener("click", () => resetAll());
 
-  // Close admin menu when clicking outside
   document.addEventListener("click", (e) => {
     const inside = ui.adminMenu.contains(e.target) || ui.adminBtn.contains(e.target);
     if(!inside) toggleAdminMenu(false);
   });
 
-  // init
+  // =============================
+  // Init
+  // =============================
   populateYearSelect();
 
-  // Ensure settings are term-valid on load
+  // normalize settings weekStart to term bounds
   {
     const { year, term } = state.settings;
     let ws = parseISODate(state.settings.weekStartISO);
     ws = clampWeekStartToTerm(mondayOfWeek(ws), year, term);
     state.settings.weekStartISO = toISODate(ws);
-    saveState();
+    saveCache();
   }
 
-  renderAll();
+  (async () => {
+    try{
+      await backendPing();
+      await loadNamesFromBackend();
+      await loadWeekFromBackend();
+    }catch(e){
+      toast(`Backend not reachable: ${e.message}. Showing local cache.`, "bad");
+      renderAll();
+    }
+  })();
 })();
 </script>
 </body>
