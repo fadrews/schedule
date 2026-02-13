@@ -177,25 +177,24 @@
       align-items:start;
     }
     @media (max-width: 1100px){.twoCol{grid-template-columns:1fr}}
-	/* When only one panel is visible, let it take full width */
-	.twoCol.single #panelABC,
-	.twoCol.single #panelHF{
-	  grid-column: 1 / -1;
-	}
+    /* When only one panel is visible, let it take full width */
+    .twoCol.single #panelABC,
+    .twoCol.single #panelHF{
+      grid-column: 1 / -1;
+    }
 
-	/* In Both view, each gridWrap handles its own horizontal scroll */
-	.gridWrap{
-	  overflow-x:auto;
-	  overflow-y:hidden;
-	}
+    /* In Both view, each gridWrap handles its own horizontal scroll */
+    .gridWrap{
+      overflow-x:auto;
+      overflow-y:hidden;
+    }
 
-	/* Slightly smaller controls inside cells so they fit easier */
-	select{
-	  font-size:11px;
-	  padding:6px 7px;
-	}
-	.who{max-width: none;}
-
+    /* Slightly smaller controls inside cells so they fit easier */
+    select{
+      font-size:11px;
+      padding:6px 7px;
+    }
+    .who{max-width: none;}
 
     /* Ensure panel doesn't shrink leaving left gutters */
     section.panel{min-width:0}
@@ -209,29 +208,29 @@
       width:100%;
     }
 
-	table{
-	  border-collapse:separate;
-	  border-spacing:0;
-	  width:100%;
-	  font-size:12px;
+    table{
+      border-collapse:separate;
+      border-spacing:0;
+      width:100%;
+      font-size:12px;
 
-	  /* key: allow squeezing to fit */
-	  table-layout: fixed;
-	  min-width: 0;
-	}
-	thead th:first-child,
-	tbody th{
-	  width: 120px; /* time column */
-	}
-	thead th,
-	td{
-	  /* allow columns to shrink */
-	  overflow:hidden;
-	  text-overflow:ellipsis;
-	}
-	td{
-	  min-width: 0; /* allow shrink */
-	}
+      /* key: allow squeezing to fit */
+      table-layout: fixed;
+      min-width: 0;
+    }
+    thead th:first-child,
+    tbody th{
+      width: 120px; /* time column */
+    }
+    thead th,
+    td{
+      /* allow columns to shrink */
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    td{
+      min-width: 0; /* allow shrink */
+    }
 
     tr:last-child td{border-bottom:0}
     td:last-child{border-right:0}
@@ -334,30 +333,29 @@
       border-color: rgba(255,107,147,.34);
       background: linear-gradient(180deg, rgba(255,107,147,.12), rgba(255,255,255,.03));
     }
-		/* 1) Strong “alert” styling when a participant is scheduled */
-	.slot.participant{
-	  border: 1px solid rgba(255,107,147,.55);
-	  background: linear-gradient(180deg, rgba(255,107,147,.18), rgba(0,0,0,.10));
-	  border-radius: 14px;
-	  padding: 10px;
-	  box-shadow: 0 0 0 1px rgba(255,107,147,.25) inset;
-	}
+    /* 1) Strong “alert” styling when a participant is scheduled */
+    .slot.participant{
+      border: 1px solid rgba(255,107,147,.55);
+      background: linear-gradient(180deg, rgba(255,107,147,.18), rgba(0,0,0,.10));
+      border-radius: 14px;
+      padding: 10px;
+      box-shadow: 0 0 0 1px rgba(255,107,147,.25) inset;
+    }
 
-	/* 2) Make the checkbox row more prominent in that state */
-	.slot.participant label{
-	  color: var(--text);
-	  font-weight: 900;
-	}
-	.slot.participant input[type="checkbox"]{
-	  transform: scale(1.15);
-	}
+    /* 2) Make the checkbox row more prominent in that state */
+    .slot.participant label{
+      color: var(--text);
+      font-weight: 900;
+    }
+    .slot.participant input[type="checkbox"]{
+      transform: scale(1.15);
+    }
 
-	/* 3) Make the badge unmistakable */
-	.badge.bad{
-	  font-weight: 900;
-	  letter-spacing: .2px;
-	}
-
+    /* 3) Make the badge unmistakable */
+    .badge.bad{
+      font-weight: 900;
+      letter-spacing: .2px;
+    }
   </style>
 </head>
 
@@ -477,7 +475,7 @@
 
         <div class="inline">
           <button class="btn" id="prevWeekBtn" type="button">◀ Prev week</button>
-		  <button class="btn" id="currentWeekBtn" type="button">Current week</button>
+          <button class="btn" id="currentWeekBtn" type="button">Current week</button>
           <button class="btn" id="nextWeekBtn" type="button">Next week ▶</button>
           <button class="btn" id="refreshBtn" type="button">Refresh</button>
         </div>
@@ -544,6 +542,29 @@
     TIMES.push(`${pad(h)}:00–${pad(h+1)}:00`);
   }
 
+  // Multi-RA encoding in the single "person" field (stored in Sheets)
+  const PERSON_DELIM = "; ";
+
+  function splitPeople(personStr){
+    return String(personStr || "")
+      .split(";")
+      .map(s => s.trim())
+      .filter(Boolean);
+  }
+
+  function joinPeople(arr){
+    const seen = new Set();
+    const out = [];
+    for (const x of (arr || [])) {
+      const v = String(x || "").trim();
+      if (!v) continue;
+      if (seen.has(v)) continue;
+      seen.add(v);
+      out.push(v);
+    }
+    return out.join(PERSON_DELIM);
+  }
+
   const el = (id) => document.getElementById(id);
 
   const ui = {
@@ -555,7 +576,7 @@
     viewHF:   el("view-hf"),
 
     prevWeekBtn: el("prevWeekBtn"),
-	currentWeekBtn: el("currentWeekBtn"),
+    currentWeekBtn: el("currentWeekBtn"),
     nextWeekBtn: el("nextWeekBtn"),
     refreshBtn:  el("refreshBtn"),
 
@@ -782,7 +803,6 @@
     }
   })();
 
-
   function ensureLocalScopeStructure(scope){
     if(state.cacheSlotsByScope[scope]) return;
     const makeSlots = (days) => {
@@ -853,7 +873,7 @@
     ui.viewHF.classList.toggle("active",   view === "HF");
     ui.panelABC.classList.toggle("hidden", view === "HF");
     ui.panelHF.classList.toggle("hidden",  view === "ABC");
-	document.querySelector(".twoCol")?.classList.toggle("single", view !== "both");
+    document.querySelector(".twoCol")?.classList.toggle("single", view !== "both");
   }
 
   function renderTop(){
@@ -934,8 +954,8 @@
         const td = document.createElement("td");
         const s = slots[day][time];
 
-		const slot = document.createElement("div");
-		slot.className = "slot" + (s.participantScheduled ? " participant" : "");
+        const slot = document.createElement("div");
+        slot.className = "slot" + (s.participantScheduled ? " participant" : "");
 
         const top = document.createElement("div");
         top.className = "slotTop";
@@ -943,7 +963,7 @@
         const who = document.createElement("div");
         who.className = "who";
         who.title = s.person || "Unassigned";
-        who.textContent = s.person || "—";
+        who.textContent = splitPeople(s.person).join(" + ") || "—";
 
         const clearBtn = document.createElement("button");
         clearBtn.className = "smallBtn";
@@ -960,25 +980,99 @@
         top.appendChild(who);
         top.appendChild(clearBtn);
 
-        const sel = document.createElement("select");
-        const opt0 = document.createElement("option");
-        opt0.value = "";
-        opt0.textContent = "Select RA";
-        sel.appendChild(opt0);
+        // --- Multi-RA controls: primary select + "+" reveals 2nd select ---
+        const people = splitPeople(s.person);
+        const p1 = people[0] || "";
+        const p2 = people[1] || "";
 
-        for(const name of state.names){
-          const opt = document.createElement("option");
-          opt.value = name;
-          opt.textContent = name;
-          sel.appendChild(opt);
+        const selRow = document.createElement("div");
+        selRow.className = "inline";
+        selRow.style.width = "100%";
+
+        const sel1 = document.createElement("select");
+        {
+          const opt0 = document.createElement("option");
+          opt0.value = "";
+          opt0.textContent = "Select RA";
+          sel1.appendChild(opt0);
+
+          for(const name of state.names){
+            const opt = document.createElement("option");
+            opt.value = name;
+            opt.textContent = name;
+            sel1.appendChild(opt);
+          }
         }
-        sel.value = s.person || "";
-        sel.addEventListener("change", async () => {
-          await saveSlotToBackend({
+        sel1.value = p1;
+
+        const sel2 = document.createElement("select");
+        sel2.classList.add("hidden");
+        {
+          const opt0 = document.createElement("option");
+          opt0.value = "";
+          opt0.textContent = "Select 2nd RA";
+          sel2.appendChild(opt0);
+
+          for(const name of state.names){
+            const opt = document.createElement("option");
+            opt.value = name;
+            opt.textContent = name;
+            sel2.appendChild(opt);
+          }
+        }
+        sel2.value = p2;
+
+        const addBtn = document.createElement("button");
+        addBtn.type = "button";
+        addBtn.className = "smallBtn";
+        addBtn.textContent = p2 ? "−" : "+";
+        addBtn.title = p2 ? "Remove second RA" : "Add second RA";
+
+        function commitPeople(newP1, newP2){
+          const combined = joinPeople([newP1, newP2]);
+          return saveSlotToBackend({
             range: activeRange, context: ctxId, day, time,
-            person: sel.value, participantScheduled: !!slots[day][time].participantScheduled
+            person: combined,
+            participantScheduled: !!slots[day][time].participantScheduled
           }, { optimistic: true });
+        }
+
+        if(p2){
+          sel2.classList.remove("hidden");
+          addBtn.textContent = "−";
+        }
+
+        addBtn.addEventListener("click", async () => {
+          if (sel2.classList.contains("hidden")) {
+            sel2.classList.remove("hidden");
+            addBtn.textContent = "−";
+            addBtn.title = "Remove second RA";
+          } else {
+            sel2.value = "";
+            sel2.classList.add("hidden");
+            addBtn.textContent = "+";
+            addBtn.title = "Add second RA";
+            await commitPeople(sel1.value, "");
+          }
         });
+
+        sel1.addEventListener("change", async () => {
+          if (sel1.value && sel1.value === sel2.value) sel2.value = "";
+          await commitPeople(sel1.value, sel2.value);
+        });
+
+        sel2.addEventListener("change", async () => {
+          if (sel2.value && sel2.value === sel1.value) {
+            toast("Same RA already selected.", "bad");
+            sel2.value = "";
+            return;
+          }
+          await commitPeople(sel1.value, sel2.value);
+        });
+
+        selRow.appendChild(sel1);
+        selRow.appendChild(addBtn);
+        selRow.appendChild(sel2);
 
         const inline = document.createElement("div");
         inline.className = "inline";
@@ -1015,7 +1109,7 @@
         }
 
         slot.appendChild(top);
-        slot.appendChild(sel);
+        slot.appendChild(selRow);
         slot.appendChild(inline);
         slot.appendChild(badge);
 
@@ -1061,7 +1155,7 @@
   async function loadWeekFromBackend({ silent=false } = {}){
     const { year, term, weekStartISO } = state.settings;
     const data = await apiPost("loadWeek", { year, term, weekStartISO });
-	setBackendStatus(true); 
+    setBackendStatus(true);
     applyWeekFromBackend(data.data);
     renderAll();
     markUpdated("Loaded");
@@ -1116,16 +1210,14 @@
     saveCache();
     loadWeekFromBackend().catch(e => toast(`Load failed: ${e.message}`, "bad"));
   }
-  
-  function jumpToCurrentWeek(){
-	const now = new Date();
-	const { year, term } = state.settings;
 
-  // Keep the current Year/Term selection, but jump weekStart to "now" clamped into that term.
-	const wsNow = clampWeekStartToTerm(mondayOfWeek(now), year, term);
-	state.settings.weekStartISO = toISODate(wsNow);
-	saveCache();
-	loadWeekFromBackend().catch(e => toast(`Load failed: ${e.message}`, "bad"));
+  function jumpToCurrentWeek(){
+    const now = new Date();
+    const { year, term } = state.settings;
+    const wsNow = clampWeekStartToTerm(mondayOfWeek(now), year, term);
+    state.settings.weekStartISO = toISODate(wsNow);
+    saveCache();
+    loadWeekFromBackend().catch(e => toast(`Load failed: ${e.message}`, "bad"));
   }
 
   // =============================
@@ -1291,7 +1383,7 @@
   ui.viewHF.addEventListener("click",   () => setView("HF"));
   ui.currentWeekBtn.addEventListener("click", jumpToCurrentWeek);
   ui.prevWeekBtn.addEventListener("click", () => shiftWeek(-1));
-  
+
   ui.nextWeekBtn.addEventListener("click", () => shiftWeek(1));
   ui.refreshBtn.addEventListener("click", () => loadWeekFromBackend().catch(e => toast(`Refresh failed: ${e.message}`, "bad")));
 
@@ -1372,4 +1464,3 @@
 </script>
 </body>
 </html>
-
