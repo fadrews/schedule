@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>ABC Lab Schedule</title>
+  <title>ABC Lab Schedule (Sheets)</title>
   <style>
     :root{
       --bg:#0b1020;
@@ -67,9 +67,10 @@
     input[type="text"], input[type="password"]{
       background:rgba(0,0,0,.22);color:var(--text);
       border:1px solid rgba(255,255,255,.10);border-radius:10px;
-      padding:8px 10px;font-size:12px;min-width:240px;outline:none;
+      padding:8px 10px;font-size:12px;min-width:220px;outline:none;
     }
     input[type="text"]::placeholder, input[type="password"]::placeholder{color:rgba(184,192,224,.75)}
+    .compactInput{min-width:180px}
 
     .chip{
       display:inline-flex;align-items:center;gap:8px;background:rgba(0,0,0,.18);
@@ -139,7 +140,7 @@
     /* Admin dropdown */
     .menuWrap{position:relative; display:inline-block;}
     .menu{
-      position:absolute;right:0;top:42px;width:min(400px, calc(100vw - 24px));
+      position:absolute;right:0;top:42px;width:min(420px, calc(100vw - 24px));
       background:rgba(10,14,30,.96);border:1px solid rgba(255,255,255,.12);
       border-radius:14px;box-shadow:var(--shadow);padding:12px;z-index:50;display:none;
     }
@@ -155,6 +156,12 @@
     }
     .dotGood{background:rgba(53,208,127,.85)}
     .dotBad{background:rgba(255,92,122,.85)}
+
+    /* Blocker banner */
+    #blockerBanner{
+      border-color: rgba(255,92,122,.28);
+      background: linear-gradient(180deg, rgba(255,92,122,.10), rgba(255,255,255,.02));
+    }
   </style>
 </head>
 
@@ -164,18 +171,29 @@
     <div>
       <h1>ABC Lab Schedule</h1>
       <p class="subtitle">
-        Shared schedule backed by Google Sheets. 1-hour slots. Weekdays: <strong>Mon–Fri, 09:00–17:00</strong>. Weekend scheduling is separate.
+        Shared schedule backed by Google Sheets. Use <strong>Refresh</strong> or wait for auto-refresh.
         Scope: <strong>Year + Term + Week</strong>.
       </p>
     </div>
+
     <div class="inline" style="align-items:center;">
-      <span class="chip" id="connChip"><span class="statusDot" id="connDot"></span>Backend: <strong id="connLabel">—</strong></span>
+      <span class="chip"><span class="statusDot" id="connDot"></span>Backend: <strong id="connLabel">—</strong></span>
       <span class="chip" id="termChip">Term: <strong>—</strong></span>
       <span class="chip" id="weekChip">Week: <strong>—</strong></span>
+      <span class="chip">Last updated: <strong id="lastUpdatedLabel">—</strong></span>
+
       <div class="menuWrap">
         <button class="btn" id="adminBtn" type="button">Admin ▾</button>
         <div class="menu" id="adminMenu" aria-label="Admin menu">
           <h3>Admin</h3>
+
+          <div class="menuRow">
+            <div>
+              <small>Your name (optional; stored locally)</small>
+              <input id="yourNameInput" class="compactInput" type="text" placeholder="e.g., Jane Doe" />
+            </div>
+          </div>
+
           <div class="menuRow">
             <div>
               <small>Year</small>
@@ -189,22 +207,25 @@
               </select>
             </div>
           </div>
+
           <div class="menuRow">
             <div style="flex:1;min-width:220px;">
               <small>Admin key (only needed for reset if enabled in Apps Script)</small>
               <input id="adminKeyInput" type="password" placeholder="Admin key (optional)" />
             </div>
           </div>
+
           <div class="menuRow">
             <button class="btn primary" id="applyTermBtn" type="button">Apply Year/Term</button>
             <button class="btn danger" id="resetWeekBtn" type="button">Reset this week</button>
           </div>
+
           <div class="menuRow" style="margin-bottom:0;">
             <button class="btn danger" id="resetAllBtn" type="button">Reset ALL data</button>
           </div>
+
           <small style="margin-top:10px;">
-            Reset this week clears only the current week (both contexts, weekdays+weekend) for the selected Year/Term.
-            Reset ALL wipes names and all schedules in the shared Sheet.
+            Reset actions modify the shared Sheet. If enabled, enter the Admin key.
           </small>
         </div>
       </div>
@@ -213,6 +234,34 @@
 </header>
 
 <main>
+  <!-- Blocker/connection banner -->
+  <div class="panel" id="blockerBanner" style="display:none; margin-bottom:12px;">
+    <div class="inline" style="justify-content:space-between; align-items:flex-start;">
+      <div>
+        <div style="font-weight:700; margin-bottom:6px;">Saving/Loading is blocked</div>
+        <div style="color:var(--muted); font-size:12px; line-height:1.35;">
+          This page can’t reach the shared Google Sheets backend. The most common cause is an ad/tracker blocker or Firefox Enhanced Tracking Protection.
+          <br>
+          <span style="font-family:var(--mono); font-size:11px;">
+            Backend: <span id="backendUrlText"></span>
+          </span>
+        </div>
+      </div>
+      <button class="btn" id="blockerHelpBtn" type="button">How to fix</button>
+    </div>
+
+    <div id="blockerHelp" class="note" style="display:none; margin-top:10px;">
+      <strong>Try this:</strong>
+      <ol style="margin:8px 0 0 18px; padding:0; color:var(--muted);">
+        <li><strong>Disable blockers for this site</strong> (uBlock/AdBlock/Ghostery/etc.) or allowlist:
+          <span style="font-family:var(--mono);">fadrews.github.io</span> and <span style="font-family:var(--mono);">script.google.com</span>.
+        </li>
+        <li><strong>Firefox Enhanced Tracking Protection:</strong> click the shield icon near the address bar → turn protection off for this site → reload.</li>
+        <li>Reload the page and click <strong>Refresh</strong>. Then try adding a name again.</li>
+      </ol>
+    </div>
+  </div>
+
   <div class="panel">
     <div class="controls">
       <div class="leftControls">
@@ -232,6 +281,8 @@
           <button class="btn" id="nextWeekBtn" type="button">Next week ▶</button>
           <button class="btn" id="refreshBtn" type="button">Refresh</button>
         </div>
+
+        <span class="chip">Auto-refresh: <strong id="autoRefreshLabel">—</strong></span>
       </div>
 
       <div class="rightControls">
@@ -244,9 +295,9 @@
       </div>
     </div>
 
-    <p class="note" id="termNote">
-      Term limits: Jan–Apr (Spring) and Sep–Dec (Fall). Week navigation is constrained to the active term.
-      Use <strong>Refresh</strong> to pull the latest updates from other users.
+    <p class="note">
+      Weekdays are <strong>Mon–Fri, 09:00–17:00</strong>. Weekend scheduling is separate.
+      Auto-refresh pulls changes from other users periodically (skips while your saves are pending).
     </p>
   </div>
 
@@ -281,7 +332,8 @@
   // CONFIG
   // =============================
   const API_URL = "https://script.google.com/macros/s/AKfycbwfNCwtEJmeWsP9bTaa6xXYTLSRWCuXb86An5EemgP1SIAnTYiJLx55MP92m2fArwXv5A/exec";
-  const LOCAL_CACHE_KEY = "abc_lab_schedule_cache_v1"; // optional cache (not authoritative)
+  const LOCAL_CACHE_KEY = "abc_lab_schedule_cache_v2";
+  const AUTO_REFRESH_MS = 45000; // 45s (adjust to 30000..60000 if desired)
 
   const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri"];
   const WEEKEND  = ["Sat", "Sun"];
@@ -330,14 +382,23 @@
     connDot: el("connDot"),
     connLabel: el("connLabel"),
 
+    lastUpdatedLabel: el("lastUpdatedLabel"),
+    autoRefreshLabel: el("autoRefreshLabel"),
+
     adminBtn: el("adminBtn"),
     adminMenu: el("adminMenu"),
     yearSelect: el("yearSelect"),
     termSelect: el("termSelect"),
     adminKeyInput: el("adminKeyInput"),
+    yourNameInput: el("yourNameInput"),
     applyTermBtn: el("applyTermBtn"),
     resetWeekBtn: el("resetWeekBtn"),
     resetAllBtn: el("resetAllBtn"),
+
+    blockerBanner: el("blockerBanner"),
+    backendUrlText: el("backendUrlText"),
+    blockerHelpBtn: el("blockerHelpBtn"),
+    blockerHelp: el("blockerHelp"),
   };
 
   function toast(msg, kind="info"){
@@ -353,47 +414,68 @@
   }
 
   // =============================
-  // API
+  // API (blocker-friendly: text/plain)
   // =============================
   async function apiPost(action, payload = {}) {
-  const body = JSON.stringify({ action, ...payload });
+    const body = JSON.stringify({ action, ...payload });
 
-  const res = await fetch(API_URL, {
-    method: "POST",
-    // IMPORTANT: text/plain avoids CORS preflight; Apps Script can still read e.postData.contents
-    headers: { "Content-Type": "text/plain;charset=utf-8" },
-    body
-  });
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body
+    });
 
-  const txt = await res.text();
-  let data;
-  try { data = JSON.parse(txt); }
-  catch { data = { ok:false, error:"Non-JSON response from backend." }; }
+    const txt = await res.text();
+    let data;
+    try { data = JSON.parse(txt); }
+    catch { data = { ok:false, error:"Non-JSON response from backend." }; }
 
-  if (!data.ok) throw new Error(data.error || "Backend error");
-  return data;
-}
+    if (!data.ok) throw new Error(data.error || "Backend error");
+    return data;
+  }
 
+  let backendOk = false;
+  let pendingSaves = 0;
+  let autoTimer = null;
+
+  function setBackendStatus(ok) {
+    backendOk = ok;
+    ui.connDot.classList.remove("dotGood","dotBad");
+    ui.connDot.classList.add(ok ? "dotGood" : "dotBad");
+    ui.connLabel.textContent = ok ? "Connected" : "Offline";
+
+    if (ui.blockerBanner) {
+      ui.backendUrlText.textContent = API_URL;
+      ui.blockerBanner.style.display = ok ? "none" : "block";
+    }
+  }
 
   async function backendPing() {
     try {
-      const data = await apiPost("ping", {});
+      await apiPost("ping", {});
       setBackendStatus(true);
-      return data;
     } catch (e) {
       setBackendStatus(false);
       throw e;
     }
   }
 
-  function setBackendStatus(ok) {
-    ui.connDot.classList.remove("dotGood","dotBad");
-    ui.connDot.classList.add(ok ? "dotGood" : "dotBad");
-    ui.connLabel.textContent = ok ? "Connected" : "Offline";
+  function fmtTime(ts){
+    if(!ts) return "—";
+    const d = new Date(ts);
+    return d.toLocaleString(undefined, { year:"numeric", month:"2-digit", day:"2-digit", hour:"2-digit", minute:"2-digit", second:"2-digit" });
+  }
+
+  function markUpdated(kind){
+    // kind: "Loaded" | "Saved"
+    state.meta.lastUpdatedAt = Date.now();
+    state.meta.lastUpdatedKind = kind;
+    saveCache();
+    ui.lastUpdatedLabel.textContent = `${kind} @ ${fmtTime(state.meta.lastUpdatedAt)}`;
   }
 
   // =============================
-  // Date helpers (local time)
+  // Date helpers
   // =============================
   function pad2(n){ return String(n).padStart(2,"0"); }
   function toISODate(d){ return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`; }
@@ -436,7 +518,7 @@
   }
 
   // =============================
-  // State (authoritative on backend)
+  // State (backend authoritative; local cache fallback)
   // =============================
   function defaultState(){
     const now = new Date();
@@ -444,14 +526,20 @@
     const termGuess = (now.getMonth() <= 3) ? "Spring" : (now.getMonth() >= 8 ? "Fall" : "Fall");
     const ws = clampWeekStartToTerm(mondayOfWeek(now), year, termGuess);
     return {
-      version: 1,
+      version: 2,
       names: [],
       settings: {
         year,
         term: termGuess,
-        weekStartISO: toISODate(ws)
+        weekStartISO: toISODate(ws),
+        adminKey: "",
+        yourName: ""
       },
-      cacheSlotsByScope: {} // local cache only
+      meta: {
+        lastUpdatedAt: 0,
+        lastUpdatedKind: ""
+      },
+      cacheSlotsByScope: {}
     };
   }
 
@@ -463,6 +551,8 @@
       if(!parsed || typeof parsed !== "object" || !parsed.settings) return defaultState();
       if(!parsed.cacheSlotsByScope) parsed.cacheSlotsByScope = {};
       if(!Array.isArray(parsed.names)) parsed.names = [];
+      if(!parsed.meta) parsed.meta = { lastUpdatedAt:0, lastUpdatedKind:"" };
+      if(typeof parsed.settings.yourName !== "string") parsed.settings.yourName = "";
       return parsed;
     }catch{
       return defaultState();
@@ -505,28 +595,26 @@
     return state.cacheSlotsByScope[s];
   }
 
-  // Apply backend week payload (flat key map) into local structure
   function applyWeekFromBackend(data){
     const sKey = data.scopeKey;
     ensureLocalScopeStructure(sKey);
 
     const slotsStruct = state.cacheSlotsByScope[sKey];
-    // reset to defaults first
-    const resetStruct = () => {
-      const makeSlots = (days) => {
-        const dayObj = {};
-        for (const d of days) {
-          dayObj[d] = {};
-          for (const t of TIMES) dayObj[d][t] = { person: "", participantScheduled: false };
-        }
-        return dayObj;
-      };
-      slotsStruct.weekdays.ABC = makeSlots(WEEKDAYS);
-      slotsStruct.weekdays.HF  = makeSlots(WEEKDAYS);
-      slotsStruct.weekend.ABC  = makeSlots(WEEKEND);
-      slotsStruct.weekend.HF   = makeSlots(WEEKEND);
+
+    const makeSlots = (days) => {
+      const dayObj = {};
+      for (const d of days) {
+        dayObj[d] = {};
+        for (const t of TIMES) dayObj[d][t] = { person: "", participantScheduled: false };
+      }
+      return dayObj;
     };
-    resetStruct();
+
+    // reset structure
+    slotsStruct.weekdays.ABC = makeSlots(WEEKDAYS);
+    slotsStruct.weekdays.HF  = makeSlots(WEEKDAYS);
+    slotsStruct.weekend.ABC  = makeSlots(WEEKEND);
+    slotsStruct.weekend.HF   = makeSlots(WEEKEND);
 
     const flat = data.slots || {};
     for(const k of Object.keys(flat)){
@@ -566,6 +654,14 @@
     const label = term === "Spring" ? "Jan–Apr (Spring)" : "Sep–Dec (Fall)";
     ui.termChip.innerHTML = `Term: <strong>${year} • ${label}</strong>`;
     ui.weekChip.innerHTML = `Week: <strong>${toISODate(ws)} → ${toISODate(we)}</strong>`;
+
+    if(state.meta.lastUpdatedAt){
+      ui.lastUpdatedLabel.textContent = `${state.meta.lastUpdatedKind || "Updated"} @ ${fmtTime(state.meta.lastUpdatedAt)}`;
+    }else{
+      ui.lastUpdatedLabel.textContent = "—";
+    }
+
+    ui.autoRefreshLabel.textContent = `${Math.round(AUTO_REFRESH_MS/1000)}s`;
   }
 
   function countFilled(){
@@ -735,7 +831,7 @@
   }
 
   // =============================
-  // Backend-backed operations
+  // Backend-backed ops
   // =============================
   async function loadNamesFromBackend(){
     const data = await apiPost("listNames", {});
@@ -748,20 +844,22 @@
     if(!name) return;
     await apiPost("addName", { name });
     await loadNamesFromBackend();
+    markUpdated("Saved");
     toast(`Added <strong>${name}</strong>`, "good");
     renderAll();
   }
 
-  async function loadWeekFromBackend(){
+  async function loadWeekFromBackend({ silent=false } = {}){
     const { year, term, weekStartISO } = state.settings;
     const data = await apiPost("loadWeek", { year, term, weekStartISO });
     applyWeekFromBackend(data.data);
     renderAll();
-    toast("Refreshed from shared Sheet.", "good");
+    markUpdated("Loaded");
+    if(!silent) toast("Refreshed from shared Sheet.", "good");
   }
 
   async function saveSlotToBackend(slot, { optimistic } = { optimistic: true }){
-    const { year, term, weekStartISO } = state.settings;
+    const { year, term, weekStartISO, yourName } = state.settings;
     const payload = {
       year, term, weekStartISO,
       range: slot.range,
@@ -770,10 +868,9 @@
       time: slot.time,
       person: slot.person || "",
       participantScheduled: !!slot.participantScheduled,
-      updatedBy: "" // optional: you can add a "Your name" field later if desired
+      updatedBy: (yourName || "").trim()
     };
 
-    // optimistic local update
     if(optimistic){
       const s = currentLocalSlots();
       s[slot.range][slot.context][slot.day][slot.time] = {
@@ -784,17 +881,21 @@
       renderAll();
     }
 
+    pendingSaves++;
     try{
       await apiPost("saveSlot", payload);
       setBackendStatus(true);
+      markUpdated("Saved");
     }catch(e){
       setBackendStatus(false);
-      toast(`Save failed: ${e.message}. (Your view may be out of sync; hit Refresh.)`, "bad");
+      toast(`Save failed: ${e.message}. (Hit Refresh after unblocking.)`, "bad");
+    }finally{
+      pendingSaves = Math.max(0, pendingSaves - 1);
     }
   }
 
   // =============================
-  // Week navigation (term constrained)
+  // Week navigation
   // =============================
   function shiftWeek(deltaWeeks){
     const { year, term } = state.settings;
@@ -803,7 +904,6 @@
     ws = clampWeekStartToTerm(mondayOfWeek(ws), year, term);
     state.settings.weekStartISO = toISODate(ws);
     saveCache();
-    // load from backend for new week
     loadWeekFromBackend().catch(e => toast(`Load failed: ${e.message}`, "bad"));
   }
 
@@ -830,6 +930,7 @@
     ui.yearSelect.value = String(state.settings.year);
     ui.termSelect.value = state.settings.term;
     ui.adminKeyInput.value = state.settings.adminKey || "";
+    ui.yourNameInput.value = state.settings.yourName || "";
   }
 
   function applyYearTerm(){
@@ -839,6 +940,7 @@
     state.settings.year = year;
     state.settings.term = term;
     state.settings.adminKey = ui.adminKeyInput.value || "";
+    state.settings.yourName = ui.yourNameInput.value || "";
 
     let ws = parseISODate(state.settings.weekStartISO);
     ws = clampWeekStartToTerm(mondayOfWeek(ws), year, term);
@@ -858,7 +960,7 @@
     const adminKey = ui.adminKeyInput.value || state.settings.adminKey || "";
     try{
       await apiPost("resetWeek", { year, term, weekStartISO, adminKey });
-      await loadWeekFromBackend();
+      await loadWeekFromBackend({ silent:true });
       toast("Reset current week (shared).", "good");
     }catch(e){
       toast(`Reset failed: ${e.message}`, "bad");
@@ -873,7 +975,7 @@
     try{
       await apiPost("resetAll", { adminKey });
       await loadNamesFromBackend();
-      await loadWeekFromBackend();
+      await loadWeekFromBackend({ silent:true });
       toast("Reset ALL data (shared).", "good");
     }catch(e){
       toast(`Reset failed: ${e.message}`, "bad");
@@ -881,7 +983,7 @@
   }
 
   // =============================
-  // Export / Import (local cache)
+  // Export / Import (local snapshot)
   // =============================
   function downloadText(filename, text){
     const blob = new Blob([text], {type:"application/json"});
@@ -900,6 +1002,7 @@
       exportedAt: new Date().toISOString(),
       names: state.names,
       settings: state.settings,
+      meta: state.meta,
       cachedScope: scopeKey(),
       cachedSlots: currentLocalSlots()
     };
@@ -920,24 +1023,44 @@
         if(!parsed || typeof parsed !== "object") throw new Error("Invalid JSON.");
         if(!Array.isArray(parsed.names) || !parsed.settings) throw new Error("Missing names/settings.");
 
-        // import into local cache only
         state.names = parsed.names;
         state.settings = { ...state.settings, ...parsed.settings };
+        state.meta = { ...state.meta, ...(parsed.meta || {}) };
         if(parsed.cachedScope && parsed.cachedSlots){
           state.cacheSlotsByScope[parsed.cachedScope] = parsed.cachedSlots;
         }
         saveCache();
         renderAll();
 
-        // then refresh from backend to sync real data
+        // refresh from backend to sync real data
         await loadNamesFromBackend();
-        await loadWeekFromBackend();
+        await loadWeekFromBackend({ silent:true });
         toast("Imported local snapshot and refreshed from backend.", "good");
       }catch(e){
         toast(`Import failed: ${e.message}`, "bad");
       }
     });
     input.click();
+  }
+
+  // =============================
+  // Auto-refresh
+  // =============================
+  function startAutoRefresh(){
+    if(autoTimer) clearInterval(autoTimer);
+    ui.autoRefreshLabel.textContent = `${Math.round(AUTO_REFRESH_MS/1000)}s`;
+    autoTimer = setInterval(async () => {
+      // Only if backend reachable and not currently saving
+      if(!backendOk) return;
+      if(pendingSaves > 0) return;
+      try{
+        await loadWeekFromBackend({ silent:true });
+      }catch{
+        // status + banner handled elsewhere via ping failures on demand;
+        // we still mark offline to show banner.
+        setBackendStatus(false);
+      }
+    }, AUTO_REFRESH_MS);
   }
 
   // =============================
@@ -952,6 +1075,7 @@
 
   ui.prevWeekBtn.addEventListener("click", () => shiftWeek(-1));
   ui.nextWeekBtn.addEventListener("click", () => shiftWeek(1));
+
   ui.refreshBtn.addEventListener("click", () => loadWeekFromBackend().catch(e => toast(`Refresh failed: ${e.message}`, "bad")));
 
   ui.addNameBtn.addEventListener("click", async () => {
@@ -983,9 +1107,19 @@
   ui.resetWeekBtn.addEventListener("click", () => resetWeek());
   ui.resetAllBtn.addEventListener("click", () => resetAll());
 
+  ui.yourNameInput.addEventListener("input", () => {
+    state.settings.yourName = ui.yourNameInput.value || "";
+    saveCache();
+  });
+
   document.addEventListener("click", (e) => {
     const inside = ui.adminMenu.contains(e.target) || ui.adminBtn.contains(e.target);
     if(!inside) toggleAdminMenu(false);
+  });
+
+  ui.blockerHelpBtn?.addEventListener("click", () => {
+    const isShown = ui.blockerHelp.style.display === "block";
+    ui.blockerHelp.style.display = isShown ? "none" : "block";
   });
 
   // =============================
@@ -1002,11 +1136,16 @@
     saveCache();
   }
 
+  renderAll();
+  startAutoRefresh();
+
   (async () => {
     try{
       await backendPing();
       await loadNamesFromBackend();
-      await loadWeekFromBackend();
+      await loadWeekFromBackend({ silent:true });
+      markUpdated("Loaded");
+      toast("Connected. Loaded shared data.", "good");
     }catch(e){
       toast(`Backend not reachable: ${e.message}. Showing local cache.`, "bad");
       renderAll();
