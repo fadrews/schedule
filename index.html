@@ -6,14 +6,22 @@
   <title>ABC Lab Schedule (Sheets)</title>
   <style>
     :root{
-      --bg:#0b1020;
-      --text:#e7ecff;
-      --muted:#b8c0e0;
-      --accent:#7aa2ff;
-      --good:#35d07f;
-      --bad:#ff5c7a;
-      --shadow: 0 12px 30px rgba(0,0,0,.35);
-      --radius:14px;
+      /* Brighter palette */
+      --bg:#0a0f1f;
+      --text:#f3f6ff;
+      --muted:#c9d3f2;
+      --accent:#8fb2ff;
+      --accent2:#9df2c6;
+      --good:#4be29b;
+      --bad:#ff6b93;
+
+      --panel: rgba(255,255,255,.08);
+      --panel2: rgba(255,255,255,.04);
+      --border: rgba(255,255,255,.14);
+      --border2: rgba(255,255,255,.10);
+
+      --shadow: 0 12px 30px rgba(0,0,0,.32);
+      --radius:16px;
       --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
       --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
     }
@@ -21,224 +29,374 @@
     body{
       margin:0;
       font-family:var(--sans);
-      background: radial-gradient(1200px 800px at 20% 0%, #1a2a66 0%, var(--bg) 60%),
-                  radial-gradient(1200px 800px at 90% 20%, #3b1a66 0%, var(--bg) 55%);
+      background:
+        radial-gradient(1100px 800px at 18% 0%, rgba(143,178,255,.55) 0%, rgba(10,15,31,.0) 60%),
+        radial-gradient(900px 700px at 92% 18%, rgba(157,242,198,.30) 0%, rgba(10,15,31,.0) 55%),
+        linear-gradient(180deg, #0a0f1f 0%, #070b16 100%);
       color:var(--text);
     }
-    header{padding:18px 18px 0;max-width:1400px;margin:0 auto;}
-    .titlebar{display:flex;gap:12px;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;}
-    h1{margin:0;font-size:18px;font-weight:700;letter-spacing:.2px}
-    .subtitle{margin:6px 0 0;font-size:13px;color:var(--muted);line-height:1.35;max-width:980px;}
 
-    main{padding:14px 18px 24px;max-width:1400px;margin:0 auto;}
+    /* Wider layout; reduce "wasted left space" */
+    header{padding:16px 16px 0;max-width:none;margin:0;}
+    main{padding:12px 16px 24px;max-width:none;margin:0;}
+
+    .topbar{
+      background: linear-gradient(180deg, rgba(255,255,255,.09), rgba(255,255,255,.04));
+      border-bottom:1px solid rgba(255,255,255,.10);
+      box-shadow: 0 10px 26px rgba(0,0,0,.22);
+      padding:14px 16px;
+      border-radius: 0 0 18px 18px;
+    }
+
+    .titlebar{
+      display:flex;
+      gap:14px;
+      align-items:flex-start;
+      justify-content:space-between;
+      flex-wrap:wrap;
+      width:100%;
+    }
+
+    h1{
+      margin:0;
+      font-size:18px;
+      font-weight:800;
+      letter-spacing:.2px
+    }
+    .subtitle{
+      margin:6px 0 0;
+      font-size:13px;
+      color:var(--muted);
+      line-height:1.35;
+      max-width:980px;
+    }
+
+    /* Bigger, easier-to-see week label in the top bar */
+    .weekBig{
+      font-size:20px;
+      font-weight:900;
+      letter-spacing:.2px;
+      color:var(--text);
+      line-height:1.1;
+      margin-top:2px;
+    }
+    .weekBig small{
+      display:block;
+      font-size:12px;
+      font-weight:700;
+      color:var(--muted);
+      margin-top:6px;
+    }
+
     .panel{
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
-      border:1px solid rgba(255,255,255,.08);
+      background: linear-gradient(180deg, var(--panel), var(--panel2));
+      border:1px solid var(--border2);
       box-shadow:var(--shadow);
       border-radius:var(--radius);
       padding:14px;
     }
+
     .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;}
     .leftControls,.rightControls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
 
     .tabs{
-      display:inline-flex;background:rgba(0,0,0,.22);
-      border:1px solid rgba(255,255,255,.08);border-radius:999px;
-      padding:4px;gap:4px;
+      display:inline-flex;
+      background:rgba(0,0,0,.20);
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:999px;
+      padding:4px;
+      gap:4px;
     }
     .tab{
       border:0;color:var(--muted);background:transparent;
       padding:7px 10px;border-radius:999px;font-size:12px;cursor:pointer;user-select:none;
     }
     .tab.active{
-      background:rgba(122,162,255,.18);color:var(--text);
-      box-shadow: inset 0 0 0 1px rgba(122,162,255,.25);
+      background:rgba(143,178,255,.20);
+      color:var(--text);
+      box-shadow: inset 0 0 0 1px rgba(143,178,255,.32);
     }
 
     .btn{
-      border:1px solid rgba(255,255,255,.10);background:rgba(0,0,0,.18);color:var(--text);
-      padding:8px 10px;border-radius:10px;cursor:pointer;font-size:12px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(0,0,0,.14);
+      color:var(--text);
+      padding:8px 10px;
+      border-radius:12px;
+      cursor:pointer;
+      font-size:12px;
     }
-    .btn:hover{border-color:rgba(255,255,255,.18)}
-    .btn.primary{background:rgba(122,162,255,.18);border-color:rgba(122,162,255,.25);}
-    .btn.danger{background:rgba(255,92,122,.12);border-color:rgba(255,92,122,.28);}
+    .btn:hover{border-color:rgba(255,255,255,.22)}
+    .btn.primary{
+      background:rgba(143,178,255,.22);
+      border-color:rgba(143,178,255,.34);
+    }
+    .btn.danger{
+      background:rgba(255,107,147,.14);
+      border-color:rgba(255,107,147,.30);
+    }
 
     .field{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
     input[type="text"], input[type="password"]{
-      background:rgba(0,0,0,.22);color:var(--text);
-      border:1px solid rgba(255,255,255,.10);border-radius:10px;
-      padding:8px 10px;font-size:12px;min-width:220px;outline:none;
+      background:rgba(0,0,0,.18);
+      color:var(--text);
+      border:1px solid rgba(255,255,255,.14);
+      border-radius:12px;
+      padding:8px 10px;
+      font-size:12px;
+      min-width:220px;
+      outline:none;
     }
-    input[type="text"]::placeholder, input[type="password"]::placeholder{color:rgba(184,192,224,.75)}
+    input[type="text"]::placeholder, input[type="password"]::placeholder{color:rgba(201,211,242,.78)}
     .compactInput{min-width:180px}
 
     .chip{
-      display:inline-flex;align-items:center;gap:8px;background:rgba(0,0,0,.18);
-      border:1px solid rgba(255,255,255,.08);border-radius:999px;padding:6px 10px;
-      font-size:12px;color:var(--muted);
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      background:rgba(0,0,0,.14);
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:999px;
+      padding:6px 10px;
+      font-size:12px;
+      color:var(--muted);
+      white-space:nowrap;
     }
-    .chip strong{color:var(--text); font-weight:700}
+    .chip strong{color:var(--text); font-weight:800}
+
     .note{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.35;}
 
-    .gridWrap{
-      overflow:auto;border-radius:12px;border:1px solid rgba(255,255,255,.08);
-      margin-top:12px;background:rgba(0,0,0,.12);
+    /* Make the two tables truly left-aligned and fill width */
+    .twoCol{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+      margin-top:12px;
+      width:100%;
+      justify-content:start;
+      align-items:start;
     }
+    @media (max-width: 1100px){.twoCol{grid-template-columns:1fr}}
+
+    /* Ensure panel doesn't shrink leaving left gutters */
+    section.panel{min-width:0}
+
+    .gridWrap{
+      overflow:auto;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.12);
+      margin-top:12px;
+      background:rgba(0,0,0,.12);
+      width:100%;
+    }
+
     table{border-collapse:separate;border-spacing:0;min-width:980px;width:100%;font-size:12px;}
     thead th{
-      position:sticky;top:0;z-index:5;background:rgba(10,14,30,.92);backdrop-filter: blur(6px);
-      border-bottom:1px solid rgba(255,255,255,.10);padding:10px 8px;text-align:left;color:var(--muted);
-      font-weight:700;white-space:nowrap;
+      position:sticky;top:0;z-index:5;
+      background:rgba(12,16,32,.94);
+      backdrop-filter: blur(6px);
+      border-bottom:1px solid rgba(255,255,255,.12);
+      padding:10px 8px;text-align:left;color:var(--muted);
+      font-weight:800;white-space:nowrap;
     }
     thead th:first-child{left:0; z-index:6;}
     tbody th{
-      position:sticky;left:0;z-index:4;background:rgba(10,14,30,.92);backdrop-filter: blur(6px);
-      border-right:1px solid rgba(255,255,255,.10);color:var(--muted);font-weight:700;padding:10px 8px;
+      position:sticky;left:0;z-index:4;
+      background:rgba(12,16,32,.94);
+      backdrop-filter: blur(6px);
+      border-right:1px solid rgba(255,255,255,.12);
+      color:var(--muted);font-weight:800;padding:10px 8px;
       white-space:nowrap;font-family:var(--mono);
     }
     td{
-      border-bottom:1px solid rgba(255,255,255,.07);border-right:1px solid rgba(255,255,255,.07);
-      padding:8px;vertical-align:top;min-width:190px;background:rgba(17,26,51,.35);
+      border-bottom:1px solid rgba(255,255,255,.08);
+      border-right:1px solid rgba(255,255,255,.08);
+      padding:8px;
+      vertical-align:top;
+      min-width:190px;
+      background:rgba(143,178,255,.06);
     }
     tr:last-child td{border-bottom:0}
     td:last-child{border-right:0}
 
     .slot{display:flex;flex-direction:column;gap:6px;min-height:92px;}
     select{
-      width:100%;background:rgba(0,0,0,.22);color:var(--text);
-      border:1px solid rgba(255,255,255,.10);border-radius:10px;padding:7px 8px;font-size:12px;outline:none;
+      width:100%;
+      background:rgba(0,0,0,.18);
+      color:var(--text);
+      border:1px solid rgba(255,255,255,.14);
+      border-radius:12px;
+      padding:7px 8px;
+      font-size:12px;
+      outline:none;
     }
     .slotTop{display:flex;gap:8px;align-items:center;justify-content:space-between;}
-    .who{font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:140px;}
+    .who{font-weight:900;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:140px;}
     .smallBtn{
-      border:1px solid rgba(255,255,255,.10);background:rgba(0,0,0,.18);color:var(--text);
-      padding:6px 8px;border-radius:10px;font-size:11px;cursor:pointer;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(0,0,0,.14);
+      color:var(--text);
+      padding:6px 8px;
+      border-radius:12px;
+      font-size:11px;
+      cursor:pointer;
     }
-    .smallBtn:hover{border-color:rgba(255,255,255,.18)}
+    .smallBtn:hover{border-color:rgba(255,255,255,.22)}
+
     .badge{
-      display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:5px 8px;font-size:11px;
-      background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.08);color:var(--muted);width:max-content;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      border-radius:999px;
+      padding:5px 8px;
+      font-size:11px;
+      background:rgba(0,0,0,.14);
+      border:1px solid rgba(255,255,255,.12);
+      color:var(--muted);
+      width:max-content;
     }
-    .badge.bad{background:rgba(255,92,122,.12); border-color:rgba(255,92,122,.25); color:var(--text)}
-    .badge.good{background:rgba(53,208,127,.12); border-color:rgba(53,208,127,.22); color:var(--text)}
+    .badge.bad{
+      background:rgba(255,107,147,.16);
+      border-color:rgba(255,107,147,.34);
+      color:var(--text)
+    }
+    .badge.good{
+      background:rgba(75,226,155,.14);
+      border-color:rgba(75,226,155,.28);
+      color:var(--text)
+    }
     .inline{display:flex; gap:8px; align-items:center; flex-wrap:wrap;}
     label{display:flex; gap:8px; align-items:center; cursor:pointer; user-select:none; color:var(--muted);}
     input[type="checkbox"]{width:15px;height:15px;accent-color:var(--accent);}
 
-    .twoCol{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;}
-    @media (max-width: 1050px){.twoCol{grid-template-columns:1fr}table{min-width:920px}}
     .hidden{display:none !important}
 
     .toast{
-      position:fixed;bottom:16px;right:16px;background:rgba(0,0,0,.35);
-      border:1px solid rgba(255,255,255,.12);backdrop-filter: blur(10px);box-shadow:var(--shadow);
-      padding:10px 12px;border-radius:12px;font-size:12px;color:var(--text);
-      max-width:min(560px, calc(100vw - 32px));display:none;
+      position:fixed;bottom:16px;right:16px;
+      background:rgba(0,0,0,.30);
+      border:1px solid rgba(255,255,255,.16);
+      backdrop-filter: blur(10px);
+      box-shadow:var(--shadow);
+      padding:10px 12px;
+      border-radius:14px;
+      font-size:12px;
+      color:var(--text);
+      max-width:min(560px, calc(100vw - 32px));
+      display:none;
     }
     .toast.show{display:block}
 
     /* Admin dropdown */
     .menuWrap{position:relative; display:inline-block;}
     .menu{
-      position:absolute;right:0;top:42px;width:min(420px, calc(100vw - 24px));
-      background:rgba(10,14,30,.96);border:1px solid rgba(255,255,255,.12);
-      border-radius:14px;box-shadow:var(--shadow);padding:12px;z-index:50;display:none;
+      position:absolute;right:0;top:42px;width:min(440px, calc(100vw - 24px));
+      background:rgba(12,16,32,.96);
+      border:1px solid rgba(255,255,255,.16);
+      border-radius:16px;
+      box-shadow:var(--shadow);
+      padding:12px;
+      z-index:50;
+      display:none;
     }
     .menu.show{display:block}
     .menu h3{margin:0 0 10px 0;font-size:13px;color:var(--text);}
     .menuRow{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:10px;}
     .menuRow > div{flex:1;min-width:160px;}
     .menu small{color:var(--muted); display:block; line-height:1.35;}
+
     .statusDot{
       display:inline-block;width:9px;height:9px;border-radius:999px;background:rgba(255,255,255,.25);
       box-shadow:0 0 0 2px rgba(0,0,0,.18) inset;
       margin-right:6px;
     }
-    .dotGood{background:rgba(53,208,127,.85)}
-    .dotBad{background:rgba(255,92,122,.85)}
+    .dotGood{background:rgba(75,226,155,.92)}
+    .dotBad{background:rgba(255,107,147,.92)}
 
     /* Blocker banner */
     #blockerBanner{
-      border-color: rgba(255,92,122,.28);
-      background: linear-gradient(180deg, rgba(255,92,122,.10), rgba(255,255,255,.02));
+      border-color: rgba(255,107,147,.34);
+      background: linear-gradient(180deg, rgba(255,107,147,.12), rgba(255,255,255,.03));
     }
   </style>
 </head>
 
 <body>
-<header>
-  <div class="titlebar">
-    <div>
-      <h1>ABC Lab Schedule</h1>
-      <p class="subtitle">
-        Shared schedule backed by Google Sheets. Use <strong>Refresh</strong> or wait for auto-refresh.
-        Scope: <strong>Year + Term + Week</strong>.
-      </p>
-    </div>
+  <div class="topbar">
+    <div class="titlebar">
+      <div>
+        <h1>ABC Lab Schedule</h1>
+        <p class="subtitle">
+          Shared schedule backed by Google Sheets. Auto-refresh is enabled. Scope: <strong>Year + Term + Week</strong>.
+        </p>
+      </div>
 
-    <div class="inline" style="align-items:center;">
-      <span class="chip"><span class="statusDot" id="connDot"></span>Backend: <strong id="connLabel">—</strong></span>
-      <span class="chip" id="termChip">Term: <strong>—</strong></span>
-      <span class="chip" id="weekChip">Week: <strong>—</strong></span>
-      <span class="chip">Last updated: <strong id="lastUpdatedLabel">—</strong></span>
+      <!-- Bigger week display in top bar -->
+      <div class="weekBig" id="weekBigLabel">
+        Week: —
+        <small id="termBigLabel">—</small>
+      </div>
 
-      <div class="menuWrap">
-        <button class="btn" id="adminBtn" type="button">Admin ▾</button>
-        <div class="menu" id="adminMenu" aria-label="Admin menu">
-          <h3>Admin</h3>
+      <div class="inline" style="align-items:center;">
+        <span class="chip"><span class="statusDot" id="connDot"></span>Backend: <strong id="connLabel">—</strong></span>
+        <span class="chip">Last updated: <strong id="lastUpdatedLabel">—</strong></span>
 
-          <div class="menuRow">
-            <div>
-              <small>Your name (optional; stored locally)</small>
-              <input id="yourNameInput" class="compactInput" type="text" placeholder="e.g., Jane Doe" />
+        <div class="menuWrap">
+          <button class="btn" id="adminBtn" type="button">Admin ▾</button>
+          <div class="menu" id="adminMenu" aria-label="Admin menu">
+            <h3>Admin</h3>
+
+            <div class="menuRow">
+              <div>
+                <small>Your name (optional; stored locally)</small>
+                <input id="yourNameInput" class="compactInput" type="text" placeholder="e.g., Jane Doe" />
+              </div>
             </div>
-          </div>
 
-          <div class="menuRow">
-            <div>
-              <small>Year</small>
-              <select id="yearSelect"></select>
+            <div class="menuRow">
+              <div>
+                <small>Year</small>
+                <select id="yearSelect"></select>
+              </div>
+              <div>
+                <small>Term</small>
+                <select id="termSelect">
+                  <option value="Spring">Jan–Apr (Spring)</option>
+                  <option value="Fall">Sep–Dec (Fall)</option>
+                </select>
+              </div>
             </div>
-            <div>
-              <small>Term</small>
-              <select id="termSelect">
-                <option value="Spring">Jan–Apr (Spring)</option>
-                <option value="Fall">Sep–Dec (Fall)</option>
-              </select>
+
+            <div class="menuRow">
+              <div style="flex:1;min-width:220px;">
+                <small>Admin key (only needed for reset if enabled in Apps Script)</small>
+                <input id="adminKeyInput" type="password" placeholder="Admin key (optional)" />
+              </div>
             </div>
-          </div>
 
-          <div class="menuRow">
-            <div style="flex:1;min-width:220px;">
-              <small>Admin key (only needed for reset if enabled in Apps Script)</small>
-              <input id="adminKeyInput" type="password" placeholder="Admin key (optional)" />
+            <div class="menuRow">
+              <button class="btn primary" id="applyTermBtn" type="button">Apply Year/Term</button>
+              <button class="btn danger" id="resetWeekBtn" type="button">Reset this week</button>
             </div>
-          </div>
 
-          <div class="menuRow">
-            <button class="btn primary" id="applyTermBtn" type="button">Apply Year/Term</button>
-            <button class="btn danger" id="resetWeekBtn" type="button">Reset this week</button>
-          </div>
+            <div class="menuRow" style="margin-bottom:0;">
+              <button class="btn danger" id="resetAllBtn" type="button">Reset ALL data</button>
+            </div>
 
-          <div class="menuRow" style="margin-bottom:0;">
-            <button class="btn danger" id="resetAllBtn" type="button">Reset ALL data</button>
+            <small style="margin-top:10px;">
+              Reset actions modify the shared Sheet. If enabled, enter the Admin key.
+            </small>
           </div>
-
-          <small style="margin-top:10px;">
-            Reset actions modify the shared Sheet. If enabled, enter the Admin key.
-          </small>
         </div>
       </div>
     </div>
   </div>
-</header>
 
 <main>
   <!-- Blocker/connection banner -->
   <div class="panel" id="blockerBanner" style="display:none; margin-bottom:12px;">
     <div class="inline" style="justify-content:space-between; align-items:flex-start;">
       <div>
-        <div style="font-weight:700; margin-bottom:6px;">Saving/Loading is blocked</div>
+        <div style="font-weight:900; margin-bottom:6px;">Saving/Loading is blocked</div>
         <div style="color:var(--muted); font-size:12px; line-height:1.35;">
           This page can’t reach the shared Google Sheets backend. The most common cause is an ad/tracker blocker or Firefox Enhanced Tracking Protection.
           <br>
@@ -287,7 +445,7 @@
 
       <div class="rightControls">
         <div class="field">
-          <input id="nameInput" type="text" placeholder="Add RA name to list and press Enter" />
+          <input id="nameInput" type="text" placeholder="Add person (e.g., Jane Doe) and press Enter" />
           <button class="btn primary" id="addNameBtn" type="button">Add</button>
         </div>
         <button class="btn" id="exportBtn" type="button">Export</button>
@@ -301,7 +459,7 @@
     </p>
   </div>
 
-  <div class="twoCol" style="margin-top:12px;">
+  <div class="twoCol">
     <section class="panel" id="panelABC">
       <div class="inline" style="justify-content:space-between;">
         <div class="inline">
@@ -332,13 +490,12 @@
   // CONFIG
   // =============================
   const API_URL = "https://script.google.com/macros/s/AKfycbwfNCwtEJmeWsP9bTaa6xXYTLSRWCuXb86An5EemgP1SIAnTYiJLx55MP92m2fArwXv5A/exec";
-  const LOCAL_CACHE_KEY = "abc_lab_schedule_cache_v2";
-  const AUTO_REFRESH_MS = 45000; // 45s (adjust to 30000..60000 if desired)
+  const LOCAL_CACHE_KEY = "abc_lab_schedule_cache_v3_ui";
+  const AUTO_REFRESH_MS = 45000; // 45s
 
   const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri"];
   const WEEKEND  = ["Sat", "Sun"];
 
-  // 9:00–17:00 => 8 one-hour slots
   const TIMES = [];
   for (let h = 9; h < 17; h++) {
     const pad = (n) => String(n).padStart(2, "0");
@@ -376,14 +533,14 @@
 
     toast: el("toast"),
 
-    termChip: el("termChip"),
-    weekChip: el("weekChip"),
-
     connDot: el("connDot"),
     connLabel: el("connLabel"),
 
     lastUpdatedLabel: el("lastUpdatedLabel"),
     autoRefreshLabel: el("autoRefreshLabel"),
+
+    weekBigLabel: el("weekBigLabel"),
+    termBigLabel: el("termBigLabel"),
 
     adminBtn: el("adminBtn"),
     adminMenu: el("adminMenu"),
@@ -405,10 +562,10 @@
     ui.toast.innerHTML = msg;
     ui.toast.classList.add("show");
     ui.toast.style.borderColor = kind === "bad"
-      ? "rgba(255,92,122,.35)"
+      ? "rgba(255,107,147,.40)"
       : kind === "good"
-        ? "rgba(53,208,127,.28)"
-        : "rgba(255,255,255,.14)";
+        ? "rgba(75,226,155,.34)"
+        : "rgba(255,255,255,.18)";
     clearTimeout(toast._t);
     toast._t = setTimeout(() => ui.toast.classList.remove("show"), 3000);
   }
@@ -418,7 +575,6 @@
   // =============================
   async function apiPost(action, payload = {}) {
     const body = JSON.stringify({ action, ...payload });
-
     const res = await fetch(API_URL, {
       method: "POST",
       headers: { "Content-Type": "text/plain;charset=utf-8" },
@@ -467,7 +623,6 @@
   }
 
   function markUpdated(kind){
-    // kind: "Loaded" | "Saved"
     state.meta.lastUpdatedAt = Date.now();
     state.meta.lastUpdatedKind = kind;
     saveCache();
@@ -490,7 +645,7 @@
   }
   function mondayOfWeek(d){
     const x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-    const day = x.getDay(); // Sun=0..Sat=6
+    const day = x.getDay();
     const diff = (day === 0 ? -6 : 1 - day);
     x.setDate(x.getDate() + diff);
     x.setHours(0,0,0,0);
@@ -498,9 +653,9 @@
   }
   function termBounds(year, term){
     if(term === "Spring"){
-      return { start: new Date(year, 0, 1), end: new Date(year, 3, 30) };   // Jan 1 .. Apr 30
+      return { start: new Date(year, 0, 1), end: new Date(year, 3, 30) };
     }
-    return { start: new Date(year, 8, 1), end: new Date(year, 11, 31) };    // Sep 1 .. Dec 31
+    return { start: new Date(year, 8, 1), end: new Date(year, 11, 31) };
   }
   function clampWeekStartToTerm(weekStart, year, term){
     const { start, end } = termBounds(year, term);
@@ -518,7 +673,7 @@
   }
 
   // =============================
-  // State (backend authoritative; local cache fallback)
+  // State
   // =============================
   function defaultState(){
     const now = new Date();
@@ -526,7 +681,7 @@
     const termGuess = (now.getMonth() <= 3) ? "Spring" : (now.getMonth() >= 8 ? "Fall" : "Fall");
     const ws = clampWeekStartToTerm(mondayOfWeek(now), year, termGuess);
     return {
-      version: 2,
+      version: 3,
       names: [],
       settings: {
         year,
@@ -565,8 +720,8 @@
 
   let state = loadCache();
 
-  let activeRange = "weekdays"; // "weekdays" | "weekend"
-  let activeView  = "both";     // "both" | "ABC" | "HF"
+  let activeRange = "weekdays";
+  let activeView  = "both";
 
   function scopeKey(){
     const { year, term, weekStartISO } = state.settings;
@@ -600,7 +755,6 @@
     ensureLocalScopeStructure(sKey);
 
     const slotsStruct = state.cacheSlotsByScope[sKey];
-
     const makeSlots = (days) => {
       const dayObj = {};
       for (const d of days) {
@@ -610,7 +764,6 @@
       return dayObj;
     };
 
-    // reset structure
     slotsStruct.weekdays.ABC = makeSlots(WEEKDAYS);
     slotsStruct.weekdays.HF  = makeSlots(WEEKDAYS);
     slotsStruct.weekend.ABC  = makeSlots(WEEKEND);
@@ -647,20 +800,20 @@
     ui.panelHF.classList.toggle("hidden",  view === "ABC");
   }
 
-  function renderTopChips(){
+  function renderTop(){
     const { year, term, weekStartISO } = state.settings;
     const ws = parseISODate(weekStartISO);
     const we = addDays(ws, 6);
-    const label = term === "Spring" ? "Jan–Apr (Spring)" : "Sep–Dec (Fall)";
-    ui.termChip.innerHTML = `Term: <strong>${year} • ${label}</strong>`;
-    ui.weekChip.innerHTML = `Week: <strong>${toISODate(ws)} → ${toISODate(we)}</strong>`;
+    const termLabel = term === "Spring" ? "Jan–Apr (Spring)" : "Sep–Dec (Fall)";
+
+    ui.weekBigLabel.innerHTML = `Week: ${toISODate(ws)} → ${toISODate(we)}<small></small>`;
+    ui.termBigLabel.textContent = `${year} • ${termLabel}`;
 
     if(state.meta.lastUpdatedAt){
       ui.lastUpdatedLabel.textContent = `${state.meta.lastUpdatedKind || "Updated"} @ ${fmtTime(state.meta.lastUpdatedAt)}`;
     }else{
       ui.lastUpdatedLabel.textContent = "—";
     }
-
     ui.autoRefreshLabel.textContent = `${Math.round(AUTO_REFRESH_MS/1000)}s`;
   }
 
@@ -823,7 +976,7 @@
   }
 
   function renderAll(){
-    renderTopChips();
+    renderTop();
     renderContext("ABC", ui.gridWrapABC);
     renderContext("HF", ui.gridWrapHF);
     renderSummary();
@@ -1032,7 +1185,6 @@
         saveCache();
         renderAll();
 
-        // refresh from backend to sync real data
         await loadNamesFromBackend();
         await loadWeekFromBackend({ silent:true });
         toast("Imported local snapshot and refreshed from backend.", "good");
@@ -1050,14 +1202,11 @@
     if(autoTimer) clearInterval(autoTimer);
     ui.autoRefreshLabel.textContent = `${Math.round(AUTO_REFRESH_MS/1000)}s`;
     autoTimer = setInterval(async () => {
-      // Only if backend reachable and not currently saving
       if(!backendOk) return;
       if(pendingSaves > 0) return;
       try{
         await loadWeekFromBackend({ silent:true });
       }catch{
-        // status + banner handled elsewhere via ping failures on demand;
-        // we still mark offline to show banner.
         setBackendStatus(false);
       }
     }, AUTO_REFRESH_MS);
@@ -1075,7 +1224,6 @@
 
   ui.prevWeekBtn.addEventListener("click", () => shiftWeek(-1));
   ui.nextWeekBtn.addEventListener("click", () => shiftWeek(1));
-
   ui.refreshBtn.addEventListener("click", () => loadWeekFromBackend().catch(e => toast(`Refresh failed: ${e.message}`, "bad")));
 
   ui.addNameBtn.addEventListener("click", async () => {
