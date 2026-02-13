@@ -334,6 +334,30 @@
       border-color: rgba(255,107,147,.34);
       background: linear-gradient(180deg, rgba(255,107,147,.12), rgba(255,255,255,.03));
     }
+		/* 1) Strong “alert” styling when a participant is scheduled */
+	.slot.participant{
+	  border: 1px solid rgba(255,107,147,.55);
+	  background: linear-gradient(180deg, rgba(255,107,147,.18), rgba(0,0,0,.10));
+	  border-radius: 14px;
+	  padding: 10px;
+	  box-shadow: 0 0 0 1px rgba(255,107,147,.25) inset;
+	}
+
+	/* 2) Make the checkbox row more prominent in that state */
+	.slot.participant label{
+	  color: var(--text);
+	  font-weight: 900;
+	}
+	.slot.participant input[type="checkbox"]{
+	  transform: scale(1.15);
+	}
+
+	/* 3) Make the badge unmistakable */
+	.badge.bad{
+	  font-weight: 900;
+	  letter-spacing: .2px;
+	}
+
   </style>
 </head>
 
@@ -909,8 +933,8 @@
         const td = document.createElement("td");
         const s = slots[day][time];
 
-        const slot = document.createElement("div");
-        slot.className = "slot";
+		const slot = document.createElement("div");
+		slot.className = "slot" + (s.participantScheduled ? " participant" : "");
 
         const top = document.createElement("div");
         top.className = "slotTop";
