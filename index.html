@@ -285,6 +285,29 @@
     label{display:flex; gap:8px; align-items:center; cursor:pointer; user-select:none; color:var(--muted);}
     input[type="checkbox"]{width:15px;height:15px;accent-color:var(--accent);}
 
+    /* One-line RA picker layout: select + button (+ optional 2nd select) */
+    .selRow{
+      display:grid;
+      grid-template-columns: 1fr auto 1fr; /* sel1, +/-, sel2 */
+      gap:8px;
+      align-items:center;
+      width:100%;
+    }
+    .selRow.one{
+      grid-template-columns: 1fr auto; /* sel1 expands when sel2 hidden */
+    }
+    .selRow select{
+      width:100%;
+    }
+    .addBtn{
+      min-width:34px;
+      padding:6px 8px;
+      text-align:center;
+    }
+
+.hidden{display:none !important}
+input[type="checkbox"]{width:15px;height:15px;accent-color:var(--accent);}
+
     .hidden{display:none !important}
 
     .toast{
@@ -986,8 +1009,99 @@
         const p2 = people[1] || "";
 
         const selRow = document.createElement("div");
-        selRow.className = "inline";
-        selRow.style.width = "100%";
+        selRow.className = "selRow";
+
+        // selects
+        const sel1 = document.createElement("select");
+        {
+          const opt0 = document.createElement("option");
+          opt0.value = "";
+          opt0.textContent = "Select RA";
+          sel1.appendChild(opt0);
+
+          for (const name of state.names) {
+            const opt = document.createElement("option");
+            opt.value = name;
+            opt.textContent = name;
+            sel1.appendChild(opt);
+          }
+        }
+        sel1.value = p1;
+
+        const sel2 = document.createElement("select");
+        {
+          const opt0 = document.createElement("option");
+          opt0.value = "";
+          opt0.textContent = "Select 2nd RA";
+          sel2.appendChild(opt0);
+
+          for (const name of state.names) {
+            const opt = document.createElement("option");
+            opt.value = name;
+            opt.textContent = name;
+            sel2.appendChild(opt);
+          }
+        }
+        sel2.value = p2;
+
+        // +/- button
+        const addBtn = document.createElement("button");
+        addBtn.type = "button";
+        addBtn.className = "smallBtn addBtn";
+
+        function updateRowLayout() {
+          const has2 = !sel2.classList.contains("hidden");
+          selRow.classList.toggle("one", !has2);
+          addBtn.textContent = has2 ? "−" : "+";
+          addBtn.title = has2 ? "Remove second RA" : "Add second RA";
+        }
+
+        function commitPeople(newP1, newP2){
+          const combined = joinPeople([newP1, newP2]);
+          return saveSlotToBackend({
+            range: activeRange, context: ctxId, day, time,
+            person: combined,
+            participantScheduled: !!slots[day][time].participantScheduled
+          }, { optimistic: true });
+        }
+
+        // initial visibility/layout
+        if (p2) sel2.classList.remove("hidden");
+        else sel2.classList.add("hidden");
+        updateRowLayout();
+
+        // wire events
+        addBtn.addEventListener("click", async () => {
+          if (sel2.classList.contains("hidden")) {
+            sel2.classList.remove("hidden");
+            updateRowLayout();
+          } else {
+            sel2.value = "";
+            sel2.classList.add("hidden");
+            updateRowLayout();
+            await commitPeople(sel1.value, "");
+          }
+        });
+
+        sel1.addEventListener("change", async () => {
+          if (sel1.value && sel1.value === sel2.value) sel2.value = "";
+          await commitPeople(sel1.value, sel2.value);
+        });
+
+        sel2.addEventListener("change", async () => {
+          if (sel2.value && sel2.value === sel1.value) {
+            toast("Same RA already selected.", "bad");
+            sel2.value = "";
+            return;
+          }
+          await commitPeople(sel1.value, sel2.value);
+        });
+
+        // assemble in-row: sel1 | +/- | sel2
+        selRow.appendChild(sel1);
+        selRow.appendChild(addBtn);
+        selRow.appendChild(sel2);
+
 
         const sel1 = document.createElement("select");
         {
