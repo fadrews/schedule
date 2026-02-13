@@ -8,19 +8,16 @@
     :root{
       --bg:#0b1020;
       --panel:#111a33;
-      --panel2:#0f1730;
       --text:#e7ecff;
       --muted:#b8c0e0;
       --line:#22305e;
       --accent:#7aa2ff;
       --good:#35d07f;
-      --warn:#ffcc66;
       --bad:#ff5c7a;
-      --chip:#1b2650;
       --shadow: 0 12px 30px rgba(0,0,0,.35);
       --radius:14px;
       --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
     }
     *{box-sizing:border-box}
     body{
@@ -42,26 +39,19 @@
       justify-content:space-between;
       flex-wrap:wrap;
     }
-    h1{
-      margin:0;
-      font-size:18px;
-      font-weight:700;
-      letter-spacing:.2px;
-    }
+    h1{margin:0;font-size:18px;font-weight:700;letter-spacing:.2px}
     .subtitle{
       margin:6px 0 0;
       font-size:13px;
       color:var(--muted);
       line-height:1.35;
-      max-width:860px;
+      max-width:920px;
     }
-
     main{
       padding:14px 18px 24px;
       max-width:1400px;
       margin:0 auto;
     }
-
     .panel{
       background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
       border:1px solid rgba(255,255,255,.08);
@@ -69,13 +59,6 @@
       border-radius:var(--radius);
       padding:14px;
     }
-    .row{
-      display:flex;
-      gap:12px;
-      flex-wrap:wrap;
-      align-items:stretch;
-    }
-    .row > .panel{flex:1}
     .controls{
       display:flex;
       gap:10px;
@@ -146,7 +129,7 @@
       border-radius:10px;
       padding:8px 10px;
       font-size:12px;
-      min-width:220px;
+      min-width:240px;
       outline:none;
     }
     input[type="text"]::placeholder{color:rgba(184,192,224,.75)}
@@ -215,7 +198,7 @@
       border-right:1px solid rgba(255,255,255,.07);
       padding:8px;
       vertical-align:top;
-      min-width:180px;
+      min-width:190px;
       background:rgba(17,26,51,.35);
     }
     tr:last-child td{border-bottom:0}
@@ -225,7 +208,7 @@
       display:flex;
       flex-direction:column;
       gap:6px;
-      min-height:90px;
+      min-height:92px;
     }
     select{
       width:100%;
@@ -249,7 +232,7 @@
       overflow:hidden;
       text-overflow:ellipsis;
       white-space:nowrap;
-      max-width:120px;
+      max-width:140px;
     }
     .smallBtn{
       border:1px solid rgba(255,255,255,.10);
@@ -261,7 +244,6 @@
       cursor:pointer;
     }
     .smallBtn:hover{border-color:rgba(255,255,255,.18)}
-    .smallBtn.clear{color:rgba(255,255,255,.9)}
     .badge{
       display:inline-flex;
       align-items:center;
@@ -276,24 +258,9 @@
     }
     .badge.bad{background:rgba(255,92,122,.12); border-color:rgba(255,92,122,.25); color:var(--text)}
     .badge.good{background:rgba(53,208,127,.12); border-color:rgba(53,208,127,.22); color:var(--text)}
-    .inline{
-      display:flex;
-      gap:8px;
-      align-items:center;
-      flex-wrap:wrap;
-    }
-    label{
-      display:flex;
-      gap:8px;
-      align-items:center;
-      cursor:pointer;
-      user-select:none;
-      color:var(--muted);
-    }
-    input[type="checkbox"]{
-      width:15px; height:15px;
-      accent-color: var(--accent);
-    }
+    .inline{display:flex; gap:8px; align-items:center; flex-wrap:wrap;}
+    label{display:flex; gap:8px; align-items:center; cursor:pointer; user-select:none; color:var(--muted);}
+    input[type="checkbox"]{width:15px;height:15px;accent-color:var(--accent);}
 
     .twoCol{
       display:grid;
@@ -305,7 +272,6 @@
       .twoCol{grid-template-columns:1fr}
       table{min-width:920px}
     }
-
     .hidden{display:none !important}
 
     .toast{
@@ -320,17 +286,45 @@
       border-radius:12px;
       font-size:12px;
       color:var(--text);
-      max-width:min(520px, calc(100vw - 32px));
+      max-width:min(560px, calc(100vw - 32px));
       display:none;
     }
     .toast.show{display:block}
-    .toast strong{color:var(--accent)}
-    .kpi{
+
+    /* Admin dropdown */
+    .menuWrap{position:relative; display:inline-block;}
+    .menu{
+      position:absolute;
+      right:0;
+      top:42px;
+      width:min(360px, calc(100vw - 24px));
+      background:rgba(10,14,30,.96);
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:14px;
+      box-shadow:var(--shadow);
+      padding:12px;
+      z-index:50;
+      display:none;
+    }
+    .menu.show{display:block}
+    .menu h3{
+      margin:0 0 10px 0;
+      font-size:13px;
+      color:var(--text);
+    }
+    .menuRow{
       display:flex;
       gap:10px;
-      flex-wrap:wrap;
       align-items:center;
+      flex-wrap:wrap;
+      margin-bottom:10px;
     }
+    .menuRow .chip{flex:1}
+    .menuRow select, .menuRow input{
+      flex:1;
+      min-width:140px;
+    }
+    .menu small{color:var(--muted); display:block; line-height:1.35;}
   </style>
 </head>
 
@@ -338,16 +332,45 @@
 <header>
   <div class="titlebar">
     <div>
-      <h1>Lab Scheduling (GitHub Pages-friendly)</h1>
+      <h1>Lab Scheduling</h1>
       <p class="subtitle">
-        Sign up for 1-hour slots. Weekdays are <strong>Mon–Fri, 9:00–17:00</strong>. Weekend scheduling is available in a separate tab.
-        Each person can hold <strong>only one slot per context</strong> (ABC Lab or HF Project).
-        Use “Participant arriving” to flag slots where the signer must be present.
+        1-hour slots. Weekdays are <strong>Mon–Fri, 09:00–17:00</strong>. Weekend scheduling is in a separate tab.
+        Schedules are scoped to <strong>Year + Term + Week</strong>.
       </p>
     </div>
-    <div class="kpi">
-      <span class="chip">Storage: <strong>Local browser</strong></span>
-      <span class="chip">Share: <strong>Export / Import JSON</strong></span>
+    <div class="inline" style="align-items:center;">
+      <span class="chip" id="termChip">Term: <strong>—</strong></span>
+      <span class="chip" id="weekChip">Week: <strong>—</strong></span>
+      <div class="menuWrap">
+        <button class="btn" id="adminBtn" type="button">Admin ▾</button>
+        <div class="menu" id="adminMenu" aria-label="Admin menu">
+          <h3>Admin</h3>
+          <div class="menuRow">
+            <div style="flex:1;">
+              <small>Year</small>
+              <select id="yearSelect"></select>
+            </div>
+            <div style="flex:1;">
+              <small>Term</small>
+              <select id="termSelect">
+                <option value="Spring">Jan–Apr (Spring)</option>
+                <option value="Fall">Sep–Dec (Fall)</option>
+              </select>
+            </div>
+          </div>
+          <div class="menuRow">
+            <button class="btn primary" id="applyTermBtn" type="button">Apply Year/Term</button>
+            <button class="btn danger" id="resetWeekBtn" type="button">Reset this week</button>
+          </div>
+          <div class="menuRow" style="margin-bottom:0;">
+            <button class="btn danger" id="resetAllBtn" type="button">Reset ALL data</button>
+          </div>
+          <small style="margin-top:10px;">
+            Reset this week clears only the currently displayed week (both contexts, weekdays+weekend) for the selected Year/Term.
+            Reset ALL wipes names and all schedules stored in this browser.
+          </small>
+        </div>
+      </div>
     </div>
   </div>
 </header>
@@ -366,6 +389,11 @@
           <button class="tab" id="view-abc" type="button">ABC only</button>
           <button class="tab" id="view-hf" type="button">HF only</button>
         </div>
+
+        <div class="inline">
+          <button class="btn" id="prevWeekBtn" type="button">◀ Prev week</button>
+          <button class="btn" id="nextWeekBtn" type="button">Next week ▶</button>
+        </div>
       </div>
 
       <div class="rightControls">
@@ -375,15 +403,11 @@
         </div>
         <button class="btn" id="exportBtn" type="button">Export</button>
         <button class="btn" id="importBtn" type="button">Import</button>
-        <button class="btn danger" id="resetBtn" type="button">Reset</button>
       </div>
     </div>
 
-    <p class="note">
-      Notes:
-      <br>• Names are shared across both contexts.
-      <br>• A person can book <strong>one</strong> slot in ABC Lab and <strong>one</strong> slot in HF Project (max) — booking a second slot in the same context is blocked.
-      <br>• Data persists in <strong>this browser</strong>. Use Export/Import to share or move schedules.
+    <p class="note" id="termNote">
+      Term limits: Jan–Apr (Spring) and Sep–Dec (Fall). Week navigation is constrained to the active term.
     </p>
   </div>
 
@@ -392,7 +416,6 @@
       <div class="inline" style="justify-content:space-between;">
         <div class="inline">
           <span class="chip">Context: <strong>ABC Lab</strong></span>
-          <span class="chip">Rule: <strong>1 slot/person</strong></span>
         </div>
         <span class="badge" id="abcSummary">0 filled</span>
       </div>
@@ -403,7 +426,6 @@
       <div class="inline" style="justify-content:space-between;">
         <div class="inline">
           <span class="chip">Context: <strong>HF Project</strong></span>
-          <span class="chip">Rule: <strong>1 slot/person</strong></span>
         </div>
         <span class="badge" id="hfSummary">0 filled</span>
       </div>
@@ -416,12 +438,7 @@
 
 <script>
 (() => {
-  const STORAGE_KEY = "lab_scheduler_v1";
-
-  const CONTEXTS = [
-    { id: "ABC", label: "ABC Lab" },
-    { id: "HF",  label: "HF Project" }
-  ];
+  const STORAGE_KEY = "lab_scheduler_v2";
 
   const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri"];
   const WEEKEND  = ["Sat", "Sun"];
@@ -443,6 +460,9 @@
     viewABC:  el("view-abc"),
     viewHF:   el("view-hf"),
 
+    prevWeekBtn: el("prevWeekBtn"),
+    nextWeekBtn: el("nextWeekBtn"),
+
     panelABC: el("panelABC"),
     panelHF:  el("panelHF"),
 
@@ -451,7 +471,6 @@
 
     exportBtn: el("exportBtn"),
     importBtn: el("importBtn"),
-    resetBtn: el("resetBtn"),
 
     gridWrapABC: el("gridWrapABC"),
     gridWrapHF: el("gridWrapHF"),
@@ -459,7 +478,19 @@
     abcSummary: el("abcSummary"),
     hfSummary: el("hfSummary"),
 
-    toast: el("toast")
+    toast: el("toast"),
+
+    termChip: el("termChip"),
+    weekChip: el("weekChip"),
+    termNote: el("termNote"),
+
+    adminBtn: el("adminBtn"),
+    adminMenu: el("adminMenu"),
+    yearSelect: el("yearSelect"),
+    termSelect: el("termSelect"),
+    applyTermBtn: el("applyTermBtn"),
+    resetWeekBtn: el("resetWeekBtn"),
+    resetAllBtn: el("resetAllBtn"),
   };
 
   function toast(msg, kind="info"){
@@ -470,30 +501,79 @@
       : kind === "good"
         ? "rgba(53,208,127,.28)"
         : "rgba(255,255,255,.14)";
-    window.clearTimeout(toast._t);
-    toast._t = window.setTimeout(() => ui.toast.classList.remove("show"), 3000);
+    clearTimeout(toast._t);
+    toast._t = setTimeout(() => ui.toast.classList.remove("show"), 3000);
+  }
+
+  function escapeHtml(s){
+    return String(s)
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  // Date helpers (local time, Monday as week start)
+  function pad2(n){ return String(n).padStart(2,"0"); }
+  function toISODate(d){
+    return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+  }
+  function parseISODate(s){
+    // expects YYYY-MM-DD
+    const [y,m,dd] = s.split("-").map(Number);
+    return new Date(y, (m-1), dd);
+  }
+  function addDays(d, days){
+    const x = new Date(d.getTime());
+    x.setDate(x.getDate()+days);
+    return x;
+  }
+  function mondayOfWeek(d){
+    const x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    const day = x.getDay(); // Sun=0..Sat=6
+    const diff = (day === 0 ? -6 : 1 - day); // move to Monday
+    x.setDate(x.getDate() + diff);
+    x.setHours(0,0,0,0);
+    return x;
+  }
+
+  function termBounds(year, term){
+    // inclusive bounds
+    if(term === "Spring"){
+      return { start: new Date(year, 0, 1), end: new Date(year, 3, 30) };   // Jan 1 .. Apr 30
+    }
+    // Fall
+    return { start: new Date(year, 8, 1), end: new Date(year, 11, 31) };    // Sep 1 .. Dec 31
+  }
+
+  function clampWeekStartToTerm(weekStart, year, term){
+    const { start, end } = termBounds(year, term);
+    const minWeek = mondayOfWeek(start);
+    const maxWeek = mondayOfWeek(end);
+    if(weekStart < minWeek) return minWeek;
+    if(weekStart > maxWeek) return maxWeek;
+    return weekStart;
   }
 
   function defaultState(){
-    // slots[range][context][day][time] = { person: "", participant: false }
-    const makeSlots = (days) => {
-      const dayObj = {};
-      for (const d of days) {
-        dayObj[d] = {};
-        for (const t of TIMES) dayObj[d][t] = { person: "", participant: false };
-      }
-      return dayObj;
-    };
-
-    const slots = {
-      weekdays: { ABC: makeSlots(WEEKDAYS), HF: makeSlots(WEEKDAYS) },
-      weekend:  { ABC: makeSlots(WEEKEND),  HF: makeSlots(WEEKEND)  }
-    };
+    // Structure:
+    // {
+    //   version: 2,
+    //   names: [],
+    //   settings: { year: 2026, term: "Spring", weekStartISO: "YYYY-MM-DD" },
+    //   schedules: { [scopeKey]: { weekdays:{ABC:{...},HF:{...}}, weekend:{...} } }
+    // }
+    const now = new Date();
+    const year = now.getFullYear();
+    const termGuess = (now.getMonth() <= 3) ? "Spring" : (now.getMonth() >= 8 ? "Fall" : "Fall");
+    const ws = clampWeekStartToTerm(mondayOfWeek(now), year, termGuess);
 
     return {
-      version: 1,
+      version: 2,
       names: [],
-      slots
+      settings: { year, term: termGuess, weekStartISO: toISODate(ws) },
+      schedules: {}
     };
   }
 
@@ -502,11 +582,10 @@
       const raw = localStorage.getItem(STORAGE_KEY);
       if(!raw) return defaultState();
       const parsed = JSON.parse(raw);
-
-      // Minimal forward compatibility
       if(!parsed || typeof parsed !== "object") return defaultState();
-      if(!parsed.slots || !parsed.names) return defaultState();
-
+      if(!parsed.settings || !parsed.schedules || !Array.isArray(parsed.names)) return defaultState();
+      // upgrade guard: ensure required fields exist
+      if(!parsed.settings.year || !parsed.settings.term || !parsed.settings.weekStartISO) return defaultState();
       return parsed;
     }catch{
       return defaultState();
@@ -519,30 +598,53 @@
 
   let state = loadState();
 
+  // View state
   let activeRange = "weekdays"; // "weekdays" | "weekend"
   let activeView  = "both";     // "both" | "ABC" | "HF"
 
-  function setActiveTab(buttonOn, buttonOff){
-    buttonOn.classList.add("active");
-    buttonOff.classList.remove("active");
+  function scopeKey(){
+    const { year, term, weekStartISO } = state.settings;
+    return `${year}::${term}::${weekStartISO}`;
+  }
+
+  function ensureScopeData(){
+    const key = scopeKey();
+    if(state.schedules[key]) return;
+
+    const makeSlots = (days) => {
+      const dayObj = {};
+      for (const d of days) {
+        dayObj[d] = {};
+        for (const t of TIMES) dayObj[d][t] = { person: "", participantScheduled: false };
+      }
+      return dayObj;
+    };
+
+    state.schedules[key] = {
+      weekdays: { ABC: makeSlots(WEEKDAYS), HF: makeSlots(WEEKDAYS) },
+      weekend:  { ABC: makeSlots(WEEKEND),  HF: makeSlots(WEEKEND)  }
+    };
+  }
+
+  function currentSlots(){
+    ensureScopeData();
+    return state.schedules[scopeKey()];
   }
 
   function setRange(range){
     activeRange = range;
-    setActiveTab(range === "weekdays" ? ui.tabWeekdays : ui.tabWeekend,
-                 range === "weekdays" ? ui.tabWeekend  : ui.tabWeekdays);
+    ui.tabWeekdays.classList.toggle("active", range === "weekdays");
+    ui.tabWeekend.classList.toggle("active",  range === "weekend");
     renderAll();
   }
 
   function setView(view){
     activeView = view;
 
-    // Buttons
     ui.viewBoth.classList.toggle("active", view === "both");
     ui.viewABC.classList.toggle("active",  view === "ABC");
     ui.viewHF.classList.toggle("active",   view === "HF");
 
-    // Panels
     ui.panelABC.classList.toggle("hidden", view === "HF");
     ui.panelHF.classList.toggle("hidden",  view === "ABC");
   }
@@ -568,66 +670,55 @@
     toast(`Added <strong>${escapeHtml(n)}</strong>`, "good");
   }
 
-  function escapeHtml(s){
-    return String(s)
-      .replaceAll("&","&amp;")
-      .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;")
-      .replaceAll('"',"&quot;")
-      .replaceAll("'","&#039;");
-  }
-
-  function slotKey(range, ctx, day, time){
-    return `${range}::${ctx}::${day}::${time}`;
-  }
-
-  function getAllAssignments(range, ctx){
-    const out = new Map(); // personLower -> slotKey
-    const days = Object.keys(state.slots[range][ctx]);
-    for(const d of days){
-      const times = Object.keys(state.slots[range][ctx][d]);
-      for(const t of times){
-        const p = state.slots[range][ctx][d][t].person;
-        if(p){
-          out.set(p.toLowerCase(), slotKey(range, ctx, d, t));
+  function countFilled(){
+    const slots = currentSlots()[activeRange];
+    const countFor = (ctx) => {
+      let filled = 0;
+      let flagged = 0;
+      const days = Object.keys(slots[ctx]);
+      for(const d of days){
+        for(const t of Object.keys(slots[ctx][d])){
+          const s = slots[ctx][d][t];
+          if(s.person) filled++;
+          if(s.participantScheduled) flagged++;
         }
       }
-    }
-    return out;
+      return { filled, flagged };
+    };
+    return { ABC: countFor("ABC"), HF: countFor("HF") };
   }
 
-  function countFilled(range, ctx){
-    let filled = 0;
-    let flagged = 0;
-    const days = Object.keys(state.slots[range][ctx]);
-    for(const d of days){
-      for(const t of Object.keys(state.slots[range][ctx][d])){
-        const s = state.slots[range][ctx][d][t];
-        if(s.person) filled++;
-        if(s.participant) flagged++;
-      }
-    }
-    return { filled, flagged };
+  function renderTopChips(){
+    const { year, term, weekStartISO } = state.settings;
+    const ws = parseISODate(weekStartISO);
+    const we = addDays(ws, 6);
+    const label = term === "Spring" ? "Jan–Apr (Spring)" : "Sep–Dec (Fall)";
+    ui.termChip.innerHTML = `Term: <strong>${escapeHtml(String(year))} • ${escapeHtml(label)}</strong>`;
+    ui.weekChip.innerHTML = `Week: <strong>${escapeHtml(toISODate(ws))} → ${escapeHtml(toISODate(we))}</strong>`;
+  }
+
+  function dayDateLabel(dayAbbrev){
+    const ws = parseISODate(state.settings.weekStartISO);
+    const map = { Mon:0, Tue:1, Wed:2, Thu:3, Fri:4, Sat:5, Sun:6 };
+    const d = addDays(ws, map[dayAbbrev]);
+    return `${dayAbbrev} (${toISODate(d)})`;
   }
 
   function renderSummary(){
-    const a = countFilled(activeRange, "ABC");
-    const h = countFilled(activeRange, "HF");
-
+    const c = countFilled();
     ui.abcSummary.className = "badge";
     ui.hfSummary.className = "badge";
 
-    ui.abcSummary.textContent = `${a.filled} filled • ${a.flagged} participant`;
-    ui.hfSummary.textContent  = `${h.filled} filled • ${h.flagged} participant`;
+    ui.abcSummary.textContent = `${c.ABC.filled} filled • ${c.ABC.flagged} participant`;
+    ui.hfSummary.textContent  = `${c.HF.filled} filled • ${c.HF.flagged} participant`;
 
-    if(a.flagged) ui.abcSummary.classList.add("bad");
-    if(h.flagged) ui.hfSummary.classList.add("bad");
+    if(c.ABC.flagged) ui.abcSummary.classList.add("bad");
+    if(c.HF.flagged)  ui.hfSummary.classList.add("bad");
   }
 
   function renderContext(ctxId, wrapEl){
     const days = activeRange === "weekdays" ? WEEKDAYS : WEEKEND;
-
-    const assigned = getAllAssignments(activeRange, ctxId);
+    const slots = currentSlots()[activeRange][ctxId];
 
     const table = document.createElement("table");
     table.setAttribute("aria-label", `${ctxId} schedule table`);
@@ -641,7 +732,7 @@
 
     for(const d of days){
       const th = document.createElement("th");
-      th.textContent = d;
+      th.textContent = dayDateLabel(d);
       hr.appendChild(th);
     }
     thead.appendChild(hr);
@@ -658,12 +749,11 @@
 
       for(const day of days){
         const td = document.createElement("td");
-        const s = state.slots[activeRange][ctxId][day][time];
+        const s = slots[day][time];
 
         const slot = document.createElement("div");
         slot.className = "slot";
 
-        // Top row: current name + clear
         const top = document.createElement("div");
         top.className = "slotTop";
 
@@ -673,12 +763,12 @@
         who.textContent = s.person || "—";
 
         const clearBtn = document.createElement("button");
-        clearBtn.className = "smallBtn clear";
+        clearBtn.className = "smallBtn";
         clearBtn.type = "button";
         clearBtn.textContent = "Clear";
-        clearBtn.disabled = !s.person && !s.participant;
+        clearBtn.disabled = !s.person && !s.participantScheduled;
         clearBtn.addEventListener("click", () => {
-          state.slots[activeRange][ctxId][day][time] = { person: "", participant: false };
+          slots[day][time] = { person: "", participantScheduled: false };
           saveState();
           renderAll();
         });
@@ -686,7 +776,6 @@
         top.appendChild(who);
         top.appendChild(clearBtn);
 
-        // Dropdown
         const sel = document.createElement("select");
         const opt0 = document.createElement("option");
         opt0.value = "";
@@ -697,66 +786,40 @@
           const opt = document.createElement("option");
           opt.value = name;
           opt.textContent = name;
-
-          // Disable if name already booked in this context elsewhere
-          // (but keep enabled if it's the current selection for this slot)
-          const bookedElsewhere = assigned.has(name.toLowerCase()) && name !== s.person;
-          if(bookedElsewhere) opt.disabled = true;
-
           sel.appendChild(opt);
         }
-
         sel.value = s.person || "";
         sel.addEventListener("change", () => {
-          const next = sel.value;
-
-          // If selecting a new person, enforce 1-slot/person in this context.
-          if(next){
-            const key = assigned.get(next.toLowerCase());
-            if(key && next !== s.person){
-              toast(
-                `Blocked: <strong>${escapeHtml(next)}</strong> already has a slot in <strong>${ctxId}</strong> (${escapeHtml(key.split("::").slice(2,4).join(" • "))}).`,
-                "bad"
-              );
-              sel.value = s.person || "";
-              return;
-            }
-          }
-
-          // Update
-          state.slots[activeRange][ctxId][day][time].person = next;
+          slots[day][time].person = sel.value;
           saveState();
           renderAll();
         });
 
-        // Participant arriving toggle
         const inline = document.createElement("div");
         inline.className = "inline";
 
         const label = document.createElement("label");
         const cb = document.createElement("input");
         cb.type = "checkbox";
-        cb.checked = !!s.participant;
+        cb.checked = !!s.participantScheduled;
         cb.addEventListener("change", () => {
-          state.slots[activeRange][ctxId][day][time].participant = cb.checked;
+          slots[day][time].participantScheduled = cb.checked;
           saveState();
           renderAll();
         });
 
         const span = document.createElement("span");
-        span.textContent = "Participant arriving";
+        span.textContent = "Participant scheduled";
 
         label.appendChild(cb);
         label.appendChild(span);
-
         inline.appendChild(label);
 
-        // Badge status
         const badge = document.createElement("div");
         badge.className = "badge";
-        if(s.participant){
+        if(s.participantScheduled){
           badge.classList.add("bad");
-          badge.textContent = "⚠ Must be present (participant)";
+          badge.textContent = "⚠ Must be present (participant scheduled)";
         }else if(s.person){
           badge.classList.add("good");
           badge.textContent = "Scheduled";
@@ -777,16 +840,28 @@
     }
 
     table.appendChild(tbody);
-
     wrapEl.innerHTML = "";
     wrapEl.appendChild(table);
   }
 
   function renderAll(){
+    ensureScopeData();
+    renderTopChips();
     renderContext("ABC", ui.gridWrapABC);
     renderContext("HF", ui.gridWrapHF);
     renderSummary();
-    setView(activeView); // re-apply panel visibility
+    setView(activeView);
+  }
+
+  // Week navigation constrained to term
+  function shiftWeek(deltaWeeks){
+    const { year, term } = state.settings;
+    let ws = parseISODate(state.settings.weekStartISO);
+    ws = addDays(ws, deltaWeeks * 7);
+    ws = clampWeekStartToTerm(mondayOfWeek(ws), year, term);
+    state.settings.weekStartISO = toISODate(ws);
+    saveState();
+    renderAll();
   }
 
   // Export / Import
@@ -823,46 +898,111 @@
         const text = await file.text();
         const parsed = JSON.parse(text);
 
-        // Minimal validation
-        if(!parsed || typeof parsed !== "object" || !parsed.slots || !parsed.names){
-          toast("Import failed: JSON missing expected fields (names, slots).", "bad");
+        if(!parsed || typeof parsed !== "object" || !parsed.settings || !parsed.schedules || !Array.isArray(parsed.names)){
+          toast("Import failed: JSON missing expected fields (settings, names, schedules).", "bad");
           return;
         }
 
         state = parsed;
+
+        // normalize current week to term bounds
+        const { year, term } = state.settings;
+        let ws = parseISODate(state.settings.weekStartISO);
+        ws = clampWeekStartToTerm(mondayOfWeek(ws), year, term);
+        state.settings.weekStartISO = toISODate(ws);
+
         saveState();
         renderAll();
         toast("Imported JSON.", "good");
-      }catch(e){
+      }catch{
         toast("Import failed: invalid JSON.", "bad");
       }
     });
     input.click();
   }
 
+  // Admin menu behavior
+  function toggleAdminMenu(force){
+    const show = (typeof force === "boolean") ? force : !ui.adminMenu.classList.contains("show");
+    ui.adminMenu.classList.toggle("show", show);
+  }
+
+  function populateYearSelect(){
+    const now = new Date().getFullYear();
+    const years = [];
+    for(let y = now - 2; y <= now + 4; y++) years.push(y);
+    ui.yearSelect.innerHTML = "";
+    for(const y of years){
+      const opt = document.createElement("option");
+      opt.value = String(y);
+      opt.textContent = String(y);
+      ui.yearSelect.appendChild(opt);
+    }
+  }
+
+  function syncAdminFields(){
+    ui.yearSelect.value = String(state.settings.year);
+    ui.termSelect.value = state.settings.term;
+  }
+
+  function applyYearTerm(){
+    const year = Number(ui.yearSelect.value);
+    const term = ui.termSelect.value;
+
+    state.settings.year = year;
+    state.settings.term = term;
+
+    // reset weekStart into the chosen term if out of bounds
+    let ws = parseISODate(state.settings.weekStartISO);
+    ws = clampWeekStartToTerm(mondayOfWeek(ws), year, term);
+    state.settings.weekStartISO = toISODate(ws);
+
+    saveState();
+    renderAll();
+    toast(`Applied <strong>${year}</strong> • <strong>${escapeHtml(term)}</strong>.`, "good");
+  }
+
+  function resetThisWeek(){
+    const ok = confirm("Reset ONLY the current week for this Year/Term (both contexts, weekdays + weekend)?");
+    if(!ok) return;
+
+    ensureScopeData();
+    const key = scopeKey();
+    delete state.schedules[key];
+    ensureScopeData();
+
+    saveState();
+    renderAll();
+    toast("Reset current week.", "good");
+  }
+
   function resetAll(){
-    const ok = confirm("Reset everything (names + schedules) in this browser?");
+    const ok = confirm("Reset ALL data (names + all schedules) in this browser?");
     if(!ok) return;
     state = defaultState();
     saveState();
+    populateYearSelect();
+    syncAdminFields();
     renderAll();
-    toast("Reset complete.", "good");
+    toast("Reset ALL data.", "good");
   }
 
   // Wire UI
   ui.tabWeekdays.addEventListener("click", () => setRange("weekdays"));
-  ui.tabWeekend.addEventListener("click", () => setRange("weekend"));
+  ui.tabWeekend.addEventListener("click",  () => setRange("weekend"));
 
   ui.viewBoth.addEventListener("click", () => setView("both"));
   ui.viewABC.addEventListener("click",  () => setView("ABC"));
   ui.viewHF.addEventListener("click",   () => setView("HF"));
+
+  ui.prevWeekBtn.addEventListener("click", () => shiftWeek(-1));
+  ui.nextWeekBtn.addEventListener("click", () => shiftWeek(1));
 
   ui.addNameBtn.addEventListener("click", () => {
     addName(ui.nameInput.value);
     ui.nameInput.value = "";
     ui.nameInput.focus();
   });
-
   ui.nameInput.addEventListener("keydown", (e) => {
     if(e.key === "Enter"){
       addName(ui.nameInput.value);
@@ -872,9 +1012,34 @@
 
   ui.exportBtn.addEventListener("click", exportState);
   ui.importBtn.addEventListener("click", importState);
-  ui.resetBtn.addEventListener("click", resetAll);
 
-  // Initial render
+  ui.adminBtn.addEventListener("click", () => {
+    syncAdminFields();
+    toggleAdminMenu();
+  });
+
+  ui.applyTermBtn.addEventListener("click", () => applyYearTerm());
+  ui.resetWeekBtn.addEventListener("click", () => resetThisWeek());
+  ui.resetAllBtn.addEventListener("click", () => resetAll());
+
+  // Close admin menu when clicking outside
+  document.addEventListener("click", (e) => {
+    const inside = ui.adminMenu.contains(e.target) || ui.adminBtn.contains(e.target);
+    if(!inside) toggleAdminMenu(false);
+  });
+
+  // init
+  populateYearSelect();
+
+  // Ensure settings are term-valid on load
+  {
+    const { year, term } = state.settings;
+    let ws = parseISODate(state.settings.weekStartISO);
+    ws = clampWeekStartToTerm(mondayOfWeek(ws), year, term);
+    state.settings.weekStartISO = toISODate(ws);
+    saveState();
+  }
+
   renderAll();
 })();
 </script>
