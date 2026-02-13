@@ -1060,6 +1060,7 @@
   async function loadWeekFromBackend({ silent=false } = {}){
     const { year, term, weekStartISO } = state.settings;
     const data = await apiPost("loadWeek", { year, term, weekStartISO });
+	setBackendStatus(true); 
     applyWeekFromBackend(data.data);
     renderAll();
     markUpdated("Loaded");
