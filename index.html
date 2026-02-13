@@ -771,16 +771,17 @@
     return `${year}::${term}::${weekStartISO}`;
   }
 
- (function autoAdvanceOnOpen(){
-    const nowISO = toISODate(mondayOfWeek(new Date()));
+  (function snapToCurrentWeekOnOpen(){
+    const nowWS = mondayOfWeek(new Date());
+    const wsNowClamped = clampWeekStartToTerm(nowWS, state.settings.year, state.settings.term);
+    const nowISO = toISODate(wsNowClamped);
+
     if(state.settings.weekStartISO !== nowISO){
-    // Only advance automatically if the stored week is in the past
-       if(parseISODate(state.settings.weekStartISO) < parseISODate(nowISO)){
-         state.settings.weekStartISO = toISODate(clampWeekStartToTerm(parseISODate(nowISO), state.settings.year, state.settings.term));
-         saveCache();
-        }
+      state.settings.weekStartISO = nowISO;
+      saveCache();
     }
-})();
+  })();
+
 
   function ensureLocalScopeStructure(scope){
     if(state.cacheSlotsByScope[scope]) return;
@@ -1371,3 +1372,4 @@
 </script>
 </body>
 </html>
+
