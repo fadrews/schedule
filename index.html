@@ -36,7 +36,6 @@
       color:var(--text);
     }
 
-    /* Wider layout; reduce "wasted left space" */
     header{padding:16px 16px 0;max-width:none;margin:0;}
     main{padding:12px 16px 24px;max-width:none;margin:0;}
 
@@ -57,346 +56,102 @@
       width:100%;
     }
 
-    h1{
-      margin:0;
-      font-size:18px;
-      font-weight:800;
-      letter-spacing:.2px
-    }
-    .subtitle{
-      margin:6px 0 0;
-      font-size:13px;
-      color:var(--muted);
-      line-height:1.35;
-      max-width:980px;
-    }
+    h1{ margin:0; font-size:18px; font-weight:800; letter-spacing:.2px }
+    .subtitle{ margin:6px 0 0; font-size:13px; color:var(--muted); line-height:1.35; max-width:980px; }
 
-    /* Bigger, easier-to-see week label in the top bar */
-    .weekBig{
-      font-size:20px;
-      font-weight:900;
-      letter-spacing:.2px;
-      color:var(--text);
-      line-height:1.1;
-      margin-top:2px;
-    }
-    .weekBig small{
-      display:block;
-      font-size:12px;
-      font-weight:700;
-      color:var(--muted);
-      margin-top:6px;
-    }
+    .weekBig{ font-size:20px; font-weight:900; letter-spacing:.2px; color:var(--text); line-height:1.1; margin-top:2px; }
+    .weekBig small{ display:block; font-size:12px; font-weight:700; color:var(--muted); margin-top:6px; }
 
-    .panel{
-      background: linear-gradient(180deg, var(--panel), var(--panel2));
-      border:1px solid var(--border2);
-      box-shadow:var(--shadow);
-      border-radius:var(--radius);
-      padding:14px;
-    }
+    .panel{ background: linear-gradient(180deg, var(--panel), var(--panel2)); border:1px solid var(--border2); box-shadow:var(--shadow); border-radius:var(--radius); padding:14px; }
 
-    /* Context-specific panel frames (only change requested) */
-    #panelABC{
-      border-color: rgba(255,255,255,.12); /* original-ish */
-    }
-    #panelHF{
-      border-color: rgba(255,255,255,.20); /* slightly lighter/clearer */
-      background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.05));
-    }
+    #panelABC{ border-color: rgba(255,255,255,.12); }
+    #panelHF{ border-color: rgba(255,255,255,.20); background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.05)); }
 
     .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;}
     .leftControls,.rightControls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
 
-    .tabs{
-      display:inline-flex;
-      background:rgba(0,0,0,.20);
-      border:1px solid rgba(255,255,255,.12);
-      border-radius:999px;
-      padding:4px;
-      gap:4px;
-    }
-    .tab{
-      border:0;color:var(--muted);background:transparent;
-      padding:7px 10px;border-radius:999px;font-size:12px;cursor:pointer;user-select:none;
-    }
-    .tab.active{
-      background:rgba(143,178,255,.20);
-      color:var(--text);
-      box-shadow: inset 0 0 0 1px rgba(143,178,255,.32);
-    }
+    .tabs{ display:inline-flex; background:rgba(0,0,0,.20); border:1px solid rgba(255,255,255,.12); border-radius:999px; padding:4px; gap:4px; }
+    .tab{ border:0;color:var(--muted);background:transparent; padding:7px 10px;border-radius:999px;font-size:12px;cursor:pointer;user-select:none; }
+    .tab.active{ background:rgba(143,178,255,.20); color:var(--text); box-shadow: inset 0 0 0 1px rgba(143,178,255,.32); }
 
-    .btn{
-      border:1px solid rgba(255,255,255,.14);
-      background:rgba(0,0,0,.14);
-      color:var(--text);
-      padding:8px 10px;
-      border-radius:12px;
-      cursor:pointer;
-      font-size:12px;
-    }
+    .btn{ border:1px solid rgba(255,255,255,.14); background:rgba(0,0,0,.14); color:var(--text); padding:8px 10px; border-radius:12px; cursor:pointer; font-size:12px; }
     .btn:hover{border-color:rgba(255,255,255,.22)}
-    .btn.primary{
-      background:rgba(143,178,255,.22);
-      border-color:rgba(143,178,255,.34);
-    }
-    .btn.danger{
-      background:rgba(255,107,147,.14);
-      border-color:rgba(255,107,147,.30);
-    }
+    .btn.primary{ background:rgba(143,178,255,.22); border-color:rgba(143,178,255,.34); }
+    .btn.danger{ background:rgba(255,107,147,.14); border-color:rgba(255,107,147,.30); }
 
     .field{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
-    input[type="text"], input[type="password"]{
-      background:rgba(0,0,0,.18);
-      color:var(--text);
-      border:1px solid rgba(255,255,255,.14);
-      border-radius:12px;
-      padding:8px 10px;
-      font-size:12px;
-      min-width:220px;
-      outline:none;
-    }
+    input[type="text"], input[type="password"]{ background:rgba(0,0,0,.18); color:var(--text); border:1px solid rgba(255,255,255,.14); border-radius:12px; padding:8px 10px; font-size:12px; min-width:220px; outline:none; }
     input[type="text"]::placeholder, input[type="password"]::placeholder{color:rgba(201,211,242,.78)}
     .compactInput{min-width:180px}
 
-    .chip{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      background:rgba(0,0,0,.14);
-      border:1px solid rgba(255,255,255,.12);
-      border-radius:999px;
-      padding:6px 10px;
-      font-size:12px;
-      color:var(--muted);
-      white-space:nowrap;
-    }
+    .chip{ display:inline-flex; align-items:center; gap:8px; background:rgba(0,0,0,.14); border:1px solid rgba(255,255,255,.12); border-radius:999px; padding:6px 10px; font-size:12px; color:var(--muted); white-space:nowrap; }
     .chip strong{color:var(--text); font-weight:800}
 
     .note{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.35;}
 
-    /* Make the two tables truly left-aligned and fill width */
-    .twoCol{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:12px;
-      margin-top:12px;
-      width:100%;
-      justify-content:start;
-      align-items:start;
-    }
+    .twoCol{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px; width:100%; justify-content:start; align-items:start; }
     @media (max-width: 1100px){.twoCol{grid-template-columns:1fr}}
-    /* When only one panel is visible, let it take full width */
-    .twoCol.single #panelABC,
-    .twoCol.single #panelHF{
-      grid-column: 1 / -1;
-    }
+    .twoCol.single #panelABC, .twoCol.single #panelHF{ grid-column: 1 / -1; }
 
-    /* In Both view, each gridWrap handles its own horizontal scroll */
-    .gridWrap{
-      overflow-x:auto;
-      overflow-y:hidden;
-    }
+    .gridWrap{ overflow-x:auto; overflow-y:hidden; border-radius:14px; border:1px solid rgba(255,255,255,.12); margin-top:12px; background:rgba(0,0,0,.12); width:100%; }
 
-    /* Slightly smaller controls inside cells so they fit easier */
-    select{
-      font-size:11px;
-      padding:6px 7px;
-    }
-    .who{max-width: none;}
-
-    /* Ensure panel doesn't shrink leaving left gutters */
-    section.panel{min-width:0}
-
-    .gridWrap{
-      overflow:auto;
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,.12);
-      margin-top:12px;
-      background:rgba(0,0,0,.12);
-      width:100%;
-    }
-
-    table{
-      border-collapse:separate;
-      border-spacing:0;
-      width:100%;
-      font-size:12px;
-
-      /* key: allow squeezing to fit */
-      table-layout: fixed;
-      min-width: 0;
-    }
-    thead th:first-child,
-    tbody th{
-      width: 120px; /* time column */
-    }
-    thead th,
-    td{
-      /* allow columns to shrink */
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-    td{
-      min-width: 0; /* allow shrink */
-    }
+    table{ border-collapse:separate; border-spacing:0; width:100%; font-size:12px; table-layout: fixed; min-width: 0; }
+    thead th:first-child, tbody th{ width: 120px; }
+    thead th, td{ overflow:hidden; text-overflow:ellipsis; }
+    td{ min-width: 0; }
 
     tr:last-child td{border-bottom:0}
     td:last-child{border-right:0}
 
     .slot{display:flex;flex-direction:column;gap:6px;min-height:92px;}
-    select{
-      width:100%;
-      background:rgba(0,0,0,.18);
-      color:var(--text);
-      border:1px solid rgba(255,255,255,.14);
-      border-radius:12px;
-      padding:7px 8px;
-      font-size:12px;
-      outline:none;
-    }
+    select{ width:100%; background:rgba(0,0,0,.18); color:var(--text); border:1px solid rgba(255,255,255,.14); border-radius:12px; padding:7px 8px; font-size:12px; outline:none; }
     .slotTop{display:flex;gap:8px;align-items:center;justify-content:space-between;}
     .who{font-weight:900;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:140px;}
-    .smallBtn{
-      border:1px solid rgba(255,255,255,.14);
-      background:rgba(0,0,0,.14);
-      color:var(--text);
-      padding:6px 8px;
-      border-radius:12px;
-      font-size:11px;
-      cursor:pointer;
-    }
+    .smallBtn{ border:1px solid rgba(255,255,255,.14); background:rgba(0,0,0,.14); color:var(--text); padding:6px 8px; border-radius:12px; font-size:11px; cursor:pointer; }
     .smallBtn:hover{border-color:rgba(255,255,255,.22)}
 
-    .badge{
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-      border-radius:999px;
-      padding:5px 8px;
-      font-size:11px;
-      background:rgba(0,0,0,.14);
-      border:1px solid rgba(255,255,255,.12);
-      color:var(--muted);
-      width:max-content;
-    }
-    .badge.bad{
-      background:rgba(255,107,147,.16);
-      border-color:rgba(255,107,147,.34);
-      color:var(--text)
-    }
-    .badge.good{
-      background:rgba(75,226,155,.14);
-      border-color:rgba(75,226,155,.28);
-      color:var(--text)
-    }
+    .badge{ display:inline-flex; align-items:center; gap:6px; border-radius:999px; padding:5px 8px; font-size:11px; background:rgba(0,0,0,.14); border:1px solid rgba(255,255,255,.12); color:var(--muted); width:max-content; }
+    .badge.bad{ background:rgba(255,107,147,.16); border-color:rgba(255,107,147,.34); color:var(--text) }
+    .badge.good{ background:rgba(75,226,155,.14); border-color:rgba(75,226,155,.28); color:var(--text) }
+
     .inline{display:flex; gap:8px; align-items:center; flex-wrap:wrap;}
     label{display:flex; gap:8px; align-items:center; cursor:pointer; user-select:none; color:var(--muted);}
     input[type="checkbox"]{width:15px;height:15px;accent-color:var(--accent);}
 
-    /* One-line RA picker layout: select + button (+ optional 2nd select) */
-    .selRow{
-      display:grid;
-      grid-template-columns: 1fr auto 1fr; /* sel1, +/-, sel2 */
-      gap:8px;
-      align-items:center;
-      width:100%;
-    }
-    .selRow.one{
-      grid-template-columns: 1fr auto; /* sel1 expands when sel2 hidden */
-    }
-    .selRow select{
-      width:100%;
-    }
-    .addBtn{
-      min-width:34px;
-      padding:6px 8px;
-      text-align:center;
-    }
+    .selRow{ display:grid; grid-template-columns: 1fr auto 1fr; gap:8px; align-items:center; width:100%; }
+    .selRow.one{ grid-template-columns: 1fr auto; }
+    .selRow select{ width:100%; }
+    .addBtn{ min-width:34px; padding:6px 8px; text-align:center; }
 
     .hidden{display:none !important}
 
-    .toast{
-      position:fixed;bottom:16px;right:16px;
-      background:rgba(0,0,0,.30);
-      border:1px solid rgba(255,255,255,.16);
-      backdrop-filter: blur(10px);
-      box-shadow:var(--shadow);
-      padding:10px 12px;
-      border-radius:14px;
-      font-size:12px;
-      color:var(--text);
-      max-width:min(560px, calc(100vw - 32px));
-      display:none;
-    }
+    .toast{ position:fixed;bottom:16px;right:16px; background:rgba(0,0,0,.30); border:1px solid rgba(255,255,255,.16); backdrop-filter: blur(10px); box-shadow:var(--shadow); padding:10px 12px; border-radius:14px; font-size:12px; color:var(--text); max-width:min(560px, calc(100vw - 32px)); display:none; }
     .toast.show{display:block}
 
-    /* Admin dropdown */
     .menuWrap{position:relative; display:inline-block;}
-    .menu{
-      position:absolute;right:0;top:42px;width:min(440px, calc(100vw - 24px));
-      background:rgba(12,16,32,.96);
-      border:1px solid rgba(255,255,255,.16);
-      border-radius:16px;
-      box-shadow:var(--shadow);
-      padding:12px;
-      z-index:50;
-      display:none;
-    }
+    .menu{ position:absolute; right:0; top:42px; width:min(440px, calc(100vw - 24px)); background:rgba(12,16,32,.96); border:1px solid rgba(255,255,255,.16); border-radius:16px; box-shadow:var(--shadow); padding:12px; z-index:50; display:none; }
     .menu.show{display:block}
     .menu h3{margin:0 0 10px 0;font-size:13px;color:var(--text);}
     .menuRow{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:10px;}
     .menuRow > div{flex:1;min-width:160px;}
     .menu small{color:var(--muted); display:block; line-height:1.35;}
 
-    .statusDot{
-      display:inline-block;width:9px;height:9px;border-radius:999px;background:rgba(255,255,255,.25);
-      box-shadow:0 0 0 2px rgba(0,0,0,.18) inset;
-      margin-right:6px;
-    }
+    .statusDot{ display:inline-block;width:9px;height:9px;border-radius:999px;background:rgba(255,255,255,.25); box-shadow:0 0 0 2px rgba(0,0,0,.18) inset; margin-right:6px; }
     .dotGood{background:rgba(75,226,155,.92)}
     .dotBad{background:rgba(255,107,147,.92)}
 
-    /* Blocker banner */
-    #blockerBanner{
-      border-color: rgba(255,107,147,.34);
-      background: linear-gradient(180deg, rgba(255,107,147,.12), rgba(255,255,255,.03));
-    }
+    #blockerBanner{ border-color: rgba(255,107,147,.34); background: linear-gradient(180deg, rgba(255,107,147,.12), rgba(255,255,255,.03)); }
 
-    /* Strong “alert” styling when a participant is scheduled */
-    .slot.participant{
-      border: 1px solid rgba(255,107,147,.55);
-      background: linear-gradient(180deg, rgba(255,107,147,.18), rgba(0,0,0,.10));
-      border-radius: 14px;
-      padding: 10px;
-      box-shadow: 0 0 0 1px rgba(255,107,147,.25) inset;
-    }
+    .slot.participant{ border: 1px solid rgba(255,107,147,.55); background: linear-gradient(180deg, rgba(255,107,147,.18), rgba(0,0,0,.10)); border-radius: 14px; padding: 10px; box-shadow: 0 0 0 1px rgba(255,107,147,.25) inset; }
+    .slot.participant label{ color: var(--text); font-weight: 900; }
+    .slot.participant input[type="checkbox"]{ transform: scale(1.15); }
 
-    /* Make the checkbox row more prominent in that state */
-    .slot.participant label{
-      color: var(--text);
-      font-weight: 900;
-    }
-    .slot.participant input[type="checkbox"]{
-      transform: scale(1.15);
-    }
+    #panelABC .chip strong{ color: var(--accent); text-shadow: 0 0 10px rgba(143,178,255,.35); }
+    #panelHF .chip strong{ color: var(--accent2); text-shadow: 0 0 10px rgba(157,242,198,.30); }
 
-    /* Make the badge unmistakable */
-    .badge.bad{
-      font-weight: 900;
-      letter-spacing: .2px;
-    }
-      /* Make context names visually distinct */
-    #panelABC .chip strong{
-      color: var(--accent);   /* ABC Lab */
-    }
-
-    #panelHF .chip strong{
-      color: var(--accent2);  /* HF Project */
-    }
-   #panelABC .chip strong{ text-shadow: 0 0 10px rgba(143,178,255,.35); }
-   #panelHF  .chip strong{ text-shadow: 0 0 10px rgba(157,242,198,.30); }
-
+    /* count controls */
+    .countControls { display:inline-flex; gap:6px; align-items:center; margin-left:6px; }
+    .countDisplay { min-width:28px; text-align:center; font-weight:700; color:var(--text); }
   </style>
 </head>
 
@@ -410,11 +165,7 @@
         </p>
       </div>
 
-      <!-- Bigger week display in top bar -->
-      <div class="weekBig" id="weekBigLabel">
-        Week: —
-        <small id="termBigLabel">—</small>
-      </div>
+      <div class="weekBig" id="weekBigLabel">Week: —<small id="termBigLabel">—</small></div>
 
       <div class="inline" style="align-items:center;">
         <span class="chip"><span class="statusDot" id="connDot"></span>Backend: <strong id="connLabel">—</strong></span>
@@ -462,9 +213,7 @@
               <button class="btn danger" id="resetAllBtn" type="button">Reset ALL data</button>
             </div>
 
-            <small style="margin-top:10px;">
-              Reset actions modify the shared Sheet. If enabled, enter the Admin key.
-            </small>
+            <small style="margin-top:10px;">Reset actions modify the shared Sheet. If enabled, enter the Admin key.</small>
           </div>
         </div>
       </div>
@@ -472,17 +221,14 @@
   </div>
 
 <main>
-  <!-- Blocker/connection banner -->
-  <div class="panel" id="blockerBanner" style="display:none; margin-bottom:12px;">
+  <div class="panel" style="display:none; margin-bottom:12px;" id="blockerBanner">
     <div class="inline" style="justify-content:space-between; align-items:flex-start;">
       <div>
         <div style="font-weight:900; margin-bottom:6px;">Saving/Loading is blocked</div>
         <div style="color:var(--muted); font-size:12px; line-height:1.35;">
           This page can’t reach the shared Google Sheets backend. The most common cause is an ad/tracker blocker or Firefox Enhanced Tracking Protection.
           <br>
-          <span style="font-family:var(--mono); font-size:11px;">
-            Backend: <span id="backendUrlText"></span>
-          </span>
+          <span style="font-family:var(--mono); font-size:11px;">Backend: <span id="backendUrlText"></span></span>
         </div>
       </div>
       <button class="btn" id="blockerHelpBtn" type="button">How to fix</button>
@@ -543,9 +289,7 @@
   <div class="twoCol">
     <section class="panel" id="panelABC">
       <div class="inline" style="justify-content:space-between;">
-        <div class="inline">
-          <span class="chip">Context: <strong>ABC Lab</strong></span>
-        </div>
+        <div class="inline"><span class="chip">Context: <strong>ABC Lab</strong></span></div>
         <span class="badge" id="abcSummary">0 filled</span>
       </div>
       <div class="gridWrap" id="gridWrapABC"></div>
@@ -553,9 +297,7 @@
 
     <section class="panel" id="panelHF">
       <div class="inline" style="justify-content:space-between;">
-        <div class="inline">
-          <span class="chip">Context: <strong>HF Project</strong></span>
-        </div>
+        <div class="inline"><span class="chip">Context: <strong>HF Project</strong></span></div>
         <span class="badge" id="hfSummary">0 filled</span>
       </div>
       <div class="gridWrap" id="gridWrapHF"></div>
@@ -664,7 +406,6 @@
   }
   function joinPeople(arr){
     const clean = (arr || []).map(x => String(x||"").trim()).filter(Boolean);
-    // de-dupe while preserving order
     const out = [];
     for(const n of clean){
       if(!out.includes(n)) out.push(n);
@@ -842,13 +583,16 @@
     }
   })();
 
+  // -----------------------------
+  // Ensure structure includes participantCount
+  // -----------------------------
   function ensureLocalScopeStructure(scope){
     if(state.cacheSlotsByScope[scope]) return;
     const makeSlots = (days) => {
       const dayObj = {};
       for (const d of days) {
         dayObj[d] = {};
-        for (const t of TIMES) dayObj[d][t] = { person: "", participantScheduled: false };
+        for (const t of TIMES) dayObj[d][t] = { person: "", participantScheduled: false, participantCount: 0 };
       }
       return dayObj;
     };
@@ -864,6 +608,9 @@
     return state.cacheSlotsByScope[s];
   }
 
+  // -----------------------------
+  // Apply backend data (reads participantCount)
+  // -----------------------------
   function applyWeekFromBackend(data){
     const sKey = data.scopeKey;
     ensureLocalScopeStructure(sKey);
@@ -873,7 +620,7 @@
       const dayObj = {};
       for (const d of days) {
         dayObj[d] = {};
-        for (const t of TIMES) dayObj[d][t] = { person: "", participantScheduled: false };
+        for (const t of TIMES) dayObj[d][t] = { person: "", participantScheduled: false, participantCount: 0 };
       }
       return dayObj;
     };
@@ -889,7 +636,8 @@
       if(!slotsStruct[range] || !slotsStruct[range][ctx] || !slotsStruct[range][ctx][day] || !slotsStruct[range][ctx][day][time]) continue;
       slotsStruct[range][ctx][day][time] = {
         person: flat[k].person || "",
-        participantScheduled: !!flat[k].participantScheduled
+        participantScheduled: !!flat[k].participantScheduled,
+        participantCount: Number(flat[k].participantCount || 0)
       };
     }
     saveCache();
@@ -935,16 +683,17 @@
   function countFilled(){
     const slots = currentLocalSlots()[activeRange];
     const countFor = (ctx) => {
-      let filled = 0, flagged = 0;
+      let filled = 0, flagged = 0, participantSum = 0;
       const days = Object.keys(slots[ctx]);
       for(const d of days){
         for(const t of Object.keys(slots[ctx][d])){
           const s = slots[ctx][d][t];
           if(s.person) filled++;
           if(s.participantScheduled) flagged++;
+          participantSum += Number(s.participantCount || 0);
         }
       }
-      return { filled, flagged };
+      return { filled, flagged, participantSum };
     };
     return { ABC: countFor("ABC"), HF: countFor("HF") };
   }
@@ -953,12 +702,15 @@
     const c = countFilled();
     ui.abcSummary.className = "badge";
     ui.hfSummary.className = "badge";
-    ui.abcSummary.textContent = `${c.ABC.filled} filled • ${c.ABC.flagged} participant`;
-    ui.hfSummary.textContent  = `${c.HF.filled} filled • ${c.HF.flagged} participant`;
+    ui.abcSummary.textContent = `${c.ABC.filled} filled • ${c.ABC.participantSum} participants`;
+    ui.hfSummary.textContent  = `${c.HF.filled} filled • ${c.HF.participantSum} participants`;
     if(c.ABC.flagged) ui.abcSummary.classList.add("bad");
     if(c.HF.flagged)  ui.hfSummary.classList.add("bad");
   }
 
+  // =============================
+  // Render per-context table
+  // =============================
   function renderContext(ctxId, wrapEl){
     const days = activeRange === "weekdays" ? WEEKDAYS : WEEKEND;
     const slots = currentLocalSlots()[activeRange][ctxId];
@@ -1012,11 +764,11 @@
         clearBtn.className = "smallBtn";
         clearBtn.type = "button";
         clearBtn.textContent = "Clear";
-        clearBtn.disabled = !s.person && !s.participantScheduled;
+        clearBtn.disabled = !s.person && !s.participantScheduled && (!s.participantCount || s.participantCount === 0);
         clearBtn.addEventListener("click", async () => {
           await saveSlotToBackend({
             range: activeRange, context: ctxId, day, time,
-            person: "", participantScheduled: false
+            person: "", participantScheduled: false, participantCount: 0
           }, { optimistic: true });
         });
 
@@ -1072,10 +824,12 @@
 
         function commitPeople(newP1, newP2){
           const combined = joinPeople([newP1, newP2]);
+          const cur = slots[day][time];
           return saveSlotToBackend({
             range: activeRange, context: ctxId, day, time,
             person: combined,
-            participantScheduled: !!slots[day][time].participantScheduled
+            participantScheduled: !!cur.participantScheduled,
+            participantCount: Number(cur.participantCount || 0)
           }, { optimistic: true });
         }
 
@@ -1116,24 +870,25 @@
         const inline = document.createElement("div");
         inline.className = "inline";
 
+        // checkbox + label
         const label = document.createElement("label");
         const cb = document.createElement("input");
         cb.type = "checkbox";
         cb.checked = !!s.participantScheduled;
         cb.addEventListener("change", async () => {
-          // if user checks the box and there is currently 0 participants,
-          // set participantCount to 1 automatically; otherwise keep current count.
+          // New behavior: when checked and count == 0 -> set to 1.
+          // When unchecked -> set count to 0.
           const currentCount = Number(slots[day][time].participantCount || 0);
-          const nextCount = (cb.checked && currentCount === 0) ? 1 : currentCount;
+          const nextCount = cb.checked ? (currentCount || 1) : 0;
 
           await saveSlotToBackend({
-          range: activeRange,
-          context: ctxId,
-          day,
-          time,
-          person: slots[day][time].person || "",
-          participantScheduled: cb.checked,
-          participantCount: nextCount
+            range: activeRange,
+            context: ctxId,
+            day,
+            time,
+            person: slots[day][time].person || "",
+            participantScheduled: cb.checked,
+            participantCount: nextCount
           }, { optimistic: true });
         });
 
@@ -1144,11 +899,59 @@
         label.appendChild(span);
         inline.appendChild(label);
 
+        // participant count controls
+        const countControls = document.createElement("span");
+        countControls.className = "countControls";
+
+        const minusBtn = document.createElement("button");
+        minusBtn.className = "smallBtn";
+        minusBtn.type = "button";
+        minusBtn.title = "Decrease participant count";
+        minusBtn.textContent = "−";
+
+        const countDisplay = document.createElement("span");
+        countDisplay.className = "countDisplay";
+        countDisplay.textContent = String(Number(s.participantCount || 0));
+
+        const plusBtn = document.createElement("button");
+        plusBtn.className = "smallBtn";
+        plusBtn.type = "button";
+        plusBtn.title = "Increase participant count";
+        plusBtn.textContent = "+";
+
+        minusBtn.addEventListener("click", async () => {
+          const current = Number(slots[day][time].participantCount || 0);
+          const next = Math.max(0, current - 1);
+          await saveSlotToBackend({
+            range: activeRange, context: ctxId, day, time,
+            person: slots[day][time].person || "",
+            participantScheduled: !!slots[day][time].participantScheduled,
+            participantCount: next
+          }, { optimistic: true });
+        });
+
+        plusBtn.addEventListener("click", async () => {
+          const current = Number(slots[day][time].participantCount || 0);
+          const next = current + 1;
+          await saveSlotToBackend({
+            range: activeRange, context: ctxId, day, time,
+            person: slots[day][time].person || "",
+            participantScheduled: !!slots[day][time].participantScheduled,
+            participantCount: next
+          }, { optimistic: true });
+        });
+
+        countControls.appendChild(minusBtn);
+        countControls.appendChild(countDisplay);
+        countControls.appendChild(plusBtn);
+
+        // badge
         const badge = document.createElement("div");
         badge.className = "badge";
-        if(s.participantScheduled){
+        const partCount = Number(s.participantCount || 0);
+        if(partCount > 0){
           badge.classList.add("bad");
-          badge.textContent = "⚠ Must be present ⚠";
+          badge.textContent = `⚠ ${partCount} participant${partCount === 1 ? "" : "s"} scheduled`;
         }else if(s.person){
           badge.classList.add("good");
           badge.textContent = "Scheduled";
@@ -1159,6 +962,7 @@
         slot.appendChild(top);
         slot.appendChild(selRow);
         slot.appendChild(inline);
+        slot.appendChild(countControls);
         slot.appendChild(badge);
 
         td.appendChild(slot);
@@ -1182,7 +986,7 @@
   }
 
   // =============================
-  // Backend-backed ops
+  // Backend-backed ops (participantCount included)
   // =============================
   async function loadNamesFromBackend(){
     const data = await apiPost("listNames", {});
@@ -1220,6 +1024,7 @@
       time: slot.time,
       person: slot.person || "",
       participantScheduled: !!slot.participantScheduled,
+      participantCount: Number(slot.participantCount || 0),
       updatedBy: (yourName || "").trim()
     };
 
@@ -1227,7 +1032,8 @@
       const s = currentLocalSlots();
       s[slot.range][slot.context][slot.day][slot.time] = {
         person: payload.person,
-        participantScheduled: payload.participantScheduled
+        participantScheduled: payload.participantScheduled,
+        participantCount: payload.participantCount
       };
       saveCache();
       renderAll();
@@ -1247,7 +1053,7 @@
   }
 
   // =============================
-  // Week navigation
+  // Week navigation & admin
   // =============================
   function shiftWeek(deltaWeeks){
     const { year, term } = state.settings;
@@ -1262,17 +1068,12 @@
   function jumpToCurrentWeek(){
     const now = new Date();
     const { year, term } = state.settings;
-
-    // Keep the current Year/Term selection, but jump weekStart to "now" clamped into that term.
     const wsNow = clampWeekStartToTerm(mondayOfWeek(now), year, term);
     state.settings.weekStartISO = toISODate(wsNow);
     saveCache();
     loadWeekFromBackend().catch(e => toast(`Load failed: ${e.message}`, "bad"));
   }
 
-  // =============================
-  // Admin
-  // =============================
   function toggleAdminMenu(force){
     const show = (typeof force === "boolean") ? force : !ui.adminMenu.classList.contains("show");
     ui.adminMenu.classList.toggle("show", show);
