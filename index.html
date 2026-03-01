@@ -1388,21 +1388,65 @@ tbody th {
     if(!silent) toast("Refreshed from shared Sheet.", "good");
   }
 
-  // Single correct saveSlotToBackend
-  async function saveSlotToBackend(slot, { optimistic } = { optimistic: true }){
+  // Single correct saveSlotToBackend - replacement
+  async function saveSlotToBackend(slot, { optimistic } = { optimistic: true }) {
     const { year, term, weekStartISO, yourName } = state.settings;
+
+    // Defensive normalization
     const normalizedParticipantCount = Math.max(0, Number(slot.participantCount || 0));
+    const normalizedTime = (slot.time || "")
+      .replace(/\u2013|\u2014/g, '-')   // replace en/em dash with hyphen
+      .replace(/\s+/g, '')             // remove spaces like "09:00 - 10:00" -> "09:00-10:00"
+      .trim();
+
     const payload = {
-      year, term, weekStartISO,
-      range: slot.range,
-      context: slot.context,
-      day: slot.day,
-      time: slot.time,
+      // primary identifying keys
+      scopeKey: `${year}::${term}::${weekStartISO}`,
+      range: slot.range || "",
+      context: slot.context || "",
+      day: slot.day || "",
+      time: normalizedTime,
+
+      // content fields
       person: slot.person || "",
       participantScheduled: !!slot.participantScheduled,
       participantCount: normalizedParticipantCount,
+
+      // metadata
+      updatedAtISO: (new Date()).toISOString(),
       updatedBy: (yourName || "").trim()
     };
+
+    // Optional client-side debug log (remove in production)
+    // console.debug("saveSlot payload:", payload);
+
+    // Send wrapped request to Apps Script backend. Backend handler shown earlier expects either
+    // params.action or body.action; using body.action and body.slot here.
+    const body = JSON.stringify({
+      action: "saveSlot",
+      slot: payload
+    });
+
+    const res = await fetch(SERVER_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body
+    });
+
+    // Helpful: capture JSON or fallback to text for error investigation
+    let result;
+    try {
+      result = await res.json();
+    } catch (err) {
+      const txt = await res.text();
+      throw new Error("saveSlot backend returned non-JSON: " + txt);
+    }
+
+    // Optional: return result for optimistic update handling
+    return result;
+  }
 
     if(optimistic){
       const s = currentLocalSlots();
