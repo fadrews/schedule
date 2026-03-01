@@ -13,7 +13,7 @@
       --accent: #2563eb; /* blue accent */
       --accent2: #60a5fa; /* pale blue for HF */
       --good: #047857;
-      --bad: #b91c1c;
+      --bad: #7f1d1d; /* stronger/darker red */
 
       --panel: #ffffff;
       --panel2: #f8fafc;
@@ -247,10 +247,10 @@
       box-shadow: 0 2px 8px rgba(17,24,39,.03);
     }
 
-    /* Slight visual difference when participant flag is set */
+    /* Slight visual difference when participant flag is set (more intense red) */
     .slot.participant{
-      border-color: rgba(185,28,28,.16);
-      background: linear-gradient(180deg, rgba(255,244,244,0.9), #fff);
+      border-color: rgba(127,29,29,.30);
+      background: rgba(255,230,230,0.95);
     }
 
     .slotTop{display:flex;gap:8px;align-items:center;justify-content:space-between;}
@@ -279,10 +279,10 @@
       width:max-content;
     }
     .badge.bad{
-      background: rgba(254,226,226,0.9);
-      border-color: rgba(185,28,28,.10);
-      color:var(--bad);
-      font-weight:700;
+      background: rgba(127,29,29,0.18); /* stronger red background */
+      border-color: rgba(127,29,29,0.25);
+      color: var(--bad);
+      font-weight:800;
     }
     .badge.good{
       background: rgba(237,250,236,0.9);
@@ -529,10 +529,10 @@
   const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri"];
   const WEEKEND  = ["Sat", "Sun"];
 
+  // TIMES: compact hour-only format as requested (e.g., "12-13", "14-15") — no ":00"
   const TIMES = [];
   for (let h = 9; h < 17; h++) {
-    const pad = (n) => String(n).padStart(2, "0");
-    TIMES.push(`${pad(h)}:00–${pad(h+1)}:00`);
+    TIMES.push(`${h}-${h+1}`);
   }
 
   const el = (id) => document.getElementById(id);
@@ -671,6 +671,12 @@
     }
   }
 
+  // Helper formatting functions (display-only)
+  function pad2(n){ return String(n).padStart(2,"0"); }
+  function toISODate(d){ return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`; }
+  function toMDY(d){ return `${pad2(d.getMonth()+1)}/${pad2(d.getDate())}/${d.getFullYear()}`; } // mm/dd/yyyy for top
+  function toMMDDdash(d){ return `${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`; } // mm-dd for context
+
   function fmtTime(ts){
     if(!ts) return "—";
     const d = new Date(ts);
@@ -687,8 +693,6 @@
   // =============================
   // Date helpers
   // =============================
-  function pad2(n){ return String(n).padStart(2,"0"); }
-  function toISODate(d){ return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`; }
   function parseISODate(s){
     const [y,m,dd] = s.split("-").map(Number);
     return new Date(y, (m-1), dd);
@@ -724,7 +728,8 @@
     const ws = parseISODate(weekStartISO);
     const map = { Mon:0, Tue:1, Wed:2, Thu:3, Fri:4, Sat:5, Sun:6 };
     const d = addDays(ws, map[dayAbbrev]);
-    return `${dayAbbrev} (${toISODate(d)})`;
+    // show Weekday (MM-DD) per your request (no year in context)
+    return `${dayAbbrev} (${toMMDDdash(d)})`;
   }
 
   // =============================
@@ -874,7 +879,8 @@
     const we = addDays(ws, 6);
     const termLabel = term === "Spring" ? "Jan–Apr (Spring)" : "Sep–Dec (Fall)";
 
-    ui.weekBigLabel.innerHTML = `Week: ${toISODate(ws)} → ${toISODate(we)}<small></small>`;
+    // Top shows month/day/year per request
+    ui.weekBigLabel.innerHTML = `Week: ${toMDY(ws)} → ${toMDY(we)}<small></small>`;
     ui.termBigLabel.textContent = `${year} • ${termLabel}`;
 
     if(state.meta.lastUpdatedAt){
@@ -927,7 +933,7 @@
 
     for(const d of days){
       const th = document.createElement("th");
-      th.textContent = dayDateLabel(d, weekStartISO);
+      th.textContent = dayDateLabel(d, weekStartISO); // now Weekday (MM-DD)
       hr.appendChild(th);
     }
     thead.appendChild(hr);
@@ -939,7 +945,7 @@
       const tr = document.createElement("tr");
 
       const th = document.createElement("th");
-      th.textContent = time;
+      th.textContent = time; // now compact e.g., "12-13"
       tr.appendChild(th);
 
       for(const day of days){
