@@ -1051,63 +1051,72 @@ tbody th {
   }
 
   function applyWeekFromBackend(data){
-    const sKey = data.scopeKey;
-    ensureLocalScopeStructure(sKey);
+  const sKey = data.scopeKey;
+  ensureLocalScopeStructure(sKey);
 
-    const slotsStruct = state.cacheSlotsByScope[sKey];
-    const makeSlots = (days) => {
-      const dayObj = {};
-      for (const d of days) {
-        dayObj[d] = {};
-        for (const t of TIMES) dayObj[d][t] = { person: "", participantScheduled: false, participantCount: 0 };
-      }
-      return dayObj;
-    };
-
-    slotsStruct.weekdays.ABC = makeSlots(WEEKDAYS);
-    slotsStruct.weekdays.HF  = makeSlots(WEEKDAYS);
-    slotsStruct.weekend.ABC  = makeSlots(WEEKEND);
-    slotsStruct.weekend.HF   = makeSlots(WEEKEND);
-
-    // robustly apply slots from backend, allowing for varied time key formats
-    const flat = data.slots || {};
-    const unmappedKeys = [];
-    for (const k of Object.keys(flat)) {
-      // backend key format: "range::ctx::day::time"
-      const parts = k.split("::");
-      if (parts.length !== 4) {
-        // unexpected format, record and skip
-        unmappedKeys.push(k);
-        continue;
-      }
-      const [range, ctx, day, timeRaw] = parts;
-      // normalize the time label into our internal TIMES key
-      const timeKey = normalizeToInternalTimeKey(timeRaw);
-
-      if (!timeKey) {
-        // keep the raw key for debugging and skip
-        unmappedKeys.push(k);
-        continue;
-      }
-
-      if (
-        !slotsStruct[range] ||
-        !slotsStruct[range][ctx] ||
-        !slotsStruct[range][ctx][day] ||
-        !slotsStruct[range][ctx][day][timeKey]
-      ) {
-        // structure doesn't match expected (range/ctx/day missing)
-        unmappedKeys.push(k);
-        continue;
-      }
-
-      // apply server-provided values (ensure numeric participantCount)
-      slotsStruct[range][ctx][day][timeKey] = {
-        person: flat[k].person || "",
-        participantScheduled: !!flat[k].participantScheduled,
-        participantCount: Number(flat[k].participantCount || 0)
-      };
+  const slotsStruct = state.cacheSlotsByScope[sKey];
+  const makeSlots = (days) => {
+    const dayObj = {};
+    for (const d of days) {
+      dayObj[d] = {};
+      for (const t of TIMES) dayObj[d][t] = { person: "", participantScheduled: false, participantCount: 0 };
     }
+    return dayObj;
+  };
+
+  slotsStruct.weekdays.ABC = makeSlots(WEEKDAYS);
+  slotsStruct.weekdays.HF  = makeSlots(WEEKDAYS);
+  slotsStruct.weekend.ABC  = makeSlots(WEEKEND);
+  slotsStruct.weekend.HF   = makeSlots(WEEKEND);
+
+  // robustly apply slots from backend, allowing for varied time key formats
+  const flat = data.slots || {};
+  const unmappedKeys = [];
+  for (const k of Object.keys(flat)) {
+    // backend key format: "range::ctx::day::time"
+    const parts = k.split("::");
+    if (parts.length !== 4) {
+      // unexpected format, record and skip
+      unmappedKeys.push(k);
+      continue;
+    }
+    const [range, ctx, day, timeRaw] = parts;
+    // normalize the time label into our internal TIMES key
+    const timeKey = normalizeToInternalTimeKey(timeRaw);
+
+    if (!timeKey) {
+      // keep the raw key for debugging and skip
+      unmappedKeys.push(k);
+      continue;
+    }
+
+    if (
+      !slotsStruct[range] ||
+      !slotsStruct[range][ctx] ||
+      !slotsStruct[range][ctx][day] ||
+      !slotsStruct[range][ctx][day][timeKey]
+    ) {
+      // structure doesn't match expected (range/ctx/day missing)
+      unmappedKeys.push(k);
+      continue;
+    }
+
+    // apply server-provided values (ensure numeric participantCount)
+    slotsStruct[range][ctx][day][timeKey] = {
+      person: flat[k].person || "",
+      participantScheduled: !!flat[k].participantScheduled,
+      participantCount: Number(flat[k].participantCount || 0)
+    };
+  }
+
+  if (unmappedKeys.length) {
+    // Helpful console output for debugging — remove or comment out in production if noisy
+    console.warn("applyWeekFromBackend: some backend slot keys couldn't be mapped to frontend TIMES:", unmappedKeys.slice(0,50));
+  }
+
+  // persist and return
+  saveCache();
+}
 
     if (unmappedKeys.length) {
       // Helpful console output for debugging — remove or comment out in production if noisy
