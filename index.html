@@ -407,6 +407,61 @@
       .twoCol { gap: 12px; max-width: 100%; padding: 0 12px; }
       .twoCol.single .panel { max-width: 100%; }
     }
+    /* ========== Alignment fix: make topbar and panels share same centered width ========== */
+/* Match main / twoCol max-width so topbar and lower panels align exactly */
+.topbar {
+  max-width: 1200px;  /* same as main */
+  margin: 0 auto;     /* center it */
+  padding-left: 16px; /* align inner content with panels */
+  padding-right: 16px;
+}
+
+/* Ensure the twoCol itself sits at same max width and shares the same horizontal padding
+   so the left edges of the panels line up with the inner content of the topbar. */
+.twoCol {
+  max-width: 1200px;  /* same as main */
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 16px; /* same inner gutter as topbar */
+  padding-right: 16px;
+  gap: 16px;
+}
+
+/* Make each panel use full available width inside the twoCol padding */
+.panel {
+  width: 100%;
+  box-sizing: border-box;
+  /* keep visual padding inside panel but don't offset overall alignment */
+  padding: 12px 12px; /* slightly narrower horizontal padding so inner table lines up */
+}
+
+/* gridWrap already has padding:8px; keep it but ensure box-sizing respects outer padding */
+.gridWrap { box-sizing: border-box; }
+
+/* Narrow the time column so it doesn't dominate the layout */
+thead th:first-child,
+tbody th {
+  width: 64px;     /* tighter width for Time column */
+  min-width: 56px; /* prevents collapse on small screens */
+  padding: 6px 8px;
+  box-sizing: border-box;
+}
+
+/* If panels are shown single-column, keep them centered and same max width as topbar */
+.twoCol.single {
+  grid-template-columns: 1fr;
+  justify-items: center;
+}
+.twoCol.single .panel {
+  max-width: 1200px;
+  width: 100%;
+}
+
+/* Small responsive tweak so everything remains aligned on narrow screens */
+@media (max-width: 980px) {
+  .topbar, .twoCol, .twoCol.single .panel { max-width: 100%; padding-left: 12px; padding-right: 12px; }
+  thead th:first-child, tbody th { width: 56px; min-width:48px; }
+}
   </style>
 </head>
 
