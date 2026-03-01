@@ -517,6 +517,29 @@ tbody th {
   .topbar, .twoCol, .twoCol.single .panel { max-width: 100%; padding-left: 12px; padding-right: 12px; }
   thead th:first-child, tbody th { width: 56px; min-width:48px; }
 }
+/* Strong override to ensure HF shows a solid pastel blue when visible */
+#panelHF:not(.hidden) {
+  background-image: none !important;        /* remove gradient/image */
+  background-color: #e6f8ff !important;     /* pastel blue */
+  background-repeat: no-repeat !important;
+  background-position: 0 0 !important;
+  border-color: rgba(59,130,246,0.10) !important;
+  box-shadow: 0 6px 18px rgba(17,24,39,.04) !important;
+  color: var(--text) !important;
+}
+
+/* If there are child elements (chip strong) you want to recolor for contrast */
+#panelHF:not(.hidden) .chip strong {
+  color: #1e6fb8 !important;
+}
+
+/* If your panel uses a gradient rule with higher specificity somewhere else,
+   add this even-more-specific rule as a fallback */
+.twoCol #panelHF:not(.hidden) {
+  background-image: none !important;
+  background-color: #e6f8ff !important;
+}
+
   </style>
 </head>
 
