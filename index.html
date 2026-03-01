@@ -1120,22 +1120,22 @@
         const cb = document.createElement("input");
         cb.type = "checkbox";
         cb.checked = !!s.participantScheduled;
-		cb.addEventListener("change", async () => {
-		  // if user checks the box and there is currently 0 participants,
-		  // set participantCount to 1 automatically; otherwise keep current count.
-		  const currentCount = Number(slots[day][time].participantCount || 0);
-		  const nextCount = (cb.checked && currentCount === 0) ? 1 : currentCount;
+        cb.addEventListener("change", async () => {
+          // if user checks the box and there is currently 0 participants,
+          // set participantCount to 1 automatically; otherwise keep current count.
+          const currentCount = Number(slots[day][time].participantCount || 0);
+          const nextCount = (cb.checked && currentCount === 0) ? 1 : currentCount;
 
-		  await saveSlotToBackend({
-			range: activeRange,
-			context: ctxId,
-			day,
-			time,
-			person: slots[day][time].person || "",
-			participantScheduled: cb.checked,
-			participantCount: nextCount
-		  }, { optimistic: true });
-		});
+          await saveSlotToBackend({
+          range: activeRange,
+          context: ctxId,
+          day,
+          time,
+          person: slots[day][time].person || "",
+          participantScheduled: cb.checked,
+          participantCount: nextCount
+          }, { optimistic: true });
+        });
 
         const span = document.createElement("span");
         span.textContent = "Participant scheduled";
