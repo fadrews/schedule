@@ -691,14 +691,12 @@ tbody th {
   const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri"];
   const WEEKEND  = ["Sat", "Sun"];
 
-  // TIMES: keep backend/internal keys as "HH:00–HH+1:00" so slot lookups match the Sheet.
-  // TIMES_DISPLAY: compact labels for the UI (e.g. "9-10", "14-15").
   const TIMES = [];
   const TIMES_DISPLAY = [];
   for (let h = 9; h < 17; h++) {
     const pad = (n) => String(n).padStart(2, "0");
-    TIMES.push(`${pad(h)}:00–${pad(h+1)}:00`); // internal key — must match backend
-    TIMES_DISPLAY.push(`${h}-${h+1}`);         // compact label for UI only
+    TIMES.push(`${pad(h)}:00–${pad(h+1)}:00`);
+    TIMES_DISPLAY.push(`${h}-${h+1}`);
   }
 
   const el = (id) => document.getElementById(id);
@@ -706,42 +704,30 @@ tbody th {
   const ui = {
     tabWeekdays: el("tab-weekdays"),
     tabWeekend:  el("tab-weekend"),
-
     viewBoth: el("view-both"),
     viewABC:  el("view-abc"),
     viewHF:   el("view-hf"),
-
     prevWeekBtn: el("prevWeekBtn"),
     currentWeekBtn: el("currentWeekBtn"),
     nextWeekBtn: el("nextWeekBtn"),
     refreshBtn:  el("refreshBtn"),
-
     panelABC: el("panelABC"),
     panelHF:  el("panelHF"),
-
     nameInput: el("nameInput"),
     addNameBtn: el("addNameBtn"),
-
     exportBtn: el("exportBtn"),
     importBtn: el("importBtn"),
-
     gridWrapABC: el("gridWrapABC"),
     gridWrapHF: el("gridWrapHF"),
-
     abcSummary: el("abcSummary"),
     hfSummary: el("hfSummary"),
-
     toast: el("toast"),
-
     connDot: el("connDot"),
     connLabel: el("connLabel"),
-
     lastUpdatedLabel: el("lastUpdatedLabel"),
     autoRefreshLabel: el("autoRefreshLabel"),
-
     weekBigLabel: el("weekBigLabel"),
     termBigLabel: el("termBigLabel"),
-
     adminBtn: el("adminBtn"),
     adminMenu: el("adminMenu"),
     yearSelect: el("yearSelect"),
@@ -751,7 +737,6 @@ tbody th {
     applyTermBtn: el("applyTermBtn"),
     resetWeekBtn: el("resetWeekBtn"),
     resetAllBtn: el("resetAllBtn"),
-
     blockerBanner: el("blockerBanner"),
     backendUrlText: el("backendUrlText"),
     blockerHelpBtn: el("blockerHelpBtn"),
@@ -770,10 +755,7 @@ tbody th {
     toast._t = setTimeout(() => ui.toast.classList.remove("show"), 3000);
   }
 
-  // =============================
   // People parsing (2 RAs max)
-  // Stored as: "Name1 / Name2" in the Sheet
-  // =============================
   const PEOPLE_DELIM = " / ";
   function splitPeople(s){
     const raw = String(s || "").trim();
@@ -782,7 +764,6 @@ tbody th {
   }
   function joinPeople(arr){
     const clean = (arr || []).map(x => String(x||"").trim()).filter(Boolean);
-    // de-dupe while preserving order
     const out = [];
     for(const n of clean){
       if(!out.includes(n)) out.push(n);
@@ -791,9 +772,7 @@ tbody th {
     return out.join(PEOPLE_DELIM);
   }
 
-  // =============================
-  // API (blocker-friendly: text/plain)
-  // =============================
+  // API
   async function apiPost(action, payload = {}) {
     const body = JSON.stringify({ action, ...payload });
     const res = await fetch(API_URL, {
@@ -820,11 +799,6 @@ tbody th {
     ui.connDot.classList.remove("dotGood","dotBad");
     ui.connDot.classList.add(ok ? "dotGood" : "dotBad");
     ui.connLabel.textContent = ok ? "Connected" : "Offline";
-
-    if (ui.blockerBanner) {
-      ui.backendUrlText.textContent = API_URL;
-      ui.blockerBanner && (ui.blockerBanner.style.display = ok ? "none" : "block");
-    }
   }
 
   async function backendPing() {
@@ -837,12 +811,11 @@ tbody th {
     }
   }
 
-  // Helper formatting functions (display-only)
+  // Helpers
   function pad2(n){ return String(n).padStart(2,"0"); }
   function toISODate(d){ return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`; }
-  function toMDY(d){ return `${pad2(d.getMonth()+1)}/${pad2(d.getDate())}/${d.getFullYear()}`; } // mm/dd/yyyy for top
-  function toMMDDdash(d){ return `${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`; } // mm-dd for context
-
+  function toMDY(d){ return `${pad2(d.getMonth()+1)}/${pad2(d.getDate())}/${d.getFullYear()}`; }
+  function toMMDDdash(d){ return `${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`; }
   function fmtTime(ts){
     if(!ts) return "—";
     const d = new Date(ts);
@@ -856,11 +829,8 @@ tbody th {
     ui.lastUpdatedLabel.textContent = `${kind} @ ${fmtTime(state.meta.lastUpdatedAt)}`;
   }
 
-  // =============================
-  // Date helpers
-  // =============================
   function parseISODate(s){
-    const [y,m,dd] = s.split("-").map(Number);
+    const [y,m,dd] = String(s||"").split("-").map(Number);
     return new Date(y, (m-1), dd);
   }
   function addDays(d, days){
@@ -894,13 +864,10 @@ tbody th {
     const ws = parseISODate(weekStartISO);
     const map = { Mon:0, Tue:1, Wed:2, Thu:3, Fri:4, Sat:5, Sun:6 };
     const d = addDays(ws, map[dayAbbrev]);
-    // show Weekday (MM-DD) per your request (no year in context)
     return `${dayAbbrev} (${toMMDDdash(d)})`;
   }
 
-  // =============================
   // State
-  // =============================
   function defaultState(){
     const now = new Date();
     const year = now.getFullYear();
@@ -945,7 +912,6 @@ tbody th {
   }
 
   let state = loadCache();
-
   let activeRange = "weekdays";
   let activeView  = "both";
 
@@ -958,7 +924,6 @@ tbody th {
     const nowWS = mondayOfWeek(new Date());
     const wsNowClamped = clampWeekStartToTerm(nowWS, state.settings.year, state.settings.term);
     const nowISO = toISODate(wsNowClamped);
-
     if(state.settings.weekStartISO !== nowISO){
       state.settings.weekStartISO = nowISO;
       saveCache();
@@ -987,157 +952,36 @@ tbody th {
     return state.cacheSlotsByScope[s];
   }
 
-  // ---------- Helper: normalize backend time labels to frontend internal TIMES keys ----------
-  /**
-  * Accepts a backend time label (various formats) and returns the canonical TIMES key
-  * used by the frontend, e.g. "09:00–10:00". Returns null if it cannot parse.
-  *
-  * Handles inputs such as:
-  *  - "09:00–10:00"
-  *  - "9:00–10:00"
-  *  - "9:00-10:00"
-  *  - "9-10"
-  *  - "09-10"
-  *  - "9–10" (en-dash)
-  *  - "09:00 - 10:00"
-  */
+  // Time normalization helper (unchanged logic)
   function normalizeToInternalTimeKey(raw) {
     if (!raw && raw !== "") return null;
     const s = String(raw).trim();
-
-    // If it already matches one of our canonical TIMES exactly, return it
     for (const t of TIMES) {
       if (t === s) return t;
     }
-
-    // Replace common dash variants with a single hyphen for parsing
     const cleaned = s.replace(/\u2013|\u2014|\u2212/g, "-").replace(/\s+/g, " ").trim();
-    // Try patterns like "HH:MM - HH:MM" or "H - H" or "H:MM-HH:MM" or "H-H"
-    // Extract numbers using regex
     const mTimeRange = cleaned.match(/(\d{1,2})(?::(\d{2}))?\s*[-]\s*(\d{1,2})(?::(\d{2}))?/);
-    if (!mTimeRange) {
-      // Try also compact like "09-10" (already covered) else fail
-      return null;
-    }
-    let h1 = Number(mTimeRange[1]);
-    let m1 = mTimeRange[2] ? Number(mTimeRange[2]) : 0;
-    let h2 = Number(mTimeRange[3]);
-    let m2 = mTimeRange[4] ? Number(mTimeRange[4]) : 0;
-
+    if (!mTimeRange) return null;
+    let h1 = Number(mTimeRange[1]), m1 = mTimeRange[2] ? Number(mTimeRange[2]) : 0;
+    let h2 = Number(mTimeRange[3]), m2 = mTimeRange[4] ? Number(mTimeRange[4]) : 0;
     if (Number.isNaN(h1) || Number.isNaN(h2)) return null;
-    // Normalize hour rollover (if backend used 24h values etc, keep as-is)
     const pad2 = (n) => String(n).padStart(2, "0");
-    // Build canonical form "HH:00–HH+1:00" only if minutes are 0 or ignored.
-    // We will convert into the exact TIMES format used: "09:00–10:00"
     const key = `${pad2(h1)}:${pad2(m1)}–${pad2(h2)}:${pad2(m2)}`;
-
-    // If that produced a known TIMES entry, return it.
     for (const t of TIMES) if (t === key) return t;
-
-    // If backend gave "9-10" (no minutes), try construct as "09:00–10:00" anyway
     if (m1 === 0 && m2 === 0) {
       const alt = `${pad2(h1)}:00–${pad2(h2)}:00`;
       for (const t of TIMES) if (t === alt) return alt;
     }
-
-    // As a last attempt, try shifting h2 to h1+1 if h2 seems like single hour shorthand (e.g. "9-10")
     if (m1 === 0 && m2 === 0 && (h2 === h1 + 1 || Math.abs(h2 - h1) === 1)) {
       const alt2 = `${pad2(h1)}:00–${pad2(h1+1)}:00`;
       for (const t of TIMES) if (t === alt2) return alt2;
     }
-
-    // Not recognized
     return null;
   }
 
-function applyWeekFromBackend(data){
-  // data is expected to be { scopeKey: "...", slots: { "range::ctx::day::time": { person, participantScheduled, participantCount } } }
-  const sKey = data.scopeKey;
-  ensureLocalScopeStructure(sKey);
-
-  const slotsStruct = state.cacheSlotsByScope[sKey];
-  const makeSlots = (days) => {
-    const dayObj = {};
-    for (const d of days) {
-      dayObj[d] = {};
-      for (const t of TIMES) dayObj[d][t] = { person: "", participantScheduled: false, participantCount: 0 };
-    }
-    return dayObj;
-  };
-
-  // initialize structure (clean slate for this scope)
-  slotsStruct.weekdays.ABC = makeSlots(WEEKDAYS);
-  slotsStruct.weekdays.HF  = makeSlots(WEEKDAYS);
-  slotsStruct.weekend.ABC  = makeSlots(WEEKEND);
-  slotsStruct.weekend.HF   = makeSlots(WEEKEND);
-
-  const flat = data.slots || {};
-  const unmappedKeys = [];
-
-  for (const k of Object.keys(flat)) {
-    // backend key format: "range::ctx::day::time"
-    const parts = k.split("::");
-    if (parts.length !== 4) {
-      unmappedKeys.push(k);
-      continue;
-    }
-    const [range, ctx, day, timeRaw] = parts;
-
-    // Attempt to normalize the time label to the frontend internal TIMES key.
-    // If backend already uses canonical keys this will just return the same key.
-    const timeKey = (typeof normalizeToInternalTimeKey === "function")
-      ? normalizeToInternalTimeKey(timeRaw)
-      : timeRaw;
-
-    if (!timeKey) {
-      unmappedKeys.push(k);
-      continue;
-    }
-
-    if (
-      !slotsStruct[range] ||
-      !slotsStruct[range][ctx] ||
-      !slotsStruct[range][ctx][day] ||
-      !slotsStruct[range][ctx][day][timeKey]
-    ) {
-      unmappedKeys.push(k);
-      continue;
-    }
-
-    // Defensive parsing: participantCount may be string or missing.
-    const rawRec = flat[k] || {};
-    const person = String(rawRec.person || "");
-    const participantScheduled = !!rawRec.participantScheduled;
-    // Accept numeric or string; fall back to 0 if NaN.
-    const participantCount = Number.isFinite(Number(rawRec.participantCount))
-      ? Number(rawRec.participantCount)
-      : (participantScheduled ? 1 : 0);
-
-    slotsStruct[range][ctx][day][timeKey] = {
-      person,
-      participantScheduled,
-      participantCount
-    };
-  }
-
-  if (unmappedKeys.length) {
-    // helpful debug output — safe to leave in while testing
-    console.warn("applyWeekFromBackend: unmapped backend slot keys (showing up to 50):", unmappedKeys.slice(0,50));
-  }
-
-  saveCache();
-}
-
-  if (unmappedKeys.length) {
-    // Helpful console output for debugging — remove or comment out in production if noisy
-    console.warn("applyWeekFromBackend: some backend slot keys couldn't be mapped to frontend TIMES:", unmappedKeys.slice(0,50));
-  }
-
-  // persist and return
-  saveCache();
-}
-
+  // Single, correct applyWeekFromBackend
   function applyWeekFromBackend(data){
+    // data expected: { scopeKey, slots: { "range::ctx::day::time": { person, participantScheduled, participantCount } } }
     const sKey = data.scopeKey;
     ensureLocalScopeStructure(sKey);
 
@@ -1151,31 +995,22 @@ function applyWeekFromBackend(data){
       return dayObj;
     };
 
+    // Reset scope to clean slate
     slotsStruct.weekdays.ABC = makeSlots(WEEKDAYS);
     slotsStruct.weekdays.HF  = makeSlots(WEEKDAYS);
     slotsStruct.weekend.ABC  = makeSlots(WEEKEND);
     slotsStruct.weekend.HF   = makeSlots(WEEKEND);
 
-    // robustly apply slots from backend, allowing for varied time key formats
     const flat = data.slots || {};
     const unmappedKeys = [];
-    for (const k of Object.keys(flat)) {
-      // backend key format: "range::ctx::day::time"
-      const parts = k.split("::");
-      if (parts.length !== 4) {
-        // unexpected format, record and skip
-        unmappedKeys.push(k);
-        continue;
-      }
-      const [range, ctx, day, timeRaw] = parts;
-      // normalize the time label into our internal TIMES key
-      const timeKey = normalizeToInternalTimeKey(timeRaw);
 
-      if (!timeKey) {
-        // keep the raw key for debugging and skip
-        unmappedKeys.push(k);
-        continue;
-      }
+    for (const k of Object.keys(flat)) {
+      const parts = k.split("::");
+      if (parts.length !== 4) { unmappedKeys.push(k); continue; }
+      const [range, ctx, day, timeRaw] = parts;
+
+      const timeKey = normalizeToInternalTimeKey(timeRaw);
+      if (!timeKey) { unmappedKeys.push(k); continue; }
 
       if (
         !slotsStruct[range] ||
@@ -1183,31 +1018,30 @@ function applyWeekFromBackend(data){
         !slotsStruct[range][ctx][day] ||
         !slotsStruct[range][ctx][day][timeKey]
       ) {
-        // structure doesn't match expected (range/ctx/day missing)
         unmappedKeys.push(k);
         continue;
       }
 
-      // apply server-provided values (ensure numeric participantCount)
+      const rawRec = flat[k] || {};
+      const person = String(rawRec.person || "");
+      const participantScheduled = !!rawRec.participantScheduled;
+      const participantCount = Number.isFinite(Number(rawRec.participantCount)) ? Number(rawRec.participantCount) : (participantScheduled ? 1 : 0);
+
       slotsStruct[range][ctx][day][timeKey] = {
-        person: flat[k].person || "",
-        participantScheduled: !!flat[k].participantScheduled,
-        participantCount: Number(flat[k].participantCount || 0)
+        person,
+        participantScheduled,
+        participantCount
       };
     }
 
     if (unmappedKeys.length) {
-      // Helpful console output for debugging — remove or comment out in production if noisy
-      console.warn("applyWeekFromBackend: some backend slot keys couldn't be mapped to frontend TIMES:", unmappedKeys.slice(0,50));
+      console.warn("applyWeekFromBackend: unmapped keys (up to 50):", unmappedKeys.slice(0,50));
     }
 
-    // persist and return
     saveCache();
   }
 
-  // =============================
   // Rendering
-  // =============================
   function setRange(range){
     activeRange = range;
     ui.tabWeekdays.classList.toggle("active", range === "weekdays");
@@ -1230,11 +1064,8 @@ function applyWeekFromBackend(data){
     const ws = parseISODate(weekStartISO);
     const we = addDays(ws, 6);
     const termLabel = term === "Spring" ? "Jan–Apr (Spring)" : "Sep–Dec (Fall)";
-
-    // Top shows month/day/year per request
     ui.weekBigLabel.innerHTML = `Week: ${toMDY(ws)} → ${toMDY(we)}<small></small>`;
     ui.termBigLabel.textContent = `${year} • ${termLabel}`;
-
     if(state.meta.lastUpdatedAt){
       ui.lastUpdatedLabel.textContent = `${state.meta.lastUpdatedKind || "Updated"} @ ${fmtTime(state.meta.lastUpdatedAt)}`;
     }else{
@@ -1278,11 +1109,9 @@ function applyWeekFromBackend(data){
     const table = document.createElement("table");
     const thead = document.createElement("thead");
     const hr = document.createElement("tr");
-
     const th0 = document.createElement("th");
     th0.textContent = "Time";
     hr.appendChild(th0);
-
     for(const d of days){
       const th = document.createElement("th");
       th.textContent = dayDateLabel(d, weekStartISO);
@@ -1293,20 +1122,17 @@ function applyWeekFromBackend(data){
 
     const tbody = document.createElement("tbody");
 
-    // Use index loop so we can separate internal keys (TIMES) from display labels (TIMES_DISPLAY)
     for (let ti = 0; ti < TIMES.length; ti++) {
-      const time = TIMES[ti];               // internal key used for lookup (must match backend)
-      const displayTime = (typeof TIMES_DISPLAY !== "undefined" && TIMES_DISPLAY[ti]) ? TIMES_DISPLAY[ti] : time; // fall back to internal key if DISPLAY not present
-
+      const time = TIMES[ti];
+      const displayTime = (typeof TIMES_DISPLAY !== "undefined" && TIMES_DISPLAY[ti]) ? TIMES_DISPLAY[ti] : time;
       const tr = document.createElement("tr");
-
       const th = document.createElement("th");
       th.textContent = displayTime;
       tr.appendChild(th);
 
       for(const day of days){
         const td = document.createElement("td");
-        const s = slots[day][time];
+        const s = slots[day][time] || { person: "", participantScheduled:false, participantCount:0 };
 
         const people = splitPeople(s.person);
         const p1 = people[0] || "";
@@ -1338,7 +1164,6 @@ function applyWeekFromBackend(data){
         top.appendChild(who);
         top.appendChild(clearBtn);
 
-        // --- RA row: sel1 + +/- + (optional) sel2 on same line
         const selRow = document.createElement("div");
         selRow.className = "selRow";
 
@@ -1348,7 +1173,6 @@ function applyWeekFromBackend(data){
           opt0.value = "";
           opt0.textContent = "Select RA";
           sel1.appendChild(opt0);
-
           for(const name of state.names){
             const opt = document.createElement("option");
             opt.value = name;
@@ -1364,7 +1188,6 @@ function applyWeekFromBackend(data){
           opt0.value = "";
           opt0.textContent = "Select 2nd RA";
           sel2.appendChild(opt0);
-
           for(const name of state.names){
             const opt = document.createElement("option");
             opt.value = name;
@@ -1439,7 +1262,6 @@ function applyWeekFromBackend(data){
         cb.addEventListener("change", async () => {
           const currentCount = Number(slots[day][time].participantCount || 0);
           const nextCount = cb.checked ? (currentCount === 0 ? 1 : currentCount) : 0;
-
           await saveSlotToBackend({
             range: activeRange,
             context: ctxId,
@@ -1458,7 +1280,6 @@ function applyWeekFromBackend(data){
         label.appendChild(span);
         inline.appendChild(label);
 
-        // small +/- control for manual participantCount adjustments
         const countWrap = document.createElement("div");
         countWrap.className = "inline";
         const minus = document.createElement("button");
@@ -1540,9 +1361,7 @@ function applyWeekFromBackend(data){
     setView(activeView);
   }
 
-  // =============================
-  // Backend-backed ops
-  // =============================
+  // Backend ops
   async function loadNamesFromBackend(){
     const data = await apiPost("listNames", {});
     state.names = Array.isArray(data.names) ? data.names : [];
@@ -1568,12 +1387,11 @@ function applyWeekFromBackend(data){
     markUpdated("Loaded");
     if(!silent) toast("Refreshed from shared Sheet.", "good");
   }
+
+  // Single correct saveSlotToBackend
   async function saveSlotToBackend(slot, { optimistic } = { optimistic: true }){
     const { year, term, weekStartISO, yourName } = state.settings;
-
-    // Normalize participantCount to an integer >= 0
     const normalizedParticipantCount = Math.max(0, Number(slot.participantCount || 0));
-
     const payload = {
       year, term, weekStartISO,
       range: slot.range,
@@ -1586,7 +1404,6 @@ function applyWeekFromBackend(data){
       updatedBy: (yourName || "").trim()
     };
 
-    // optimistic local update: keep frontend in sync immediately
     if(optimistic){
       const s = currentLocalSlots();
       if (s && s[slot.range] && s[slot.range][slot.context] && s[slot.range][slot.context][slot.day]) {
@@ -1613,22 +1430,7 @@ function applyWeekFromBackend(data){
     }
   }
 
-    pendingSaves++;
-    try{
-      await apiPost("saveSlot", payload);
-      setBackendStatus(true);
-      markUpdated("Saved");
-    }catch(e){
-      setBackendStatus(false);
-      toast(`Save failed: ${e.message}. (Hit Refresh after unblocking.)`, "bad");
-    }finally{
-      pendingSaves = Math.max(0, pendingSaves - 1);
-    }
-  }
-
-  // =============================
-  // Week navigation
-  // =============================
+  // Week navigation & admin & export/import (same as before)...
   function shiftWeek(deltaWeeks){
     const { year, term } = state.settings;
     let ws = parseISODate(state.settings.weekStartISO);
@@ -1638,25 +1440,18 @@ function applyWeekFromBackend(data){
     saveCache();
     loadWeekFromBackend().catch(e => toast(`Load failed: ${e.message}`, "bad"));
   }
-
   function jumpToCurrentWeek(){
     const now = new Date();
     const { year, term } = state.settings;
-
     const wsNow = clampWeekStartToTerm(mondayOfWeek(now), year, term);
     state.settings.weekStartISO = toISODate(wsNow);
     saveCache();
     loadWeekFromBackend().catch(e => toast(`Load failed: ${e.message}`, "bad"));
   }
-
-  // =============================
-  // Admin
-  // =============================
   function toggleAdminMenu(force){
     const show = (typeof force === "boolean") ? force : !ui.adminMenu.classList.contains("show");
     ui.adminMenu.classList.toggle("show", show);
   }
-
   function populateYearSelect(){
     const now = new Date().getFullYear();
     ui.yearSelect.innerHTML = "";
@@ -1667,27 +1462,22 @@ function applyWeekFromBackend(data){
       ui.yearSelect.appendChild(opt);
     }
   }
-
   function syncAdminFields(){
     ui.yearSelect.value = String(state.settings.year);
     ui.termSelect.value = state.settings.term;
     ui.adminKeyInput.value = state.settings.adminKey || "";
     ui.yourNameInput.value = state.settings.yourName || "";
   }
-
   function applyYearTerm(){
     const year = Number(ui.yearSelect.value);
     const term = ui.termSelect.value;
-
     state.settings.year = year;
     state.settings.term = term;
     state.settings.adminKey = ui.adminKeyInput.value || "";
     state.settings.yourName = ui.yourNameInput.value || "";
-
     let ws = parseISODate(state.settings.weekStartISO);
     ws = clampWeekStartToTerm(mondayOfWeek(ws), year, term);
     state.settings.weekStartISO = toISODate(ws);
-
     saveCache();
     renderAll();
     loadWeekFromBackend().catch(e => toast(`Load failed: ${e.message}`, "bad"));
@@ -1697,7 +1487,6 @@ function applyWeekFromBackend(data){
   async function resetWeek(){
     const ok = confirm("Reset ONLY the current week for this Year/Term (both contexts, weekdays + weekend) in the shared Sheet?");
     if(!ok) return;
-
     const { year, term, weekStartISO } = state.settings;
     const adminKey = ui.adminKeyInput.value || state.settings.adminKey || "";
     try{
@@ -1712,7 +1501,6 @@ function applyWeekFromBackend(data){
   async function resetAll(){
     const ok = confirm("Reset ALL data (names + all schedules) in the shared Sheet?");
     if(!ok) return;
-
     const adminKey = ui.adminKeyInput.value || state.settings.adminKey || "";
     try{
       await apiPost("resetAll", { adminKey });
@@ -1724,9 +1512,6 @@ function applyWeekFromBackend(data){
     }
   }
 
-  // =============================
-  // Export / Import (local snapshot)
-  // =============================
   function downloadText(filename, text){
     const blob = new Blob([text], {type:"application/json"});
     const url = URL.createObjectURL(blob);
@@ -1764,7 +1549,6 @@ function applyWeekFromBackend(data){
         const parsed = JSON.parse(text);
         if(!parsed || typeof parsed !== "object") throw new Error("Invalid JSON.");
         if(!Array.isArray(parsed.names) || !parsed.settings) throw new Error("Missing names/settings.");
-
         state.names = parsed.names;
         state.settings = { ...state.settings, ...parsed.settings };
         state.meta = { ...state.meta, ...(parsed.meta || {}) };
@@ -1773,7 +1557,6 @@ function applyWeekFromBackend(data){
         }
         saveCache();
         renderAll();
-
         await loadNamesFromBackend();
         await loadWeekFromBackend({ silent:true });
         toast("Imported local snapshot and refreshed from backend.", "good");
@@ -1784,9 +1567,6 @@ function applyWeekFromBackend(data){
     input.click();
   }
 
-  // =============================
-  // Auto-refresh
-  // =============================
   function startAutoRefresh(){
     if(autoTimer) clearInterval(autoTimer);
     ui.autoRefreshLabel.textContent = `${Math.round(AUTO_REFRESH_MS/1000)}s`;
@@ -1801,12 +1581,9 @@ function applyWeekFromBackend(data){
     }, AUTO_REFRESH_MS);
   }
 
-  // =============================
   // Wire UI
-  // =============================
   ui.tabWeekdays.addEventListener("click", () => setRange("weekdays"));
   ui.tabWeekend.addEventListener("click",  () => setRange("weekend"));
-
   ui.viewBoth.addEventListener("click", () => setView("both"));
   ui.viewABC.addEventListener("click", () => setView("ABC"));
   ui.viewHF.addEventListener("click",   () => setView("HF"));
@@ -1814,7 +1591,6 @@ function applyWeekFromBackend(data){
   ui.prevWeekBtn.addEventListener("click", () => shiftWeek(-1));
   ui.nextWeekBtn.addEventListener("click", () => shiftWeek(1));
   ui.refreshBtn.addEventListener("click", () => loadWeekFromBackend().catch(e => toast(`Refresh failed: ${e.message}`, "bad")));
-
   ui.addNameBtn.addEventListener("click", async () => {
     const v = ui.nameInput.value;
     ui.nameInput.value = "";
@@ -1822,7 +1598,6 @@ function applyWeekFromBackend(data){
     try { await addNameToBackend(v); }
     catch(e){ toast(`Add failed: ${e.message}`, "bad"); }
   });
-
   ui.nameInput.addEventListener("keydown", async (e) => {
     if(e.key === "Enter"){
       const v = ui.nameInput.value;
@@ -1831,40 +1606,24 @@ function applyWeekFromBackend(data){
       catch(err){ toast(`Add failed: ${err.message}`, "bad"); }
     }
   });
-
   ui.exportBtn.addEventListener("click", exportLocal);
   ui.importBtn.addEventListener("click", importLocal);
-
-  ui.adminBtn.addEventListener("click", () => {
-    syncAdminFields();
-    toggleAdminMenu();
-  });
-
+  ui.adminBtn.addEventListener("click", () => { syncAdminFields(); toggleAdminMenu(); });
   ui.applyTermBtn.addEventListener("click", () => applyYearTerm());
   ui.resetWeekBtn.addEventListener("click", () => resetWeek());
   ui.resetAllBtn.addEventListener("click", () => resetAll());
-
-  ui.yourNameInput.addEventListener("input", () => {
-    state.settings.yourName = ui.yourNameInput.value || "";
-    saveCache();
-  });
-
+  ui.yourNameInput.addEventListener("input", () => { state.settings.yourName = ui.yourNameInput.value || ""; saveCache(); });
   document.addEventListener("click", (e) => {
     const inside = ui.adminMenu.contains(e.target) || ui.adminBtn.contains(e.target);
     if(!inside) toggleAdminMenu(false);
   });
-
   ui.blockerHelpBtn?.addEventListener("click", () => {
     const isShown = ui.blockerHelp.style.display === "block";
     ui.blockerHelp.style.display = isShown ? "none" : "block";
   });
 
-  // =============================
   // Init
-  // =============================
   populateYearSelect();
-
-  // normalize settings weekStart to term bounds
   {
     const { year, term } = state.settings;
     let ws = parseISODate(state.settings.weekStartISO);
@@ -1872,7 +1631,6 @@ function applyWeekFromBackend(data){
     state.settings.weekStartISO = toISODate(ws);
     saveCache();
   }
-
   renderAll();
   startAutoRefresh();
 
