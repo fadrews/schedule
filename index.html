@@ -987,6 +987,69 @@ tbody th {
     return state.cacheSlotsByScope[s];
   }
 
+  // ---------- Helper: normalize backend time labels to frontend internal TIMES keys ----------
+  /**
+  * Accepts a backend time label (various formats) and returns the canonical TIMES key
+  * used by the frontend, e.g. "09:00–10:00". Returns null if it cannot parse.
+  *
+  * Handles inputs such as:
+  *  - "09:00–10:00"
+  *  - "9:00–10:00"
+  *  - "9:00-10:00"
+  *  - "9-10"
+  *  - "09-10"
+  *  - "9–10" (en-dash)
+  *  - "09:00 - 10:00"
+  */
+  function normalizeToInternalTimeKey(raw) {
+    if (!raw && raw !== "") return null;
+    const s = String(raw).trim();
+
+    // If it already matches one of our canonical TIMES exactly, return it
+    for (const t of TIMES) {
+      if (t === s) return t;
+    }
+
+    // Replace common dash variants with a single hyphen for parsing
+    const cleaned = s.replace(/\u2013|\u2014|\u2212/g, "-").replace(/\s+/g, " ").trim();
+    // Try patterns like "HH:MM - HH:MM" or "H - H" or "H:MM-HH:MM" or "H-H"
+    // Extract numbers using regex
+    const mTimeRange = cleaned.match(/(\d{1,2})(?::(\d{2}))?\s*[-]\s*(\d{1,2})(?::(\d{2}))?/);
+    if (!mTimeRange) {
+      // Try also compact like "09-10" (already covered) else fail
+      return null;
+    }
+    let h1 = Number(mTimeRange[1]);
+    let m1 = mTimeRange[2] ? Number(mTimeRange[2]) : 0;
+    let h2 = Number(mTimeRange[3]);
+    let m2 = mTimeRange[4] ? Number(mTimeRange[4]) : 0;
+
+    if (Number.isNaN(h1) || Number.isNaN(h2)) return null;
+    // Normalize hour rollover (if backend used 24h values etc, keep as-is)
+    const pad2 = (n) => String(n).padStart(2, "0");
+    // Build canonical form "HH:00–HH+1:00" only if minutes are 0 or ignored.
+    // We will convert into the exact TIMES format used: "09:00–10:00"
+    const key = `${pad2(h1)}:${pad2(m1)}–${pad2(h2)}:${pad2(m2)}`;
+
+    // If that produced a known TIMES entry, return it.
+    for (const t of TIMES) if (t === key) return t;
+
+    // If backend gave "9-10" (no minutes), try construct as "09:00–10:00" anyway
+    if (m1 === 0 && m2 === 0) {
+      const alt = `${pad2(h1)}:00–${pad2(h2)}:00`;
+      for (const t of TIMES) if (t === alt) return alt;
+    }
+
+    // As a last attempt, try shifting h2 to h1+1 if h2 seems like single hour shorthand (e.g. "9-10")
+    if (m1 === 0 && m2 === 0 && (h2 === h1 + 1 || Math.abs(h2 - h1) === 1)) {
+      const alt2 = `${pad2(h1)}:00–${pad2(h1+1)}:00`;
+      for (const t of TIMES) if (t === alt2) return alt2;
+    }
+
+    // Not recognized
+    return null;
+  }
+
   function applyWeekFromBackend(data){
     const sKey = data.scopeKey;
     ensureLocalScopeStructure(sKey);
@@ -1006,16 +1069,50 @@ tbody th {
     slotsStruct.weekend.ABC  = makeSlots(WEEKEND);
     slotsStruct.weekend.HF   = makeSlots(WEEKEND);
 
+    // robustly apply slots from backend, allowing for varied time key formats
     const flat = data.slots || {};
-    for(const k of Object.keys(flat)){
-      const [range, ctx, day, time] = k.split("::");
-      if(!slotsStruct[range] || !slotsStruct[range][ctx] || !slotsStruct[range][ctx][day] || !slotsStruct[range][ctx][day][time]) continue;
-      slotsStruct[range][ctx][day][time] = {
+    const unmappedKeys = [];
+    for (const k of Object.keys(flat)) {
+      // backend key format: "range::ctx::day::time"
+      const parts = k.split("::");
+      if (parts.length !== 4) {
+        // unexpected format, record and skip
+        unmappedKeys.push(k);
+        continue;
+      }
+      const [range, ctx, day, timeRaw] = parts;
+      // normalize the time label into our internal TIMES key
+      const timeKey = normalizeToInternalTimeKey(timeRaw);
+
+      if (!timeKey) {
+        // keep the raw key for debugging and skip
+        unmappedKeys.push(k);
+        continue;
+      }
+
+      if (
+        !slotsStruct[range] ||
+        !slotsStruct[range][ctx] ||
+        !slotsStruct[range][ctx][day] ||
+        !slotsStruct[range][ctx][day][timeKey]
+      ) {
+        // structure doesn't match expected (range/ctx/day missing)
+        unmappedKeys.push(k);
+        continue;
+      }
+
+      // apply server-provided values (ensure numeric participantCount)
+      slotsStruct[range][ctx][day][timeKey] = {
         person: flat[k].person || "",
         participantScheduled: !!flat[k].participantScheduled,
         participantCount: Number(flat[k].participantCount || 0)
       };
     }
+
+    if (unmappedKeys.length) {
+      // Helpful console output for debugging — remove or comment out in production if noisy
+      console.warn("applyWeekFromBackend: some backend slot keys couldn't be mapped to frontend TIMES:", unmappedKeys.slice(0,50));
+    }    }
     saveCache();
   }
 
