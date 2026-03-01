@@ -408,62 +408,6 @@
       .twoCol.single .panel { max-width: 100%; }
     }
     /* ========== Alignment fix: make topbar and panels share same centered width ========== */
-/* Match main / twoCol max-width so topbar and lower panels align exactly */
-.topbar {
-  max-width: 1200px;  /* same as main */
-  margin: 0 auto;     /* center it */
-  padding-left: 16px; /* align inner content with panels */
-  padding-right: 16px;
-}
-
-/* Ensure the twoCol itself sits at same max width and shares the same horizontal padding
-   so the left edges of the panels line up with the inner content of the topbar. */
-.twoCol {
-  max-width: 1200px;  /* same as main */
-  margin-left: auto;
-  margin-right: auto;
-  padding-left: 16px; /* same inner gutter as topbar */
-  padding-right: 16px;
-  gap: 16px;
-}
-
-/* Make each panel use full available width inside the twoCol padding */
-.panel {
-  width: 100%;
-  box-sizing: border-box;
-  /* keep visual padding inside panel but don't offset overall alignment */
-  padding: 12px 12px; /* slightly narrower horizontal padding so inner table lines up */
-}
-
-/* gridWrap already has padding:8px; keep it but ensure box-sizing respects outer padding */
-.gridWrap { box-sizing: border-box; }
-
-/* Narrow the time column so it doesn't dominate the layout */
-thead th:first-child,
-tbody th {
-  width: 64px;     /* tighter width for Time column */
-  min-width: 56px; /* prevents collapse on small screens */
-  padding: 6px 8px;
-  box-sizing: border-box;
-}
-
-/* If panels are shown single-column, keep them centered and same max width as topbar */
-.twoCol.single {
-  grid-template-columns: 1fr;
-  justify-items: center;
-}
-.twoCol.single .panel {
-  max-width: 1200px;
-  width: 100%;
-}
-
-/* Small responsive tweak so everything remains aligned on narrow screens */
-@media (max-width: 980px) {
-  .topbar, .twoCol, .twoCol.single .panel { max-width: 100%; padding-left: 12px; padding-right: 12px; }
-  thead th:first-child, tbody th { width: 56px; min-width:48px; }
-}
-/* ========== Alignment fix: make topbar and panels share same centered width ========== */
-/* Match main / twoCol max-width so topbar and lower panels align exactly */
 .topbar {
   max-width: 1200px;  /* same as main */
   margin: 0 auto;     /* center it */
@@ -695,6 +639,7 @@ tbody th {
   const TIMES_DISPLAY = [];
   for (let h = 9; h < 17; h++) {
     const pad = (n) => String(n).padStart(2, "0");
+    // Keep en-dash (U+2013) used internally to match backend keys
     TIMES.push(`${pad(h)}:00–${pad(h+1)}:00`);
     TIMES_DISPLAY.push(`${h}-${h+1}`);
   }
@@ -772,21 +717,28 @@ tbody th {
     return out.join(PEOPLE_DELIM);
   }
 
-  // API
+  // -----------------------
+  // Robust API helper
+  // -----------------------
   async function apiPost(action, payload = {}) {
-    const body = JSON.stringify({ action, ...payload });
+    const bodyObj = { action, ...payload };
     const res = await fetch(API_URL, {
       method: "POST",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body
+      headers: { "Content-Type": "application/json; charset=utf-8" },
+      body: JSON.stringify(bodyObj)
     });
 
     const txt = await res.text();
     let data;
-    try { data = JSON.parse(txt); }
-    catch { data = { ok:false, error:"Non-JSON response from backend." }; }
+    try {
+      data = JSON.parse(txt);
+    } catch (err) {
+      throw new Error("Non-JSON response from backend: " + txt);
+    }
 
-    if (!data.ok) throw new Error(data.error || "Backend error");
+    if (!data || data.ok === false) {
+      throw new Error(data && data.error ? data.error : "Unknown backend error");
+    }
     return data;
   }
 
@@ -1388,73 +1340,40 @@ tbody th {
     if(!silent) toast("Refreshed from shared Sheet.", "good");
   }
 
-  // Single correct saveSlotToBackend - replacement
+  // -----------------------
+  // Single correct saveSlotToBackend
+  // -----------------------
   async function saveSlotToBackend(slot, { optimistic } = { optimistic: true }) {
     const { year, term, weekStartISO, yourName } = state.settings;
 
-    // Defensive normalization
+    // Defensive normalization for participantCount
     const normalizedParticipantCount = Math.max(0, Number(slot.participantCount || 0));
-    const normalizedTime = (slot.time || "")
-      .replace(/\u2013|\u2014/g, '-')   // replace en/em dash with hyphen
-      .replace(/\s+/g, '')             // remove spaces like "09:00 - 10:00" -> "09:00-10:00"
-      .trim();
 
-    const payload = {
-      // primary identifying keys
+    // Normalize time *to the internal canonical key* (preserve en-dash)
+    const timeKey = normalizeToInternalTimeKey(slot.time) || String(slot.time || "").trim();
+
+    const payloadSlot = {
       scopeKey: `${year}::${term}::${weekStartISO}`,
       range: slot.range || "",
       context: slot.context || "",
       day: slot.day || "",
-      time: normalizedTime,
-
-      // content fields
+      time: timeKey, // MUST match the same format used in applyWeek/from backend
       person: slot.person || "",
       participantScheduled: !!slot.participantScheduled,
       participantCount: normalizedParticipantCount,
-
-      // metadata
       updatedAtISO: (new Date()).toISOString(),
       updatedBy: (yourName || "").trim()
     };
 
-    // Optional client-side debug log (remove in production)
-    // console.debug("saveSlot payload:", payload);
-
-    // Send wrapped request to Apps Script backend. Backend handler shown earlier expects either
-    // params.action or body.action; using body.action and body.slot here.
-    const body = JSON.stringify({
-      action: "saveSlot",
-      slot: payload
-    });
-
-    const res = await fetch(SERVER_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body
-    });
-
-    // Helpful: capture JSON or fallback to text for error investigation
-    let result;
-    try {
-      result = await res.json();
-    } catch (err) {
-      const txt = await res.text();
-      throw new Error("saveSlot backend returned non-JSON: " + txt);
-    }
-
-    // Optional: return result for optimistic update handling
-    return result;
-  }
-
-    if(optimistic){
+    // optimistic UI update (apply before network)
+    if (optimistic) {
       const s = currentLocalSlots();
-      if (s && s[slot.range] && s[slot.range][slot.context] && s[slot.range][slot.context][slot.day]) {
-        s[slot.range][slot.context][slot.day][slot.time] = {
-          person: payload.person,
-          participantScheduled: payload.participantScheduled,
-          participantCount: payload.participantCount
+      if (s && s[payloadSlot.range] && s[payloadSlot.range][payloadSlot.context] && s[payloadSlot.range][payloadSlot.context][payloadSlot.day]) {
+        const t = payloadSlot.time;
+        s[payloadSlot.range][payloadSlot.context][payloadSlot.day][t] = {
+          person: payloadSlot.person,
+          participantScheduled: payloadSlot.participantScheduled,
+          participantCount: payloadSlot.participantCount
         };
         saveCache();
         renderAll();
@@ -1462,14 +1381,16 @@ tbody th {
     }
 
     pendingSaves++;
-    try{
-      await apiPost("saveSlot", payload);
+    try {
+      await apiPost("saveSlot", { slot: payloadSlot });
       setBackendStatus(true);
       markUpdated("Saved");
-    }catch(e){
+      return { ok: true };
+    } catch (e) {
       setBackendStatus(false);
       toast(`Save failed: ${e.message}. (Hit Refresh after unblocking.)`, "bad");
-    }finally{
+      throw e;
+    } finally {
       pendingSaves = Math.max(0, pendingSaves - 1);
     }
   }
