@@ -529,10 +529,14 @@
   const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri"];
   const WEEKEND  = ["Sat", "Sun"];
 
-  // TIMES: compact hour-only format as requested (e.g., "12-13", "14-15") — no ":00"
+  // TIMES: keep backend/internal keys as "HH:00–HH+1:00" so slot lookups match the Sheet.
+  // TIMES_DISPLAY: compact labels for the UI (e.g. "9-10", "14-15").
   const TIMES = [];
+  const TIMES_DISPLAY = [];
   for (let h = 9; h < 17; h++) {
-    TIMES.push(`${h}-${h+1}`);
+    const pad = (n) => String(n).padStart(2, "0");
+    TIMES.push(`${pad(h)}:00–${pad(h+1)}:00`); // internal key — must match backend
+    TIMES_DISPLAY.push(`${h}-${h+1}`);         // compact label for UI only
   }
 
   const el = (id) => document.getElementById(id);
@@ -933,7 +937,7 @@
 
     for(const d of days){
       const th = document.createElement("th");
-      th.textContent = dayDateLabel(d, weekStartISO); // now Weekday (MM-DD)
+      th.textContent = dayDateLabel(d, weekStartISO);
       hr.appendChild(th);
     }
     thead.appendChild(hr);
@@ -941,11 +945,15 @@
 
     const tbody = document.createElement("tbody");
 
-    for(const time of TIMES){
+    // Use index loop so we can separate internal keys (TIMES) from display labels (TIMES_DISPLAY)
+    for (let ti = 0; ti < TIMES.length; ti++) {
+      const time = TIMES[ti];               // internal key used for lookup (must match backend)
+      const displayTime = (typeof TIMES_DISPLAY !== "undefined" && TIMES_DISPLAY[ti]) ? TIMES_DISPLAY[ti] : time; // fall back to internal key if DISPLAY not present
+
       const tr = document.createElement("tr");
 
       const th = document.createElement("th");
-      th.textContent = time; // now compact e.g., "12-13"
+      th.textContent = displayTime;
       tr.appendChild(th);
 
       for(const day of days){
@@ -1081,8 +1089,6 @@
         cb.type = "checkbox";
         cb.checked = !!s.participantScheduled;
         cb.addEventListener("change", async () => {
-          // when checking: if current participantCount is 0 => set to 1
-          // when unchecking: set participantCount to 0
           const currentCount = Number(slots[day][time].participantCount || 0);
           const nextCount = cb.checked ? (currentCount === 0 ? 1 : currentCount) : 0;
 
