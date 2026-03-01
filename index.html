@@ -11,7 +11,7 @@
       --text: #111827;
       --muted: #6b7280;
       --accent: #2563eb; /* blue accent */
-      --accent2: #60a5fa; /* pale blue for HF */
+      --accent2: #3b82c6; /* darker blue for HF label */
       --good: #047857;
       --bad: #7f1d1d; /* stronger/darker red */
 
@@ -97,18 +97,20 @@
       box-shadow:var(--shadow);
       border-radius:var(--radius);
       padding:12px;
+      width:100%;
+      max-width:100%;
+      box-sizing:border-box;
     }
 
     /* Context-specific panel frames + distinct backgrounds */
     #panelABC{
       border-color: rgba(17,24,39,.06);
-      background: linear-gradient(180deg, #ffffff, #fafafa); /* very slight difference but overall white */
+      background: #ffffff; /* solid white */
     }
+    /* HF: darker solid background, gradient removed as requested */
     #panelHF{
       border-color: rgba(17,24,39,.06);
-      background: linear-gradient(180deg, rgba(228,245,255,0.9), rgba(245,250ff,1)); /* pale pastel */
-      /* fallback solid */
-      background-color: #f0fbff;
+      background-color: #e6f4ff; /* slightly darker pale blue, solid */
     }
 
     .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;}
@@ -182,19 +184,32 @@
 
     .note{font-size:13px;color:var(--muted);margin-top:10px;line-height:1.35;}
 
+    /* === Match bottom panels to top frame width & centering ===
+      main uses max-width:1200px; mirror that here so panels align with topbar */
     .twoCol{
       display:grid;
-      grid-template-columns:1fr 1fr;
+      grid-template-columns: 1fr 1fr;
       gap:16px;
       margin-top:12px;
       width:100%;
+      max-width:1200px; /* match main */
+      margin-left:auto;
+      margin-right:auto;
       justify-content:start;
       align-items:start;
     }
     @media (max-width: 1100px){.twoCol{grid-template-columns:1fr}}
+    .twoCol.single{
+      grid-template-columns: 1fr;
+      justify-items: center;
+    }
     .twoCol.single #panelABC,
     .twoCol.single #panelHF{
       grid-column: 1 / -1;
+    }
+    .twoCol.single .panel{
+      width:100%;
+      max-width:1200px;
     }
 
     .gridWrap{
@@ -213,14 +228,17 @@
       font-size:13px;
       table-layout: fixed;
     }
+    /* Narrow the time column (was 120px). Tweak width as needed. */
     thead th:first-child,
     tbody th{
-      width: 120px; /* time column */
-      padding:8px;
+      width: 78px; /* narrower time column */
+      padding:6px 8px;
       text-align:left;
       vertical-align:top;
       color:var(--muted);
       font-weight:600;
+      min-width:64px;
+      box-sizing:border-box;
     }
     thead th,
     td{
@@ -247,7 +265,7 @@
       box-shadow: 0 2px 8px rgba(17,24,39,.03);
     }
 
-    /* Slight visual difference when participant flag is set (more intense red) */
+    /* Participant flag: stronger red visuals */
     .slot.participant{
       border-color: rgba(127,29,29,.30);
       background: rgba(255,230,230,0.95);
@@ -376,8 +394,19 @@
     .panel .badge { margin-left:6px; }
 
     /* Make table cells appear as a grid by separating with gaps via border-collapse trick:
-       put a thin gutter by using cell background same as container, and slot boxed inside */
+      put a thin gutter by using cell background same as container, and slot boxed inside */
     thead th, tbody th, td { background: transparent; }
+
+    /* Responsive tweak for very narrow screens */
+    @media (max-width: 900px){
+      thead th:first-child,
+      tbody th {
+        width: 64px;
+        padding: 6px 6px;
+      }
+      .twoCol { gap: 12px; max-width: 100%; padding: 0 12px; }
+      .twoCol.single .panel { max-width: 100%; }
+    }
   </style>
 </head>
 
