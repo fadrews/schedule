@@ -1330,14 +1330,27 @@ tbody th {
     renderAll();
   }
 
-  async function loadWeekFromBackend({ silent=false } = {}){
+  async function loadWeekFromBackend({ silent=false } = {}) {
     const { year, term, weekStartISO } = state.settings;
-    const data = await apiPost("loadWeek", { year, term, weekStartISO });
+    const raw = await apiPost("loadWeek", { year, term, weekStartISO });
     setBackendStatus(true);
-    applyWeekFromBackend(data.data);
+
+    // Support both shapes:
+    // 1) { data: { scopeKey, slots: {...} } }
+    // 2) { scopeKey, slots: {...} }
+    const payload = (raw && raw.data) ? raw.data : raw;
+
+    if (!payload || typeof payload !== "object" || !payload.scopeKey) {
+      // Defensive error message so UI shows useful info instead of a cryptic runtime error
+      const msg = "Malformed backend response for loadWeek (missing scopeKey).";
+      console.error(msg, raw);
+      throw new Error(msg);
+    }
+
+    applyWeekFromBackend(payload);
     renderAll();
     markUpdated("Loaded");
-    if(!silent) toast("Refreshed from shared Sheet.", "good");
+    if (!silent) toast("Refreshed from shared Sheet.", "good");
   }
 
   // -----------------------
