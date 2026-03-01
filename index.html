@@ -628,7 +628,7 @@ tbody th {
   // =============================
   // CONFIG
   // =============================
-  const API_URL = "https://script.google.com/macros/s/AKfycbwfNCwtEJmeWsP9bTaa6xXYTLSRWCuXb86An5EemgP1SIAnTYiJLx55MP92m2fArwXv5A/exec";
+  const API_URL = "hhttps://script.google.com/macros/s/AKfycby6AuMpVAyqrlMABeypmis6BAh2A36PMYe_QbjtmikHJ7TlMFuhh1_DiE1truO35PEufg/exec";
   const LOCAL_CACHE_KEY = "abc_lab_schedule_cache_v3_ui";
   const AUTO_REFRESH_MS = 45000; // 45s
 
@@ -1611,6 +1611,9 @@ tbody th {
       renderAll();
     }
   })();
+  // expose debug helpers to the console
+  window.saveSlotToBackend = saveSlotToBackend;
+  window.apiPost = apiPost;
 })();
 </script>
 </body>
