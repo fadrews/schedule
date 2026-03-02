@@ -1457,18 +1457,19 @@ async function loadWeekFromBackend({ silent = false } = {}) {
   // -----------------------
   // Single correct saveSlotToBackend
   // -----------------------
+// Replace existing saveSlotToBackend with this defensive, multi-shape retry implementation
+
+  // Replace existing saveSlotToBackend with this defensive, multi-shape retry implementation
 async function saveSlotToBackend(slot, opts) {
-  // Defensive beginning of saveSlotToBackend — paste at start of that function
-  // normalize opts and default optimistic = true
   opts = (typeof opts === "object" && opts !== null) ? opts : { optimistic: true };
   const optimistic = (opts.optimistic === undefined) ? true : !!opts.optimistic;
-  
-  // ensure state/settings
+
+  // Ensure state/settings
   window.state = window.state || {};
   state.settings = state.settings || {};
-  let { year, term, weekStartISO, yourName } = state.settings || {};
-  
-  // try slot.scopeKey if available
+  let { year, term, weekStartISO } = state.settings || {};
+
+  // try to infer missing pieces from provided slot
   if ((!year || !term || !weekStartISO) && slot && slot.scopeKey) {
     const parts = String(slot.scopeKey).split("::");
     if (parts.length >= 3) {
@@ -1477,9 +1478,8 @@ async function saveSlotToBackend(slot, opts) {
       weekStartISO = weekStartISO || parts.slice(2).join("::");
     }
   }
-  
-  // try global fallback
-  if ((!year || !term || !weekStartISO) && (state && state.scopeKey)) {
+  // fallback to state.scopeKey
+  if ((!year || !term || !weekStartISO) && state && state.scopeKey) {
     const parts = String(state.scopeKey).split("::");
     if (parts.length >= 3) {
       year = year || parts[0];
@@ -1487,8 +1487,7 @@ async function saveSlotToBackend(slot, opts) {
       weekStartISO = weekStartISO || parts.slice(2).join("::");
     }
   }
-  
-  // final fallback (today)
+  // final fallback to today
   if (!year || !term || !weekStartISO) {
     const d = new Date();
     year = year || String(d.getFullYear());
@@ -1496,15 +1495,11 @@ async function saveSlotToBackend(slot, opts) {
     weekStartISO = weekStartISO || d.toISOString().slice(0,10);
     console.warn("saveSlotToBackend: missing year/term/weekStartISO — using fallback", { year, term, weekStartISO });
   }
-  
-  // ensure state.settings updated so subsequent calls see same values
   state.settings.year = year;
   state.settings.term = term;
   state.settings.weekStartISO = weekStartISO;
-  state.settings.yourName = state.settings.yourName || yourName || "";
-  
-  // then proceed to build payloadSlot as before
-  // validate coordinates & normalize time
+
+  // Determine final coordinates & normalize time
   const finalRange = slot.range || slot.r || activeRange || "";
   const finalContext = slot.context || slot.ctx || "";
   const finalDay = slot.day || "";
@@ -1531,12 +1526,13 @@ async function saveSlotToBackend(slot, opts) {
   const participantCount = (typeof slot.participantCount !== "undefined") ? Number(slot.participantCount) : (slot.participantScheduled ? 1 : 0);
   const normalizedParticipantCount = Number.isFinite(participantCount) ? Math.max(0, Math.floor(participantCount)) : (slot.participantScheduled ? 1 : 0);
 
-  const payloadSlot = {
+  // canonical payload object we'll try to save
+  const canonicalSlot = {
     scopeKey: `${year}::${term}::${weekStartISO}`,
     range: finalRange,
     context: finalContext,
     day: finalDay,
-    time: timeKey, // MUST match the same format used in applyWeek/from backend
+    time: timeKey,
     timeRaw: rawTime,
     slotKey: `${finalRange}::${finalContext}::${finalDay}::${timeKey}`,
     person: slot.person || "",
@@ -1546,32 +1542,70 @@ async function saveSlotToBackend(slot, opts) {
     updatedBy: (state.settings.yourName || "").trim()
   };
 
-  // optimistic UI update (apply before network)
+  // OPTIMISTIC UI update
   if (optimistic) {
     const s = currentLocalSlots();
-    if (s && s[payloadSlot.range] && s[payloadSlot.range][payloadSlot.context] && s[payloadSlot.range][payloadSlot.context][payloadSlot.day]) {
-      const t = payloadSlot.time;
-      s[payloadSlot.range][payloadSlot.context][payloadSlot.day][t] = {
-        person: payloadSlot.person,
-        participantScheduled: payloadSlot.participantScheduled,
-        participantCount: payloadSlot.participantCount
+    if (s && s[canonicalSlot.range] && s[canonicalSlot.range][canonicalSlot.context] && s[canonicalSlot.range][canonicalSlot.context][canonicalSlot.day]) {
+      s[canonicalSlot.range][canonicalSlot.context][canonicalSlot.day][canonicalSlot.time] = {
+        person: canonicalSlot.person,
+        participantScheduled: canonicalSlot.participantScheduled,
+        participantCount: canonicalSlot.participantCount
       };
       saveCache();
       renderAll();
     }
   }
 
+  // Try multiple payload shapes if backend rejects
+  const attempts = [
+    { desc: "nested slot object", payload: { slot: canonicalSlot } },
+    { desc: "slot as JSON string", payload: { slot: JSON.stringify(canonicalSlot) } },
+    { desc: "flattened slot fields", payload: Object.assign({}, canonicalSlot) }
+  ];
+
   pendingSaves++;
   try {
-    const resp = await apiPost("saveSlot", { slot: payloadSlot });
-    console.debug("saveSlotToBackend server response:", resp);
-    setBackendStatus(true);
-    markUpdated("Saved");
-    return resp;
-  } catch (e) {
-    setBackendStatus(false);
-    toast(`Save failed: ${e.message}. (Hit Refresh after unblocking.)`, "bad");
-    throw e;
+    for (let i = 0; i < attempts.length; i++) {
+      const attempt = attempts[i];
+      // we always include top-level identifying fields (apiPost will also ensure them)
+      const sendPayload = Object.assign({}, attempt.payload, { year, term, weekStartISO });
+      console.debug(`saveSlotToBackend: attempt ${i+1} (${attempt.desc}) ->`, sendPayload);
+
+      // use apiPost so we keep standard headers & logging; apiPost will attach year/term/weekStartISO as needed
+      let resp;
+      try {
+        resp = await apiPost("saveSlot", sendPayload);
+      } catch (e) {
+        console.warn("saveSlotToBackend: network/apiPost error on attempt", i+1, e);
+        // if network error, surface and rethrow after rollback
+        throw e;
+      }
+
+      console.debug(`saveSlotToBackend: server response (attempt ${i+1}):`, resp);
+
+      if (resp && resp.ok === true) {
+        setBackendStatus(true);
+        markUpdated("Saved");
+        return resp;
+      }
+
+      // If server explicitly says missing coordinates, continue to next attempt
+      const errMsg = (resp && resp.error) ? String(resp.error) : (resp && typeof resp === "object" ? JSON.stringify(resp) : String(resp));
+      // If not last attempt, log and retry
+      if (i < attempts.length - 1) {
+        console.warn(`saveSlotToBackend: attempt ${i+1} rejected (${errMsg}); retrying with next payload shape.`);
+        toast(`Save rejected (${attempt.desc}). Retrying...`, "info");
+        // small delay to avoid rapid-fire
+        await new Promise(resolve => setTimeout(resolve, 250));
+        continue;
+      } else {
+        // last attempt failed -> surface error and rollback
+        toast(`Save failed: ${errMsg}`, "bad");
+        // reload authoritative state to rollback optimistic changes
+        try { await loadWeekFromBackend({ silent: true }); } catch(_) {}
+        throw new Error(`Save failed after retries: ${errMsg}`);
+      }
+    }
   } finally {
     pendingSaves = Math.max(0, pendingSaves - 1);
   }
@@ -1803,3 +1837,4 @@ async function saveSlotToBackend(slot, opts) {
 </body>
 
 </html>
+
