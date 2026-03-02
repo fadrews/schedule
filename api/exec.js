@@ -1,4 +1,5 @@
 // /api/exec.js (Node runtime)
+console.log('APPS_SCRIPT_WEBAPP_URL=', process.env.APPS_SCRIPT_WEBAPP_URL);
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
