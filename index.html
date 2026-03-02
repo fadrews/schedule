@@ -5,500 +5,66 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>ABC Lab Schedule (Sheets)</title>
   <style>
+    /* (Same CSS as before) */
     :root{
-      /* Light palette (white background, dark text) */
-      --bg: #ffffff;
-      --text: #111827;
-      --muted: #6b7280;
-      --accent: #2563eb; /* blue accent */
-      --accent2: #3b82c6; /* darker blue for HF label */
-      --good: #047857;
-      --bad: #7f1d1d; /* stronger/darker red */
-
-      --panel: #ffffff;
-      --panel2: #f8fafc;
-      --border: rgba(17,24,39,.08);
-      --border2: rgba(17,24,39,.06);
-
-      --shadow: 0 6px 18px rgba(17,24,39,.06);
-      --radius:10px;
-      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      --bg:#ffffff; --text:#111827; --muted:#6b7280; --accent:#2563eb; --accent2:#3b82c6;
+      --good:#047857; --bad:#7f1d1d;
+      --panel:#ffffff; --panel2:#f8fafc; --border:rgba(17,24,39,.08); --border2:rgba(17,24,39,.06);
+      --shadow:0 6px 18px rgba(17,24,39,.06); --radius:10px; --mono: ui-monospace, Menlo, Monaco, monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
     }
-
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;
-      font-family:var(--sans);
-      background: var(--bg);
-      color:var(--text);
-      -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
-      padding:20px;
-    }
-
-    header{padding:8px 0 0;max-width:none;margin:0;}
-    main{padding:8px 0 24px;max-width:1200px;margin:0 auto;}
-
-    .topbar{
-      background: linear-gradient(180deg, rgba(255,255,255,1), rgba(250,250,250,1));
-      border-bottom:1px solid var(--border);
-      box-shadow: 0 6px 18px rgba(17,24,39,.03);
-      padding:14px 16px;
-      border-radius: 10px;
-      margin-bottom:16px;
-    }
-
-    .titlebar{
-      display:flex;
-      gap:14px;
-      align-items:flex-start;
-      justify-content:space-between;
-      flex-wrap:wrap;
-      width:100%;
-    }
-
-    h1{
-      margin:0;
-      font-size:18px;
-      font-weight:700;
-      letter-spacing:.2px;
-      color:var(--text);
-    }
-    .subtitle{
-      margin:6px 0 0;
-      font-size:13px;
-      color:var(--muted);
-      line-height:1.35;
-      max-width:980px;
-    }
-
-    .weekBig{
-      font-size:18px;
-      font-weight:800;
-      letter-spacing:.2px;
-      color:var(--text);
-      line-height:1.1;
-      margin-top:2px;
-      text-align:right;
-    }
-    .weekBig small{
-      display:block;
-      font-size:12px;
-      font-weight:600;
-      color:var(--muted);
-      margin-top:6px;
-    }
-
-    .panel{
-      background: linear-gradient(180deg, var(--panel), var(--panel2));
-      border:1px solid var(--border2);
-      box-shadow:var(--shadow);
-      border-radius:var(--radius);
-      padding:12px;
-      width:100%;
-      max-width:100%;
-      box-sizing:border-box;
-    }
-
-    /* Context-specific panel frames + distinct backgrounds */
-    #panelABC{
-      border-color: rgba(17,24,39,.06);
-      background: #ffffff; /* solid white */
-    }
-    /* HF: darker solid background, gradient removed as requested */
-    #panelHF{
-      border-color: rgba(17,24,39,.06);
-      background-color: #d3ebfd; /* slightly darker pale blue, solid */
-    }
-
-    .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;}
-    .leftControls,.rightControls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
-
-    .tabs{
-      display:inline-flex;
-      background:transparent;
-      border:1px solid rgba(17,24,39,.04);
-      border-radius:999px;
-      padding:4px;
-      gap:4px;
-    }
-    .tab{
-      border:0;color:var(--muted);background:transparent;
-      padding:7px 10px;border-radius:999px;font-size:12px;cursor:pointer;user-select:none;
-    }
-    .tab.active{
-      background: rgba(37,99,235,0.08);
-      color:var(--text);
-      box-shadow: inset 0 0 0 1px rgba(37,99,235,0.06);
-    }
-
-    .btn{
-      border:1px solid rgba(17,24,39,.06);
-      background:transparent;
-      color:var(--text);
-      padding:8px 10px;
-      border-radius:8px;
-      cursor:pointer;
-      font-size:12px;
-    }
-    .btn:hover{border-color:rgba(17,24,39,.12)}
-    .btn.primary{
-      background:var(--accent);
-      color:#fff;
-      border-color:transparent;
-    }
-    .btn.danger{
-      background:transparent;
-      color:var(--bad);
-      border-color:rgba(185,28,28,.08);
-    }
-
-    .field{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
-    input[type="text"], input[type="password"]{
-      background: #fff;
-      color:var(--text);
-      border:1px solid rgba(17,24,39,.06);
-      border-radius:8px;
-      padding:8px 10px;
-      font-size:13px;
-      min-width:220px;
-      outline:none;
-    }
-    input[type="text"]::placeholder, input[type="password"]::placeholder{color:var(--muted)}
-    .compactInput{min-width:180px}
-
-    .chip{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      background:transparent;
-      border-radius:999px;
-      padding:6px 10px;
-      font-size:13px;
-      color:var(--muted);
-      white-space:nowrap;
-    }
-    .chip strong{color:var(--text); font-weight:800}
-
-    .note{font-size:13px;color:var(--muted);margin-top:10px;line-height:1.35;}
-
-    .twoCol{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:16px;
-      margin-top:12px;
-      width:100%;
-      max-width:1200px; /* match main */
-      margin-left:auto;
-      margin-right:auto;
-      justify-content:start;
-      align-items:start;
-    }
-    @media (max-width: 1100px){.twoCol{grid-template-columns:1fr}}
-    .twoCol.single{
-      grid-template-columns: 1fr;
-      justify-items: center;
-    }
-    .twoCol.single #panelABC,
-    .twoCol.single #panelHF{
-      grid-column: 1 / -1;
-    }
-    .twoCol.single .panel{
-      width:100%;
-      max-width:1200px;
-    }
-
-    .gridWrap{
-      overflow:auto;
-      border-radius:12px;
-      border:1px solid rgba(17,24,39,.04);
-      margin-top:12px;
-      background:transparent;
-      width:100%;
-      padding:8px;
-    }
-
-    table{
-      border-collapse:collapse;
-      width:100%;
-      font-size:13px;
-      table-layout: fixed;
-    }
-    /* Narrow the time column (was 120px). Tweak width as needed. */
-    thead th:first-child,
-    tbody th{
-      width: 78px; /* narrower time column */
-      padding:6px 8px;
-      text-align:left;
-      vertical-align:top;
-      color:var(--muted);
-      font-weight:600;
-      min-width:64px;
-      box-sizing:border-box;
-    }
-    thead th,
-    td{
-      overflow:hidden;
-      text-overflow:ellipsis;
-      padding:6px;
-      vertical-align:top;
-      border-collapse:separate;
-    }
-
-    tr{ }
-    td{ min-width:0; padding:8px; }
-
-    /* Boxed matrix look for each schedule "cell" */
-    .slot{
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-      min-height:92px;
-      background: #fff;
-      border:1px solid rgba(17,24,39,.06);
-      border-radius:8px;
-      padding:10px;
-      box-shadow: 0 2px 8px rgba(17,24,39,.03);
-    }
-
-    /* Participant flag: stronger red visuals */
-    .slot.participant{
-      border-color: rgba(127,29,29,.30);
-      background: rgba(255,230,230,0.95);
-    }
-
-    .slotTop{display:flex;gap:8px;align-items:center;justify-content:space-between;}
-    .who{font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:180px;font-size:13px;}
-    .smallBtn{
-      border:1px solid rgba(17,24,39,.06);
-      background:transparent;
-      color:var(--text);
-      padding:6px 8px;
-      border-radius:8px;
-      font-size:12px;
-      cursor:pointer;
-    }
-    .smallBtn:hover{border-color:rgba(17,24,39,.12)}
-
-    .badge{
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-      border-radius:999px;
-      padding:4px 8px;
-      font-size:12px;
-      background:transparent;
-      border:1px solid rgba(17,24,39,.04);
-      color:var(--muted);
-      width:max-content;
-    }
-    .badge.bad{
-      background: rgba(127,29,29,0.18); /* stronger red background */
-      border-color: rgba(127,29,29,0.25);
-      color: var(--bad);
-      font-weight:800;
-    }
-    .badge.good{
-      background: rgba(237,250,236,0.9);
-      border-color: rgba(4,120,87,.08);
-      color:var(--good);
-      font-weight:700;
-    }
-
-    .inline{display:flex; gap:8px; align-items:center; flex-wrap:wrap;}
-    label{display:flex; gap:8px; align-items:center; cursor:pointer; user-select:none; color:var(--muted); font-size:13px;}
-    input[type="checkbox"]{width:16px;height:16px;accent-color:var(--accent);}
-
-    .selRow{
-      display:grid;
-      grid-template-columns: 1fr auto 1fr;
-      gap:8px;
-      align-items:center;
-      width:100%;
-    }
-    .selRow.one{ grid-template-columns: 1fr auto; }
-    .selRow select{
-      width:100%;
-      font-size:13px;
-      border:1px solid rgba(17,24,39,.06);
-      border-radius:8px;
-      padding:8px;
-      background:#fff;
-      color:var(--text);
-    }
-    .addBtn{
-      min-width:34px;
-      padding:6px 8px;
-      text-align:center;
-      border-radius:8px;
-      border:1px solid rgba(17,24,39,.06);
-      background:transparent;
-    }
-
-    .hidden{display:none !important}
-
-    .toast{
-      position:fixed;bottom:16px;right:16px;
-      background:rgba(17,24,39,.96);
-      color:#fff;
-      padding:10px 12px;
-      border-radius:8px;
-      font-size:13px;
-      display:none;
-    }
+    *{box-sizing:border-box} html,body{height:100%}
+    body{margin:0;font-family:var(--sans);background:var(--bg);color:var(--text);padding:20px;}
+    .topbar{background:linear-gradient(180deg,#fff,#fafafa);border-bottom:1px solid var(--border);box-shadow:0 6px 18px rgba(17,24,39,.03);padding:14px 16px;border-radius:10px;margin-bottom:16px;}
+    .titlebar{display:flex;gap:14px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;width:100%;}
+    h1{margin:0;font-size:18px;font-weight:700}
+    .subtitle{margin:6px 0 0;font-size:13px;color:var(--muted);line-height:1.35;max-width:980px}
+    .weekBig{font-size:18px;font-weight:800;color:var(--text);line-height:1.1;margin-top:2px;text-align:right}
+    .weekBig small{display:block;font-size:12px;color:var(--muted);margin-top:6px}
+    .panel{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--border2);box-shadow:var(--shadow);border-radius:var(--radius);padding:12px;width:100%;box-sizing:border-box}
+    .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+    .tabs{display:inline-flex;background:transparent;border:1px solid rgba(17,24,39,.04);border-radius:999px;padding:4px;gap:4px}
+    .tab{border:0;color:var(--muted);background:transparent;padding:7px 10px;border-radius:999px;font-size:12px;cursor:pointer}
+    .tab.active{background:rgba(37,99,235,0.08);color:var(--text)}
+    .btn{border:1px solid rgba(17,24,39,.06);background:transparent;color:var(--text);padding:8px 10px;border-radius:8px;cursor:pointer;font-size:12px}
+    .btn.primary{background:var(--accent);color:#fff;border-color:transparent}
+    .btn.danger{color:var(--bad);border-color:rgba(185,28,28,.08)}
+    input[type="text"], input[type="password"]{background:#fff;color:var(--text);border:1px solid rgba(17,24,39,.06);border-radius:8px;padding:8px 10px;font-size:13px;min-width:220px;outline:none}
+    .chip{display:inline-flex;align-items:center;gap:8px;background:transparent;border-radius:999px;padding:6px 10px;font-size:13px;color:var(--muted)}
+    .note{font-size:13px;color:var(--muted);margin-top:10px;line-height:1.35}
+    .twoCol{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:12px;width:100%;max-width:1200px;margin-left:auto;margin-right:auto;align-items:start}
+    @media (max-width:1100px){.twoCol{grid-template-columns:1fr}}
+    .gridWrap{overflow:auto;border-radius:12px;border:1px solid rgba(17,24,39,.04);margin-top:12px;background:transparent;width:100%;padding:8px}
+    table{border-collapse:collapse;width:100%;font-size:13px;table-layout:fixed}
+    thead th:first-child, tbody th{width:78px;padding:6px 8px;text-align:left;color:var(--muted);font-weight:600;min-width:64px}
+    td{padding:8px}
+    .slot{display:flex;flex-direction:column;gap:8px;min-height:92px;background:#fff;border:1px solid rgba(17,24,39,.06);border-radius:8px;padding:10px}
+    .slot.participant{border-color:rgba(127,29,29,.30);background:rgba(255,230,230,0.95)}
+    .slotTop{display:flex;gap:8px;align-items:center;justify-content:space-between}
+    .who{font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:180px;font-size:13px}
+    .smallBtn{border:1px solid rgba(17,24,39,.06);background:transparent;padding:6px 8px;border-radius:8px;font-size:12px;cursor:pointer}
+    .badge{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:4px 8px;font-size:12px;background:transparent;border:1px solid rgba(17,24,39,.04);color:var(--muted)}
+    .badge.bad{background:rgba(127,29,29,0.18);border-color:rgba(127,29,29,0.25);color:var(--bad);font-weight:800}
+    .badge.good{background:rgba(237,250,236,0.9);border-color:rgba(4,120,87,.08);color:var(--good);font-weight:700}
+    .inline{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .selRow{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;width:100%}
+    .selRow.one{grid-template-columns:1fr auto}
+    .selRow select{width:100%;font-size:13px;border:1px solid rgba(17,24,39,.06);border-radius:8px;padding:8px;background:#fff;color:var(--text)}
+    .addBtn{min-width:34px;padding:6px 8px;text-align:center;border-radius:8px;border:1px solid rgba(17,24,39,.06);background:transparent}
+    .hidden{display:none!important}
+    .toast{position:fixed;bottom:16px;right:16px;background:rgba(17,24,39,.96);color:#fff;padding:10px 12px;border-radius:8px;font-size:13px;display:none}
     .toast.show{display:block}
-
-    .menuWrap{position:relative; display:inline-block;}
-    .menu{
-      position:absolute;right:0;top:42px;width:min(440px, calc(100vw - 24px));
-      background:#fff;
-      border:1px solid rgba(17,24,39,.06);
-      border-radius:10px;
-      box-shadow:var(--shadow);
-      padding:12px;
-      z-index:50;
-      display:none;
-    }
-    .menu.show{display:block}
-    .menu h3{margin:0 0 10px 0;font-size:13px;color:var(--text);}
-    .menuRow{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:10px;}
-    .menuRow > div{flex:1;min-width:160px;}
-    .menu small{color:var(--muted); display:block; line-height:1.35;}
-
-    .statusDot{
-      display:inline-block;width:9px;height:9px;border-radius:999px;background:rgba(17,24,39,.14);
-      margin-right:6px;
-    }
-    .dotGood{background:var(--good)}
-    .dotBad{background:var(--bad)}
-
-    /* Context label: larger and more prominent */
-    #panelABC .chip strong{
-      color: var(--accent);   /* ABC Lab */
-      font-size:16px;
-      text-shadow: none;
-    }
-
-    #panelHF .chip strong{
-      color: var(--accent2);  /* HF Project */
-      font-size:16px;
-      text-shadow: none;
-    }
-
-    /* Panel header spacing tweaks */
-    .panel > .inline { margin-bottom:6px; align-items:center; }
-    .panel .badge { margin-left:6px; }
-
-    /* Make table cells appear as a grid by separating with gaps via border-collapse trick:
-      put a thin gutter by using cell background same as container, and slot boxed inside */
-    thead th, tbody th, td { background: transparent; }
-
-    /* Responsive tweak for very narrow screens */
-    @media (max-width: 900px){
-      thead th:first-child,
-      tbody th {
-        width: 64px;
-        padding: 6px 6px;
-      }
-      .twoCol { gap: 12px; max-width: 100%; padding: 0 12px; }
-      .twoCol.single .panel { max-width: 100%; }
-    }
-    /* ========== Alignment fix: make topbar and panels share same centered width ========== */
-.topbar {
-  max-width: 1200px;  /* same as main */
-  margin: 0 auto;     /* center it */
-  padding-left: 16px; /* align inner content with panels */
-  padding-right: 16px;
-}
-
-/* Ensure the twoCol itself sits at same max width and shares the same horizontal padding
-   so the left edges of the panels line up with the inner content of the topbar. */
-.twoCol {
-  max-width: 1200px;  /* same as main */
-  margin-left: auto;
-  margin-right: auto;
-  padding-left: 16px; /* same inner gutter as topbar */
-  padding-right: 16px;
-  gap: 16px;
-}
-
-/* Make each panel use full available width inside the twoCol padding */
-.panel {
-  width: 100%;
-  box-sizing: border-box;
-  /* keep visual padding inside panel but don't offset overall alignment */
-  padding: 12px 12px; /* slightly narrower horizontal padding so inner table lines up */
-}
-
-/* gridWrap already has padding:8px; keep it but ensure box-sizing respects outer padding */
-.gridWrap { box-sizing: border-box; }
-
-/* Narrow the time column so it doesn't dominate the layout */
-thead th:first-child,
-tbody th {
-  width: 64px;     /* tighter width for Time column */
-  min-width: 56px; /* prevents collapse on small screens */
-  padding: 6px 8px;
-  box-sizing: border-box;
-}
-
-/* If panels are shown single-column, keep them centered and same max width as topbar */
-.twoCol.single {
-  grid-template-columns: 1fr;
-  justify-items: center;
-}
-.twoCol.single .panel {
-  max-width: 1200px;
-  width: 100%;
-}
-
-/* Small responsive tweak so everything remains aligned on narrow screens */
-@media (max-width: 980px) {
-  .topbar, .twoCol, .twoCol.single .panel { max-width: 100%; padding-left: 12px; padding-right: 12px; }
-  thead th:first-child, tbody th { width: 56px; min-width:48px; }
-}
-/* Strong override to ensure HF shows a solid pastel blue when visible */
-#panelHF:not(.hidden) {
-  background-image: none !important;        /* remove gradient/image */
-  background-color: #e6f8ff !important;     /* pastel blue */
-  background-repeat: no-repeat !important;
-  background-position: 0 0 !important;
-  border-color: rgba(59,130,246,0.10) !important;
-  box-shadow: 0 6px 18px rgba(17,24,39,.04) !important;
-  color: var(--text) !important;
-}
-
-/* If there are child elements (chip strong) you want to recolor for contrast */
-#panelHF:not(.hidden) .chip strong {
-  color: #1e6fb8 !important;
-}
-
-/* If your panel uses a gradient rule with higher specificity somewhere else,
-   add this even-more-specific rule as a fallback */
-.twoCol #panelHF:not(.hidden) {
-  background-image: none !important;
-  background-color: #e6f8ff !important;
-}
-
   </style>
 </head>
-
 <body>
   <div class="topbar">
     <div class="titlebar">
       <div>
         <h1>ABC Lab Schedule</h1>
-        <p class="subtitle">
-          Shared schedule backed by Google Sheets. Auto-refresh is enabled. Scope: <strong>Year + Term + Week</strong>.
-        </p>
+        <p class="subtitle">Shared schedule backed by Google Sheets. Auto-refresh is enabled. Scope: <strong>Year + Term + Week</strong>.</p>
       </div>
 
-      <div class="weekBig" id="weekBigLabel">
-        Week: —
-        <small id="termBigLabel">—</small>
-      </div>
+      <div class="weekBig" id="weekBigLabel">Week: — <small id="termBigLabel">—</small></div>
 
       <div class="inline" style="align-items:center;">
         <span class="chip"><span class="statusDot" id="connDot"></span>Backend: <strong id="connLabel">—</strong></span>
@@ -508,47 +74,17 @@ tbody th {
           <button class="btn" id="adminBtn" type="button">Admin ▾</button>
           <div class="menu" id="adminMenu" aria-label="Admin menu">
             <h3>Admin</h3>
-
             <div class="menuRow">
-              <div>
-                <small>Your name (optional; stored locally)</small>
-                <input id="yourNameInput" class="compactInput" type="text" placeholder="e.g., Frank Drews" />
-              </div>
+              <div><small>Your name (optional; stored locally)</small><input id="yourNameInput" class="compactInput" type="text" placeholder="e.g., Frank Drews" /></div>
             </div>
-
             <div class="menuRow">
-              <div>
-                <small>Year</small>
-                <select id="yearSelect"></select>
-              </div>
-              <div>
-                <small>Term</small>
-                <select id="termSelect">
-                  <option value="Spring">Jan–Apr (Spring)</option>
-                  <option value="Fall">Sep–Dec (Fall)</option>
-                </select>
-              </div>
+              <div><small>Year</small><select id="yearSelect"></select></div>
+              <div><small>Term</small><select id="termSelect"><option value="Spring">Jan–Apr (Spring)</option><option value="Fall">Sep–Dec (Fall)</option></select></div>
             </div>
-
-            <div class="menuRow">
-              <div style="flex:1;min-width:220px;">
-                <small>Admin key (only needed for reset if enabled in Apps Script)</small>
-                <input id="adminKeyInput" type="password" placeholder="Admin key (optional)" />
-              </div>
-            </div>
-
-            <div class="menuRow">
-              <button class="btn primary" id="applyTermBtn" type="button">Apply Year/Term</button>
-              <button class="btn danger" id="resetWeekBtn" type="button">Reset this week</button>
-            </div>
-
-            <div class="menuRow" style="margin-bottom:0;">
-              <button class="btn danger" id="resetAllBtn" type="button">Reset ALL data</button>
-            </div>
-
-            <small style="margin-top:10px;">
-              Reset actions modify the shared Sheet. If enabled, enter the Admin key.
-            </small>
+            <div class="menuRow"><div style="flex:1;min-width:220px;"><small>Admin key (only needed for reset if enabled in Apps Script)</small><input id="adminKeyInput" type="password" placeholder="Admin key (optional)" /></div></div>
+            <div class="menuRow"><button class="btn primary" id="applyTermBtn" type="button">Apply Year/Term</button><button class="btn danger" id="resetWeekBtn" type="button">Reset this week</button></div>
+            <div class="menuRow" style="margin-bottom:0;"><button class="btn danger" id="resetAllBtn" type="button">Reset ALL data</button></div>
+            <small style="margin-top:10px;">Reset actions modify the shared Sheet. If enabled, enter the Admin key.</small>
           </div>
         </div>
       </div>
@@ -559,61 +95,31 @@ tbody th {
   <div class="panel">
     <div class="controls">
       <div class="leftControls">
-        <div class="tabs" role="tablist" aria-label="Schedule range">
-          <button class="tab active" id="tab-weekdays" type="button">Weekdays</button>
-          <button class="tab" id="tab-weekend" type="button">Weekend</button>
-        </div>
+        <div class="tabs" role="tablist" aria-label="Schedule range"><button class="tab active" id="tab-weekdays" type="button">Weekdays</button><button class="tab" id="tab-weekend" type="button">Weekend</button></div>
 
-        <div class="tabs" role="tablist" aria-label="Context display">
-          <button class="tab active" id="view-both" type="button">Both</button>
-          <button class="tab" id="view-abc" type="button">ABC only</button>
-          <button class="tab" id="view-hf" type="button">HF only</button>
-        </div>
+        <div class="tabs" role="tablist" aria-label="Context display"><button class="tab active" id="view-both" type="button">Both</button><button class="tab" id="view-abc" type="button">ABC only</button><button class="tab" id="view-hf" type="button">HF only</button></div>
 
-        <div class="inline">
-          <button class="btn" id="prevWeekBtn" type="button">◀ Prev week</button>
-          <button class="btn" id="currentWeekBtn" type="button">Current week</button>
-          <button class="btn" id="nextWeekBtn" type="button">Next week ▶</button>
-          <button class="btn" id="refreshBtn" type="button">Refresh</button>
-        </div>
-
+        <div class="inline"><button class="btn" id="prevWeekBtn" type="button">◀ Prev week</button><button class="btn" id="currentWeekBtn" type="button">Current week</button><button class="btn" id="nextWeekBtn" type="button">Next week ▶</button><button class="btn" id="refreshBtn" type="button">Refresh</button></div>
         <span class="chip">Auto-refresh: <strong id="autoRefreshLabel">—</strong></span>
       </div>
 
       <div class="rightControls">
-        <div class="field">
-          <input id="nameInput" type="text" placeholder="Add RA name and press Enter" />
-          <button class="btn primary" id="addNameBtn" type="button">Add</button>
-        </div>
+        <div class="field"><input id="nameInput" type="text" placeholder="Add RA name and press Enter" /><button class="btn primary" id="addNameBtn" type="button">Add</button></div>
         <button class="btn" id="exportBtn" type="button">Export</button>
         <button class="btn" id="importBtn" type="button">Import</button>
       </div>
     </div>
-
-    <p class="note">
-      Weekdays are <strong>Mon–Fri, 09:00–17:00</strong>. Weekend scheduling is separate.
-      Auto-refresh pulls changes from other users periodically (skips while your saves are pending).
-    </p>
+    <p class="note">Weekdays are <strong>Mon–Fri, 09:00–17:00</strong>. Weekend scheduling is separate. Auto-refresh pulls changes from other users periodically (skips while your saves are pending).</p>
   </div>
 
   <div class="twoCol">
     <section class="panel" id="panelABC">
-      <div class="inline" style="justify-content:space-between;">
-        <div class="inline">
-          <span class="chip">Context: <strong>ABC Lab</strong></span>
-        </div>
-        <span class="badge" id="abcSummary">0 filled</span>
-      </div>
+      <div class="inline" style="justify-content:space-between;"><div class="inline"><span class="chip">Context: <strong>ABC Lab</strong></span></div><span class="badge" id="abcSummary">0 filled</span></div>
       <div class="gridWrap" id="gridWrapABC"></div>
     </section>
 
     <section class="panel" id="panelHF">
-      <div class="inline" style="justify-content:space-between;">
-        <div class="inline">
-          <span class="chip">Context: <strong>HF Project</strong></span>
-        </div>
-        <span class="badge" id="hfSummary">0 filled</span>
-      </div>
+      <div class="inline" style="justify-content:space-between;"><div class="inline"><span class="chip">Context: <strong>HF Project</strong></span></div><span class="badge" id="hfSummary">0 filled</span></div>
       <div class="gridWrap" id="gridWrapHF"></div>
     </section>
   </div>
@@ -623,1218 +129,408 @@ tbody th {
 
 <script>
 (() => {
-  // =============================
   // CONFIG
-  // =============================
   const API_URL = "/api/exec";
   const LOCAL_CACHE_KEY = "abc_lab_schedule_cache_v3_ui";
   const AUTO_REFRESH_MS = 45000; // 45s
-
-  const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri"];
-  const WEEKEND  = ["Sat", "Sun"];
-
-  const TIMES = [];
-  const TIMES_DISPLAY = [];
-  for (let h = 9; h < 17; h++) {
-    const pad = (n) => String(n).padStart(2, "0");
-    // Keep en-dash (U+2013) used internally to match backend keys
-    TIMES.push(`${pad(h)}:00–${pad(h+1)}:00`);
-    TIMES_DISPLAY.push(`${h}-${h+1}`);
-  }
-
-  const el = (id) => document.getElementById(id);
-
-  const ui = {
-    tabWeekdays: el("tab-weekdays"),
-    tabWeekend:  el("tab-weekend"),
-    viewBoth: el("view-both"),
-    viewABC:  el("view-abc"),
-    viewHF:   el("view-hf"),
-    prevWeekBtn: el("prevWeekBtn"),
-    currentWeekBtn: el("currentWeekBtn"),
-    nextWeekBtn: el("nextWeekBtn"),
-    refreshBtn:  el("refreshBtn"),
-    panelABC: el("panelABC"),
-    panelHF:  el("panelHF"),
-    nameInput: el("nameInput"),
-    addNameBtn: el("addNameBtn"),
-    exportBtn: el("exportBtn"),
-    importBtn: el("importBtn"),
-    gridWrapABC: el("gridWrapABC"),
-    gridWrapHF: el("gridWrapHF"),
-    abcSummary: el("abcSummary"),
-    hfSummary: el("hfSummary"),
-    toast: el("toast"),
-    connDot: el("connDot"),
-    connLabel: el("connLabel"),
-    lastUpdatedLabel: el("lastUpdatedLabel"),
-    autoRefreshLabel: el("autoRefreshLabel"),
-    weekBigLabel: el("weekBigLabel"),
-    termBigLabel: el("termBigLabel"),
-    adminBtn: el("adminBtn"),
-    adminMenu: el("adminMenu"),
-    yearSelect: el("yearSelect"),
-    termSelect: el("termSelect"),
-    adminKeyInput: el("adminKeyInput"),
-    yourNameInput: el("yourNameInput"),
-    applyTermBtn: el("applyTermBtn"),
-    resetWeekBtn: el("resetWeekBtn"),
-    resetAllBtn: el("resetAllBtn"),
-    blockerBanner: el("blockerBanner"),
-    backendUrlText: el("backendUrlText"),
-    blockerHelpBtn: el("blockerHelpBtn"),
-    blockerHelp: el("blockerHelp"),
+  const WEEKDAYS = ["Mon","Tue","Wed","Thu","Fri"];
+  const WEEKEND = ["Sat","Sun"];
+  const TIMES = []; const TIMES_DISPLAY = [];
+  for (let h=9; h<17; h++){ const pad=n=>String(n).padStart(2,"0"); TIMES.push(`${pad(h)}:00–${pad(h+1)}:00`); TIMES_DISPLAY.push(`${h}-${h+1}`); }
+  const el = id => document.getElementById(id);
+  const ui = { tabWeekdays: el("tab-weekdays"), tabWeekend: el("tab-weekend"), viewBoth: el("view-both"), viewABC: el("view-abc"), viewHF: el("view-hf"),
+    prevWeekBtn: el("prevWeekBtn"), currentWeekBtn: el("currentWeekBtn"), nextWeekBtn: el("nextWeekBtn"), refreshBtn: el("refreshBtn"),
+    panelABC: el("panelABC"), panelHF: el("panelHF"), nameInput: el("nameInput"), addNameBtn: el("addNameBtn"),
+    exportBtn: el("exportBtn"), importBtn: el("importBtn"), gridWrapABC: el("gridWrapABC"), gridWrapHF: el("gridWrapHF"),
+    abcSummary: el("abcSummary"), hfSummary: el("hfSummary"), toast: el("toast"), connDot: el("connDot"), connLabel: el("connLabel"),
+    lastUpdatedLabel: el("lastUpdatedLabel"), autoRefreshLabel: el("autoRefreshLabel"), weekBigLabel: el("weekBigLabel"),
+    termBigLabel: el("termBigLabel"), adminBtn: el("adminBtn"), adminMenu: el("adminMenu"), yearSelect: el("yearSelect"),
+    termSelect: el("termSelect"), adminKeyInput: el("adminKeyInput"), yourNameInput: el("yourNameInput"),
+    applyTermBtn: el("applyTermBtn"), resetWeekBtn: el("resetWeekBtn"), resetAllBtn: el("resetAllBtn")
   };
 
+  // Utility
+  function toast(msg, kind="info"){ ui.toast.innerHTML = msg; ui.toast.classList.add("show"); ui.toast.style.borderColor = kind==="bad" ? "rgba(185,28,28,.40)" : kind==="good" ? "rgba(4,120,87,.34)" : "rgba(17,24,39,.08)"; clearTimeout(toast._t); toast._t = setTimeout(()=>ui.toast.classList.remove("show"),3000);}
 
-    // Minimal loader shim — inserts state.settings and applies backend payload
-  async function loadWeekFromBackend({ silent = false } = {}) {
-    // Ensure state exists
-    window.state = window.state || {};
-    state.settings = state.settings || { year: null, term: null, weekStartISO: null, yourName: "" };
-  
-    const { year, term, weekStartISO } = state.settings;
-    if (!year || !term || !weekStartISO) {
-      // nothing to load for — caller should set state.settings first
-      console.warn("loadWeekFromBackend: missing year/term/weekStartISO; skipping fetch");
-      return null;
-    }
-  
-    try {
-      const res = await fetch("/api/exec", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "loadWeek", year, term, weekStartISO })
-      });
-      const text = await res.text();
-      const parsed = JSON.parse(text);
-      const payload = (parsed && parsed.data) ? parsed.data : parsed;
-      if (!payload || typeof payload !== "object") {
-        console.warn("loadWeekFromBackend: invalid payload", parsed);
-        return null;
-      }
-  
-      // Set canonical settings.scopeKey if present
-      if (!state.settings.scopeKey && payload.scopeKey) state.settings.scopeKey = payload.scopeKey;
-  
-      // Apply to UI
-      if (typeof applyWeekFromBackend === "function") {
-        applyWeekFromBackend(payload);
-      } else {
-        console.warn("applyWeekFromBackend not found; payload received but not applied");
-      }
-  
-      if (typeof renderAll === "function") renderAll();
-      if (!silent && typeof toast === "function") toast("Refreshed from shared Sheet.", "good");
-      return payload;
-    } catch (err) {
-      console.error("loadWeekFromBackend fetch error:", err);
-      if (typeof setBackendStatus === "function") setBackendStatus(false);
-      if (!silent && typeof toast === "function") toast("Load failed: " + String(err), "bad");
-      throw err;
-    }
-  }
-  
-  function toast(msg, kind="info"){
-    ui.toast.innerHTML = msg;
-    ui.toast.classList.add("show");
-    ui.toast.style.borderColor = kind === "bad"
-      ? "rgba(185,28,28,.40)"
-      : kind === "good"
-        ? "rgba(4,120,87,.34)"
-        : "rgba(17,24,39,.08)";
-    clearTimeout(toast._t);
-    toast._t = setTimeout(() => ui.toast.classList.remove("show"), 3000);
-  }
-
-  // People parsing (2 RAs max)
   const PEOPLE_DELIM = " / ";
-  function splitPeople(s){
-    const raw = String(s || "").trim();
-    if(!raw) return [];
-    return raw.split(PEOPLE_DELIM).map(x => x.trim()).filter(Boolean).slice(0,2);
-  }
-  function joinPeople(arr){
-    const clean = (arr || []).map(x => String(x||"").trim()).filter(Boolean);
-    const out = [];
-    for(const n of clean){
-      if(!out.includes(n)) out.push(n);
-      if(out.length >= 2) break;
-    }
-    return out.join(PEOPLE_DELIM);
-  }
+  function splitPeople(s){ const raw=String(s||"").trim(); if(!raw) return []; return raw.split(PEOPLE_DELIM).map(x=>x.trim()).filter(Boolean).slice(0,2); }
+  function joinPeople(arr){ const clean=(arr||[]).map(x=>String(x||"").trim()).filter(Boolean); const out=[]; for(const n of clean){ if(!out.includes(n)) out.push(n); if(out.length>=2) break; } return out.join(PEOPLE_DELIM); }
 
-  // -----------------------
-  // Robust API helper
-  // -----------------------
+  // Robust apiPost (keeps attaching year/term/weekStartISO if missing)
   async function apiPost(action, payload = {}) {
-    // Ensure state/settings exist
-    window.state = window.state || {};
-    state.settings = state.settings || {};
-  
-    // Ensure minimal identifying fields (try multiple fallbacks)
+    window.state = window.state || {}; state.settings = state.settings || {};
     let { year, term, weekStartISO, yourName } = state.settings;
-  
-    // If payload contains a slot with a scopeKey, try parse
-    const maybeScopeKey = (payload && payload.slot && payload.slot.scopeKey) || state.settings.scopeKey || state.scopeKey;
-    if ((!year || !term || !weekStartISO) && maybeScopeKey) {
+    const maybeScopeKey = (payload && payload.scopeKey) || state.settings.scopeKey || state.scopeKey;
+    if((!year || !term || !weekStartISO) && maybeScopeKey){
       const parts = String(maybeScopeKey).split("::");
-      if (parts.length >= 3) {
-        year = year || parts[0];
-        term = term || parts[1];
-        weekStartISO = weekStartISO || parts.slice(2).join("::");
-      }
+      if(parts.length>=3){ year = year || parts[0]; term = term || parts[1]; weekStartISO = weekStartISO || parts.slice(2).join("::"); }
     }
-  
-    // Final fallback: synthesize from today's date (prevents hard throws)
-    if (!year || !term || !weekStartISO) {
-      const d = new Date();
-      year = year || String(d.getFullYear());
-      term = term || "Unknown";
-      weekStartISO = weekStartISO || d.toISOString().slice(0,10);
-      console.warn("apiPost: missing year/term/weekStartISO, synthesizing fallback", { action, year, term, weekStartISO });
-      // Also write back safe defaults so subsequent calls use them
-      state.settings.year = year;
-      state.settings.term = term;
-      state.settings.weekStartISO = weekStartISO;
+    if(!year || !term || !weekStartISO){
+      const d = new Date(); year = year || String(d.getFullYear()); term = term || "Unknown"; weekStartISO = weekStartISO || d.toISOString().slice(0,10);
+      state.settings.year = year; state.settings.term = term; state.settings.weekStartISO = weekStartISO;
+      console.warn("apiPost used fallback year/term/weekStartISO", {action, year, term, weekStartISO});
     }
-  
-    // Attach the identifying fields to payload where required by backend
-    if (!payload.year) payload.year = year;
-    if (!payload.term) payload.term = term;
-    if (!payload.weekStartISO) payload.weekStartISO = weekStartISO;
-  
-    // Debug log for network-level visibility
-    try {
-      console.debug("apiPost: outgoing", action, JSON.parse(JSON.stringify(payload)));
-    } catch (e) {
-      console.debug("apiPost: outgoing (unserializable payload)", action, payload);
-    }
-  
-    // Standard fetch to proxy
-    const res = await fetch(API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(Object.assign({ action }, payload))
-    });
-  
+    if(!payload.year) payload.year = year; if(!payload.term) payload.term = term; if(!payload.weekStartISO) payload.weekStartISO = weekStartISO;
+    try { console.debug("apiPost outgoing", action, payload); } catch(e){}
+    const res = await fetch(API_URL, { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(Object.assign({ action }, payload)) });
     const text = await res.text();
-    try {
-      return JSON.parse(text);
-    } catch (e) {
-      throw new Error("Invalid JSON from API: " + text);
-    }
+    try { return JSON.parse(text); } catch(e){ throw new Error("Invalid JSON from API: " + text); }
   }
 
-  let backendOk = false;
-  let pendingSaves = 0;
-  let autoTimer = null;
+  let backendOk = false; let pendingSaves = 0; let autoTimer = null;
+  function setBackendStatus(ok){ backendOk = ok; ui.connDot.classList.remove("dotGood","dotBad"); ui.connDot.classList.add(ok ? "dotGood" : "dotBad"); ui.connLabel.textContent = ok ? "Connected" : "Offline"; }
+  async function backendPing(){ try{ await apiPost("ping", {}); setBackendStatus(true); }catch(e){ setBackendStatus(false); throw e; } }
 
-  function setBackendStatus(ok) {
-    backendOk = ok;
-    ui.connDot.classList.remove("dotGood","dotBad");
-    ui.connDot.classList.add(ok ? "dotGood" : "dotBad");
-    ui.connLabel.textContent = ok ? "Connected" : "Offline";
-  }
-
-  async function backendPing() {
-    try {
-      await apiPost("ping", {});
-      setBackendStatus(true);
-    } catch (e) {
-      setBackendStatus(false);
-      throw e;
-    }
-  }
-
-  // Helpers
   function pad2(n){ return String(n).padStart(2,"0"); }
   function toISODate(d){ return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`; }
   function toMDY(d){ return `${pad2(d.getMonth()+1)}/${pad2(d.getDate())}/${d.getFullYear()}`; }
   function toMMDDdash(d){ return `${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`; }
-  function fmtTime(ts){
-    if(!ts) return "—";
-    const d = new Date(ts);
-    return d.toLocaleString(undefined, { year:"numeric", month:"2-digit", day:"2-digit", hour:"2-digit", minute:"2-digit", second:"2-digit" });
-  }
-
-  function markUpdated(kind){
-    state.meta.lastUpdatedAt = Date.now();
-    state.meta.lastUpdatedKind = kind;
-    saveCache();
-    ui.lastUpdatedLabel.textContent = `${kind} @ ${fmtTime(state.meta.lastUpdatedAt)}`;
-  }
-
-  function parseISODate(s){
-    const [y,m,dd] = String(s||"").split("-").map(Number);
-    return new Date(y, (m-1), dd);
-  }
-  function addDays(d, days){
-    const x = new Date(d.getTime());
-    x.setDate(x.getDate()+days);
-    return x;
-  }
-  function mondayOfWeek(d){
-    const x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-    const day = x.getDay();
-    const diff = (day === 0 ? -6 : 1 - day);
-    x.setDate(x.getDate() + diff);
-    x.setHours(0,0,0,0);
-    return x;
-  }
-  function termBounds(year, term){
-    if(term === "Spring"){
-      return { start: new Date(year, 0, 1), end: new Date(year, 3, 30) };
-    }
-    return { start: new Date(year, 8, 1), end: new Date(year, 11, 31) };
-  }
-  function clampWeekStartToTerm(weekStart, year, term){
-    const { start, end } = termBounds(year, term);
-    const minWeek = mondayOfWeek(start);
-    const maxWeek = mondayOfWeek(end);
-    if(weekStart < minWeek) return minWeek;
-    if(weekStart > maxWeek) return maxWeek;
-    return weekStart;
-  }
-  function dayDateLabel(dayAbbrev, weekStartISO){
-    const ws = parseISODate(weekStartISO);
-    const map = { Mon:0, Tue:1, Wed:2, Thu:3, Fri:4, Sat:5, Sun:6 };
-    const d = addDays(ws, map[dayAbbrev]);
-    return `${dayAbbrev} (${toMMDDdash(d)})`;
-  }
+  function fmtTime(ts){ if(!ts) return "—"; const d=new Date(ts); return d.toLocaleString(undefined,{year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit"}); }
+  function parseISODate(s){ const [y,m,dd]=String(s||"").split("-").map(Number); return new Date(y,(m-1),dd); }
+  function addDays(d, days){ const x=new Date(d.getTime()); x.setDate(x.getDate()+days); return x; }
+  function mondayOfWeek(d){ const x=new Date(d.getFullYear(),d.getMonth(),d.getDate()); const day=x.getDay(); const diff=(day===0?-6:1-day); x.setDate(x.getDate()+diff); x.setHours(0,0,0,0); return x; }
+  function termBounds(year, term){ if(term==="Spring") return {start:new Date(year,0,1), end:new Date(year,3,30)}; return {start:new Date(year,8,1), end:new Date(year,11,31)}; }
+  function clampWeekStartToTerm(weekStart, year, term){ const {start,end} = termBounds(year,term); const minWeek = mondayOfWeek(start); const maxWeek = mondayOfWeek(end); if(weekStart < minWeek) return minWeek; if(weekStart > maxWeek) return maxWeek; return weekStart; }
+  function dayDateLabel(dayAbbrev, weekStartISO){ const ws = parseISODate(weekStartISO); const map = {Mon:0,Tue:1,Wed:2,Thu:3,Fri:4,Sat:5,Sun:6}; const d=addDays(ws,map[dayAbbrev]); return `${dayAbbrev} (${toMMDDdash(d)})`; }
 
   // State
-  function defaultState(){
-    const now = new Date();
-    const year = now.getFullYear();
-    const termGuess = (now.getMonth() <= 3) ? "Spring" : (now.getMonth() >= 8 ? "Fall" : "Fall");
-    const ws = clampWeekStartToTerm(mondayOfWeek(now), year, termGuess);
-    return {
-      version: 3,
-      names: [],
-      settings: {
-        year,
-        term: termGuess,
-        weekStartISO: toISODate(ws),
-        adminKey: "",
-        yourName: ""
-      },
-      meta: {
-        lastUpdatedAt: 0,
-        lastUpdatedKind: ""
-      },
-      cacheSlotsByScope: {}
-    };
-  }
-
-  function loadCache(){
-    try{
-      const raw = localStorage.getItem(LOCAL_CACHE_KEY);
-      if(!raw) return defaultState();
-      const parsed = JSON.parse(raw);
-      if(!parsed || typeof parsed !== "object" || !parsed.settings) return defaultState();
-      if(!parsed.cacheSlotsByScope) parsed.cacheSlotsByScope = {};
-      if(!Array.isArray(parsed.names)) parsed.names = [];
-      if(!parsed.meta) parsed.meta = { lastUpdatedAt:0, lastUpdatedKind:"" };
-      if(typeof parsed.settings.yourName !== "string") parsed.settings.yourName = "";
-      return parsed;
-    }catch{
-      return defaultState();
-    }
-  }
-
-  function saveCache(){
-    localStorage.setItem(LOCAL_CACHE_KEY, JSON.stringify(state));
-  }
+  function defaultState(){ const now=new Date(); const year=now.getFullYear(); const termGuess = (now.getMonth()<=3) ? "Spring" : (now.getMonth()>=8 ? "Fall" : "Fall"); const ws = clampWeekStartToTerm(mondayOfWeek(now), year, termGuess); return { version:3, names:[], settings:{ year, term:termGuess, weekStartISO:toISODate(ws), adminKey:"", yourName:"" }, meta:{ lastUpdatedAt:0, lastUpdatedKind:"" }, cacheSlotsByScope:{} }; }
+  function loadCache(){ try{ const raw = localStorage.getItem(LOCAL_CACHE_KEY); if(!raw) return defaultState(); const parsed = JSON.parse(raw); if(!parsed || typeof parsed !== "object" || !parsed.settings) return defaultState(); if(!parsed.cacheSlotsByScope) parsed.cacheSlotsByScope = {}; if(!Array.isArray(parsed.names)) parsed.names = []; if(!parsed.meta) parsed.meta = { lastUpdatedAt:0, lastUpdatedKind:"" }; if(typeof parsed.settings.yourName !== "string") parsed.settings.yourName = ""; return parsed; }catch{ return defaultState(); } }
+  function saveCache(){ localStorage.setItem(LOCAL_CACHE_KEY, JSON.stringify(state)); }
 
   let state = loadCache();
-  let activeRange = "weekdays";
-  let activeView  = "both";
+  let activeRange = "weekdays"; let activeView = "both";
+  function scopeKey(){ const { year, term, weekStartISO } = state.settings; return `${year}::${term}::${weekStartISO}`; }
+  (function snapToCurrentWeekOnOpen(){ const nowWS = mondayOfWeek(new Date()); const wsNowClamped = clampWeekStartToTerm(nowWS, state.settings.year, state.settings.term); const nowISO = toISODate(wsNowClamped); if(state.settings.weekStartISO !== nowISO){ state.settings.weekStartISO = nowISO; saveCache(); } })();
 
-  function scopeKey(){
-    const { year, term, weekStartISO } = state.settings;
-    return `${year}::${term}::${weekStartISO}`;
-  }
+  function ensureLocalScopeStructure(scope){ if(state.cacheSlotsByScope[scope]) return; const makeSlots = (days)=>{ const dayObj={}; for(const d of days){ dayObj[d] = {}; for(const t of TIMES) dayObj[d][t] = { person:"", participantScheduled:false, participantCount:0 }; } return dayObj; }; state.cacheSlotsByScope[scope] = { weekdays: { ABC: makeSlots(WEEKDAYS), HF: makeSlots(WEEKDAYS) }, weekend: { ABC: makeSlots(WEEKEND), HF: makeSlots(WEEKEND) } }; }
+  function currentLocalSlots(){ const s = scopeKey(); ensureLocalScopeStructure(s); return state.cacheSlotsByScope[s]; }
 
-  (function snapToCurrentWeekOnOpen(){
-    const nowWS = mondayOfWeek(new Date());
-    const wsNowClamped = clampWeekStartToTerm(nowWS, state.settings.year, state.settings.term);
-    const nowISO = toISODate(wsNowClamped);
-    if(state.settings.weekStartISO !== nowISO){
-      state.settings.weekStartISO = nowISO;
-      saveCache();
-    }
-  })();
-
-  function ensureLocalScopeStructure(scope){
-    if(state.cacheSlotsByScope[scope]) return;
-    const makeSlots = (days) => {
-      const dayObj = {};
-      for (const d of days) {
-        dayObj[d] = {};
-        for (const t of TIMES) dayObj[d][t] = { person: "", participantScheduled: false, participantCount: 0 };
-      }
-      return dayObj;
-    };
-    state.cacheSlotsByScope[scope] = {
-      weekdays: { ABC: makeSlots(WEEKDAYS), HF: makeSlots(WEEKDAYS) },
-      weekend:  { ABC: makeSlots(WEEKEND),  HF: makeSlots(WEEKEND)  }
-    };
-  }
-
-  function currentLocalSlots(){
-    const s = scopeKey();
-    ensureLocalScopeStructure(s);
-    return state.cacheSlotsByScope[s];
-  }
-
-  // Time normalization helper (unchanged logic)
   function normalizeToInternalTimeKey(raw) {
     if (!raw && raw !== "") return null;
     const s = String(raw).trim();
-    for (const t of TIMES) {
-      if (t === s) return t;
-    }
+    for (const t of TIMES) { if (t === s) return t; }
     const cleaned = s.replace(/\u2013|\u2014|\u2212/g, "-").replace(/\s+/g, " ").trim();
     const mTimeRange = cleaned.match(/(\d{1,2})(?::(\d{2}))?\s*[-]\s*(\d{1,2})(?::(\d{2}))?/);
-    if (!mTimeRange) return null;
+    if(!mTimeRange) return null;
     let h1 = Number(mTimeRange[1]), m1 = mTimeRange[2] ? Number(mTimeRange[2]) : 0;
     let h2 = Number(mTimeRange[3]), m2 = mTimeRange[4] ? Number(mTimeRange[4]) : 0;
-    if (Number.isNaN(h1) || Number.isNaN(h2)) return null;
-    const pad2 = (n) => String(n).padStart(2, "0");
+    if(Number.isNaN(h1) || Number.isNaN(h2)) return null;
+    const pad2 = n => String(n).padStart(2,"0");
     const key = `${pad2(h1)}:${pad2(m1)}–${pad2(h2)}:${pad2(m2)}`;
-    for (const t of TIMES) if (t === key) return t;
-    if (m1 === 0 && m2 === 0) {
-      const alt = `${pad2(h1)}:00–${pad2(h2)}:00`;
-      for (const t of TIMES) if (t === alt) return alt;
-    }
-    if (m1 === 0 && m2 === 0 && (h2 === h1 + 1 || Math.abs(h2 - h1) === 1)) {
-      const alt2 = `${pad2(h1)}:00–${pad2(h1+1)}:00`;
-      for (const t of TIMES) if (t === alt2) return alt2;
-    }
+    for (const t of TIMES) if(t===key) return key;
+    if(m1===0 && m2===0){ const alt = `${pad2(h1)}:00–${pad2(h2)}:00`; for(const t of TIMES) if(t===alt) return alt; }
+    if(m1===0 && m2===0 && (h2===h1+1 || Math.abs(h2-h1)===1)){ const alt2 = `${pad2(h1)}:00–${pad2(h1+1)}:00`; for(const t of TIMES) if(t===alt2) return alt2; }
     return null;
   }
 
-  // Single, correct applyWeekFromBackend
+  // applyWeekFromBackend unchanged
   function applyWeekFromBackend(data){
-    // data expected: { scopeKey, slots: { "range::ctx::day::time": { person, participantScheduled, participantCount } } }
     const sKey = data.scopeKey;
     ensureLocalScopeStructure(sKey);
-
     const slotsStruct = state.cacheSlotsByScope[sKey];
-    const makeSlots = (days) => {
-      const dayObj = {};
-      for (const d of days) {
-        dayObj[d] = {};
-        for (const t of TIMES) dayObj[d][t] = { person: "", participantScheduled: false, participantCount: 0 };
-      }
-      return dayObj;
-    };
-
-    // Reset scope to clean slate
+    const makeSlots = (days)=>{ const dayObj={}; for(const d of days){ dayObj[d]={}; for(const t of TIMES) dayObj[d][t] = { person:"", participantScheduled:false, participantCount:0 }; } return dayObj; };
     slotsStruct.weekdays.ABC = makeSlots(WEEKDAYS);
-    slotsStruct.weekdays.HF  = makeSlots(WEEKDAYS);
-    slotsStruct.weekend.ABC  = makeSlots(WEEKEND);
-    slotsStruct.weekend.HF   = makeSlots(WEEKEND);
-
-    const flat = data.slots || {};
-    const unmappedKeys = [];
-
-    for (const k of Object.keys(flat)) {
+    slotsStruct.weekdays.HF = makeSlots(WEEKDAYS);
+    slotsStruct.weekend.ABC = makeSlots(WEEKEND);
+    slotsStruct.weekend.HF = makeSlots(WEEKEND);
+    const flat = data.slots || {}; const unmappedKeys = [];
+    for(const k of Object.keys(flat)){
       const parts = k.split("::");
-      if (parts.length !== 4) { unmappedKeys.push(k); continue; }
+      if(parts.length !== 4) { unmappedKeys.push(k); continue; }
       const [range, ctx, day, timeRaw] = parts;
-
       const timeKey = normalizeToInternalTimeKey(timeRaw);
-      if (!timeKey) { unmappedKeys.push(k); continue; }
-
-      if (
-        !slotsStruct[range] ||
-        !slotsStruct[range][ctx] ||
-        !slotsStruct[range][ctx][day] ||
-        !slotsStruct[range][ctx][day][timeKey]
-      ) {
-        unmappedKeys.push(k);
-        continue;
-      }
-
+      if(!timeKey){ unmappedKeys.push(k); continue; }
+      if(!slotsStruct[range] || !slotsStruct[range][ctx] || !slotsStruct[range][ctx][day] || !slotsStruct[range][ctx][day][timeKey]){ unmappedKeys.push(k); continue; }
       const rawRec = flat[k] || {};
       const person = String(rawRec.person || "");
       const participantScheduled = !!rawRec.participantScheduled;
       const participantCount = Number.isFinite(Number(rawRec.participantCount)) ? Number(rawRec.participantCount) : (participantScheduled ? 1 : 0);
-
-      slotsStruct[range][ctx][day][timeKey] = {
-        person,
-        participantScheduled,
-        participantCount
-      };
+      slotsStruct[range][ctx][day][timeKey] = { person, participantScheduled, participantCount };
     }
-
-    if (unmappedKeys.length) {
-      console.warn("applyWeekFromBackend: unmapped keys (up to 50):", unmappedKeys.slice(0,50));
-    }
-
+    if(unmappedKeys.length) console.warn("applyWeekFromBackend: unmapped keys (up to 50):", unmappedKeys.slice(0,50));
     saveCache();
   }
 
-  // Rendering
-  function setRange(range){
-    activeRange = range;
-    ui.tabWeekdays.classList.toggle("active", range === "weekdays");
-    ui.tabWeekend.classList.toggle("active",  range === "weekend");
-    renderAll();
-  }
-
-  function setView(view){
-    activeView = view;
-    ui.viewBoth.classList.toggle("active", view === "both");
-    ui.viewABC.classList.toggle("active",  view === "ABC");
-    ui.viewHF.classList.toggle("active",   view === "HF");
-    ui.panelABC.classList.toggle("hidden", view === "HF");
-    ui.panelHF.classList.toggle("hidden",  view === "ABC");
-    document.querySelector(".twoCol")?.classList.toggle("single", view !== "both");
-  }
-
-  function renderTop(){
-    const { year, term, weekStartISO } = state.settings;
-    const ws = parseISODate(weekStartISO);
-    const we = addDays(ws, 6);
-    const termLabel = term === "Spring" ? "Jan–Apr (Spring)" : "Sep–Dec (Fall)";
-    ui.weekBigLabel.innerHTML = `Week: ${toMDY(ws)} → ${toMDY(we)}<small></small>`;
-    ui.termBigLabel.textContent = `${year} • ${termLabel}`;
-    if(state.meta.lastUpdatedAt){
-      ui.lastUpdatedLabel.textContent = `${state.meta.lastUpdatedKind || "Updated"} @ ${fmtTime(state.meta.lastUpdatedAt)}`;
-    }else{
-      ui.lastUpdatedLabel.textContent = "—";
-    }
-    ui.autoRefreshLabel.textContent = `${Math.round(AUTO_REFRESH_MS/1000)}s`;
-  }
-
-  function countFilled(){
-    const slots = currentLocalSlots()[activeRange];
-    const countFor = (ctx) => {
-      let filled = 0, flagged = 0;
-      const days = Object.keys(slots[ctx]);
-      for(const d of days){
-        for(const t of Object.keys(slots[ctx][d])){
-          const s = slots[ctx][d][t];
-          if(s.person) filled++;
-          if(s.participantScheduled) flagged++;
-        }
-      }
-      return { filled, flagged };
-    };
-    return { ABC: countFor("ABC"), HF: countFor("HF") };
-  }
-
-  function renderSummary(){
-    const c = countFilled();
-    ui.abcSummary.className = "badge";
-    ui.hfSummary.className = "badge";
-    ui.abcSummary.textContent = `${c.ABC.filled} filled • ${c.ABC.flagged} participant`;
-    ui.hfSummary.textContent  = `${c.HF.filled} filled • ${c.HF.flagged} participant`;
-    if(c.ABC.flagged) ui.abcSummary.classList.add("bad");
-    if(c.HF.flagged)  ui.hfSummary.classList.add("bad");
-  }
+  // Rendering and helpers (unchanged)
+  function setRange(range){ activeRange = range; ui.tabWeekdays.classList.toggle("active", range==="weekdays"); ui.tabWeekend.classList.toggle("active", range==="weekend"); renderAll(); }
+  function setView(view){ activeView = view; ui.viewBoth.classList.toggle("active", view==="both"); ui.viewABC.classList.toggle("active", view==="ABC"); ui.viewHF.classList.toggle("active", view==="HF"); ui.panelABC.classList.toggle("hidden", view==="HF"); ui.panelHF.classList.toggle("hidden", view==="ABC"); document.querySelector(".twoCol")?.classList.toggle("single", view!=="both"); }
+  function renderTop(){ const { year, term, weekStartISO } = state.settings; const ws = parseISODate(weekStartISO); const we = addDays(ws,6); const termLabel = term==="Spring" ? "Jan–Apr (Spring)" : "Sep–Dec (Fall)"; ui.weekBigLabel.innerHTML = `Week: ${toMDY(ws)} → ${toMDY(we)}<small></small>`; ui.termBigLabel.textContent = `${year} • ${termLabel}`; ui.lastUpdatedLabel.textContent = state.meta.lastUpdatedAt ? `${state.meta.lastUpdatedKind||"Updated"} @ ${fmtTime(state.meta.lastUpdatedAt)}` : "—"; ui.autoRefreshLabel.textContent = `${Math.round(AUTO_REFRESH_MS/1000)}s`; }
+  function countFilled(){ const slots = currentLocalSlots()[activeRange]; const countFor = ctx => { let filled=0, flagged=0; const days = Object.keys(slots[ctx]); for(const d of days){ for(const t of Object.keys(slots[ctx][d])){ const s = slots[ctx][d][t]; if(s.person) filled++; if(s.participantScheduled) flagged++; } } return { filled, flagged }; }; return { ABC: countFor("ABC"), HF: countFor("HF") }; }
+  function renderSummary(){ const c=countFilled(); ui.abcSummary.className="badge"; ui.hfSummary.className="badge"; ui.abcSummary.textContent = `${c.ABC.filled} filled • ${c.ABC.flagged} participant`; ui.hfSummary.textContent = `${c.HF.filled} filled • ${c.HF.flagged} participant`; if(c.ABC.flagged) ui.abcSummary.classList.add("bad"); if(c.HF.flagged) ui.hfSummary.classList.add("bad"); }
 
   function renderContext(ctxId, wrapEl){
-    const days = activeRange === "weekdays" ? WEEKDAYS : WEEKEND;
+    const days = activeRange==="weekdays" ? WEEKDAYS : WEEKEND;
     const slots = currentLocalSlots()[activeRange][ctxId];
     const weekStartISO = state.settings.weekStartISO;
-
     const table = document.createElement("table");
-    const thead = document.createElement("thead");
-    const hr = document.createElement("tr");
-    const th0 = document.createElement("th");
-    th0.textContent = "Time";
-    hr.appendChild(th0);
-    for(const d of days){
-      const th = document.createElement("th");
-      th.textContent = dayDateLabel(d, weekStartISO);
-      hr.appendChild(th);
-    }
-    thead.appendChild(hr);
-    table.appendChild(thead);
-
+    const thead = document.createElement("thead"); const hr = document.createElement("tr");
+    const th0 = document.createElement("th"); th0.textContent = "Time"; hr.appendChild(th0);
+    for(const d of days){ const th = document.createElement("th"); th.textContent = dayDateLabel(d, weekStartISO); hr.appendChild(th); }
+    thead.appendChild(hr); table.appendChild(thead);
     const tbody = document.createElement("tbody");
-
-    for (let ti = 0; ti < TIMES.length; ti++) {
-      const time = TIMES[ti];
-      const displayTime = (typeof TIMES_DISPLAY !== "undefined" && TIMES_DISPLAY[ti]) ? TIMES_DISPLAY[ti] : time;
-      const tr = document.createElement("tr");
-      const th = document.createElement("th");
-      th.textContent = displayTime;
-      tr.appendChild(th);
-
+    for(let ti=0; ti<TIMES.length; ti++){
+      const time = TIMES[ti]; const displayTime = (typeof TIMES_DISPLAY!=="undefined" && TIMES_DISPLAY[ti]) ? TIMES_DISPLAY[ti] : time;
+      const tr = document.createElement("tr"); const th = document.createElement("th"); th.textContent = displayTime; tr.appendChild(th);
       for(const day of days){
         const td = document.createElement("td");
-        const s = slots[day][time] || { person: "", participantScheduled:false, participantCount:0 };
-
-        const people = splitPeople(s.person);
-        const p1 = people[0] || "";
-        const p2 = people[1] || "";
-
-        const slot = document.createElement("div");
-        slot.className = "slot" + (s.participantScheduled ? " participant" : "");
-
-        const top = document.createElement("div");
-        top.className = "slotTop";
-
-        const who = document.createElement("div");
-        who.className = "who";
-        who.title = s.person || "Unassigned";
-        who.textContent = s.person || "—";
-
-        const clearBtn = document.createElement("button");
-        clearBtn.className = "smallBtn";
-        clearBtn.type = "button";
-        clearBtn.textContent = "Clear";
-        clearBtn.disabled = !s.person && !s.participantScheduled;
+        const s = slots[day][time] || { person:"", participantScheduled:false, participantCount:0 };
+        const people = splitPeople(s.person); const p1 = people[0]||""; const p2 = people[1]||"";
+        const slot = document.createElement("div"); slot.className = "slot" + (s.participantScheduled ? " participant" : "");
+        const top = document.createElement("div"); top.className = "slotTop";
+        const who = document.createElement("div"); who.className = "who"; who.title = s.person || "Unassigned"; who.textContent = s.person || "—";
+        const clearBtn = document.createElement("button"); clearBtn.className="smallBtn"; clearBtn.type="button"; clearBtn.textContent="Clear"; clearBtn.disabled = !s.person && !s.participantScheduled;
         clearBtn.addEventListener("click", async () => {
-          await saveSlotToBackend({
-            range: activeRange, context: ctxId, day, time,
-            person: "", participantScheduled: false, participantCount: 0
-          }, { optimistic: true });
+          await saveSlotToBackend({ range: activeRange, context: ctxId, day, time, person:"", participantScheduled:false, participantCount:0 }, { optimistic: true });
         });
+        top.appendChild(who); top.appendChild(clearBtn);
 
-        top.appendChild(who);
-        top.appendChild(clearBtn);
-
-        const selRow = document.createElement("div");
-        selRow.className = "selRow";
-
+        const selRow = document.createElement("div"); selRow.className = "selRow";
         const sel1 = document.createElement("select");
-        {
-          const opt0 = document.createElement("option");
-          opt0.value = "";
-          opt0.textContent = "Select RA";
-          sel1.appendChild(opt0);
-          for(const name of state.names){
-            const opt = document.createElement("option");
-            opt.value = name;
-            opt.textContent = name;
-            sel1.appendChild(opt);
-          }
-        }
+        { const opt0 = document.createElement("option"); opt0.value=""; opt0.textContent="Select RA"; sel1.appendChild(opt0); for(const name of state.names){ const opt=document.createElement("option"); opt.value=name; opt.textContent=name; sel1.appendChild(opt); } }
         sel1.value = p1;
-
         const sel2 = document.createElement("select");
-        {
-          const opt0 = document.createElement("option");
-          opt0.value = "";
-          opt0.textContent = "Select 2nd RA";
-          sel2.appendChild(opt0);
-          for(const name of state.names){
-            const opt = document.createElement("option");
-            opt.value = name;
-            opt.textContent = name;
-            sel2.appendChild(opt);
-          }
-        }
+        { const opt0 = document.createElement("option"); opt0.value=""; opt0.textContent="Select 2nd RA"; sel2.appendChild(opt0); for(const name of state.names){ const opt=document.createElement("option"); opt.value=name; opt.textContent=name; sel2.appendChild(opt); } }
         sel2.value = p2;
-
-        const addBtn = document.createElement("button");
-        addBtn.type = "button";
-        addBtn.className = "smallBtn addBtn";
-
-        function updateRowLayout() {
-          const has2 = !sel2.classList.contains("hidden");
-          selRow.classList.toggle("one", !has2);
-          addBtn.textContent = has2 ? "−" : "+";
-          addBtn.title = has2 ? "Remove second RA" : "Add second RA";
-        }
-
+        const addBtn = document.createElement("button"); addBtn.type="button"; addBtn.className="smallBtn addBtn";
+        function updateRowLayout(){ const has2 = !sel2.classList.contains("hidden"); selRow.classList.toggle("one", !has2); addBtn.textContent = has2 ? "−" : "+"; addBtn.title = has2 ? "Remove second RA" : "Add second RA"; }
         function commitPeople(newP1, newP2){
           const combined = joinPeople([newP1, newP2]);
-          // At top of commitPeople function:
-          if (!window.appReady || !window.appReady.loaded) {
-            console.warn("commitPeople called before app ready — ignoring");
-            return;
-          }
-          return saveSlotToBackend({
-            range: activeRange, context: ctxId, day, time,
-            person: combined,
-            participantScheduled: !!slots[day][time].participantScheduled,
-            participantCount: Number(slots[day][time].participantCount || 0)
-          }, { optimistic: true });
+          if(!window.appReady || !window.appReady.loaded){ console.warn("commitPeople called before app ready — ignoring"); return; }
+          return saveSlotToBackend({ range: activeRange, context: ctxId, day, time, person:combined, participantScheduled: !!slots[day][time].participantScheduled, participantCount: Number(slots[day][time].participantCount || 0) }, { optimistic:true });
         }
+        if(p2) sel2.classList.remove("hidden"); else sel2.classList.add("hidden"); updateRowLayout();
+        addBtn.addEventListener("click", async () => { if(sel2.classList.contains("hidden")){ sel2.classList.remove("hidden"); updateRowLayout(); } else { sel2.value=""; sel2.classList.add("hidden"); updateRowLayout(); await commitPeople(sel1.value,""); } });
+        sel1.addEventListener("change", async ()=>{ if(sel1.value && sel1.value===sel2.value) sel2.value=""; await commitPeople(sel1.value, sel2.value); });
+        sel2.addEventListener("change", async ()=>{ if(sel2.value && sel2.value===sel1.value){ toast("Same RA already selected.","bad"); sel2.value=""; return; } await commitPeople(sel1.value, sel2.value); });
+        selRow.appendChild(sel1); selRow.appendChild(addBtn); selRow.appendChild(sel2);
 
-        if (p2) sel2.classList.remove("hidden");
-        else sel2.classList.add("hidden");
-        updateRowLayout();
+        const inline = document.createElement("div"); inline.className="inline";
+        const label = document.createElement("label"); const cb = document.createElement("input"); cb.type="checkbox"; cb.checked = !!s.participantScheduled;
+        cb.addEventListener("change", async ()=>{ const currentCount = Number(slots[day][time].participantCount || 0); const nextCount = cb.checked ? (currentCount===0 ? 1 : currentCount) : 0; await saveSlotToBackend({ range: activeRange, context: ctxId, day, time, person: slots[day][time].person || "", participantScheduled: cb.checked, participantCount: nextCount }, { optimistic:true }); });
+        const span = document.createElement("span"); span.textContent = "Participant scheduled"; label.appendChild(cb); label.appendChild(span); inline.appendChild(label);
 
-        addBtn.addEventListener("click", async () => {
-          if (sel2.classList.contains("hidden")) {
-            sel2.classList.remove("hidden");
-            updateRowLayout();
-          } else {
-            sel2.value = "";
-            sel2.classList.add("hidden");
-            updateRowLayout();
-            await commitPeople(sel1.value, "");
-          }
-        });
+        const countWrap = document.createElement("div"); countWrap.className="inline";
+        const minus = document.createElement("button"); minus.type="button"; minus.className="smallBtn"; minus.textContent="−";
+        const countSpan = document.createElement("span"); countSpan.textContent = String(s.participantCount || 0); countSpan.style.minWidth="28px"; countSpan.style.display="inline-block"; countSpan.style.textAlign="center";
+        const plus = document.createElement("button"); plus.type="button"; plus.className="smallBtn"; plus.textContent="+";
+        minus.addEventListener("click", async ()=>{ let curr = Number(slots[day][time].participantCount || 0); curr = Math.max(0, curr-1); const checked = curr>0; await saveSlotToBackend({ range: activeRange, context: ctxId, day, time, person: slots[day][time].person || "", participantScheduled: checked, participantCount: curr }, { optimistic:true }); });
+        plus.addEventListener("click", async ()=>{ let curr = Number(slots[day][time].participantCount || 0); curr = curr + 1; const checked = curr>0; await saveSlotToBackend({ range: activeRange, context: ctxId, day, time, person: slots[day][time].person || "", participantScheduled: checked, participantCount: curr }, { optimistic:true }); });
+        countWrap.appendChild(minus); countWrap.appendChild(countSpan); countWrap.appendChild(plus);
 
-        sel1.addEventListener("change", async () => {
-          if (sel1.value && sel1.value === sel2.value) sel2.value = "";
-          await commitPeople(sel1.value, sel2.value);
-        });
+        const badge = document.createElement("div"); badge.className="badge";
+        if(s.participantScheduled){ badge.classList.add("bad"); badge.textContent = `⚠ ${s.participantCount || 1} participant(s)`; } else if(s.person){ badge.classList.add("good"); badge.textContent = "Scheduled"; } else { badge.textContent = "Open"; }
 
-        sel2.addEventListener("change", async () => {
-          if (sel2.value && sel2.value === sel1.value) {
-            toast("Same RA already selected.", "bad");
-            sel2.value = "";
-            return;
-          }
-          await commitPeople(sel1.value, sel2.value);
-        });
-
-        selRow.appendChild(sel1);
-        selRow.appendChild(addBtn);
-        selRow.appendChild(sel2);
-
-        const inline = document.createElement("div");
-        inline.className = "inline";
-
-        const label = document.createElement("label");
-        const cb = document.createElement("input");
-        cb.type = "checkbox";
-        cb.checked = !!s.participantScheduled;
-        cb.addEventListener("change", async () => {
-          const currentCount = Number(slots[day][time].participantCount || 0);
-          const nextCount = cb.checked ? (currentCount === 0 ? 1 : currentCount) : 0;
-          await saveSlotToBackend({
-            range: activeRange,
-            context: ctxId,
-            day,
-            time,
-            person: slots[day][time].person || "",
-            participantScheduled: cb.checked,
-            participantCount: nextCount
-          }, { optimistic: true });
-        });
-
-        const span = document.createElement("span");
-        span.textContent = "Participant scheduled";
-
-        label.appendChild(cb);
-        label.appendChild(span);
-        inline.appendChild(label);
-
-        const countWrap = document.createElement("div");
-        countWrap.className = "inline";
-        const minus = document.createElement("button");
-        minus.type = "button";
-        minus.className = "smallBtn";
-        minus.textContent = "−";
-        const countSpan = document.createElement("span");
-        countSpan.textContent = String(s.participantCount || 0);
-        countSpan.style.minWidth = "28px";
-        countSpan.style.display = "inline-block";
-        countSpan.style.textAlign = "center";
-        const plus = document.createElement("button");
-        plus.type = "button";
-        plus.className = "smallBtn";
-        plus.textContent = "+";
-
-        minus.addEventListener("click", async () => {
-          let curr = Number(slots[day][time].participantCount || 0);
-          curr = Math.max(0, curr - 1);
-          const checked = curr > 0;
-          await saveSlotToBackend({
-            range: activeRange, context: ctxId, day, time,
-            person: slots[day][time].person || "",
-            participantScheduled: checked,
-            participantCount: curr
-          }, { optimistic: true });
-        });
-        plus.addEventListener("click", async () => {
-          let curr = Number(slots[day][time].participantCount || 0);
-          curr = curr + 1;
-          const checked = curr > 0;
-          await saveSlotToBackend({
-            range: activeRange, context: ctxId, day, time,
-            person: slots[day][time].person || "",
-            participantScheduled: checked,
-            participantCount: curr
-          }, { optimistic: true });
-        });
-
-        countWrap.appendChild(minus);
-        countWrap.appendChild(countSpan);
-        countWrap.appendChild(plus);
-
-        const badge = document.createElement("div");
-        badge.className = "badge";
-        if(s.participantScheduled){
-          badge.classList.add("bad");
-          badge.textContent = `⚠ ${s.participantCount || 1} participant(s)`;
-        }else if(s.person){
-          badge.classList.add("good");
-          badge.textContent = "Scheduled";
-        }else{
-          badge.textContent = "Open";
-        }
-
-        slot.appendChild(top);
-        slot.appendChild(selRow);
-        slot.appendChild(inline);
-        slot.appendChild(countWrap);
-        slot.appendChild(badge);
-
-        td.appendChild(slot);
-        tr.appendChild(td);
+        slot.appendChild(top); slot.appendChild(selRow); slot.appendChild(inline); slot.appendChild(countWrap); slot.appendChild(badge);
+        td.appendChild(slot); tr.appendChild(td);
       }
-
       tbody.appendChild(tr);
     }
-
-    table.appendChild(tbody);
-    wrapEl.innerHTML = "";
-    wrapEl.appendChild(table);
+    table.appendChild(tbody); wrapEl.innerHTML=""; wrapEl.appendChild(table);
   }
 
-  function renderAll(){
-    renderTop();
-    renderContext("ABC", ui.gridWrapABC);
-    renderContext("HF", ui.gridWrapHF);
-    renderSummary();
-    setView(activeView);
-  }
+  function renderAll(){ renderTop(); renderContext("ABC", ui.gridWrapABC); renderContext("HF", ui.gridWrapHF); renderSummary(); setView(activeView); }
 
   // Backend ops
-  async function loadNamesFromBackend(){
-    const data = await apiPost("listNames", {});
-    state.names = Array.isArray(data.names) ? data.names : [];
-    saveCache();
+  async function loadNamesFromBackend(){ const data = await apiPost("listNames", {}); state.names = Array.isArray(data.names) ? data.names : []; saveCache(); }
+  async function addNameToBackend(nameRaw){ const name = String(nameRaw||"").trim().replace(/\s+/g," "); if(!name) return; await apiPost("addName", { name }); await loadNamesFromBackend(); markUpdated("Saved"); toast(`Added <strong>${name}</strong>`, "good"); renderAll(); }
+
+  async function loadWeekFromBackend({ silent = false } = {}) {
+    // Ensure state exists
+    window.state = window.state || {};
+    state.settings = state.settings || { year: null, term: null, weekStartISO: null, yourName: "" };
+    const { year, term, weekStartISO } = state.settings;
+    if(!year || !term || !weekStartISO){ console.warn("loadWeekFromBackend: missing year/term/weekStartISO; skipping fetch"); return null; }
+    try {
+      const res = await fetch("/api/exec", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ action:"loadWeek", year, term, weekStartISO }) });
+      const text = await res.text();
+      const parsed = JSON.parse(text);
+      const payload = (parsed && parsed.data) ? parsed.data : parsed;
+      if(!payload || typeof payload !== "object"){ console.warn("loadWeekFromBackend: invalid payload", parsed); return null; }
+      if(!state.settings.scopeKey && payload.scopeKey) state.settings.scopeKey = payload.scopeKey;
+      if(typeof applyWeekFromBackend === "function"){ applyWeekFromBackend(payload); } else { console.warn("applyWeekFromBackend not found; payload received but not applied"); }
+      if(typeof renderAll === "function") renderAll();
+      if(!silent && typeof toast === "function") toast("Refreshed from shared Sheet.","good");
+      return payload;
+    } catch(err) {
+      console.error("loadWeekFromBackend fetch error:", err);
+      if(typeof setBackendStatus === "function") setBackendStatus(false);
+      if(!silent && typeof toast === "function") toast("Load failed: " + String(err), "bad");
+      throw err;
+    }
   }
-
-  async function addNameToBackend(nameRaw){
-    const name = String(nameRaw || "").trim().replace(/\s+/g," ");
-    if(!name) return;
-    await apiPost("addName", { name });
-    await loadNamesFromBackend();
-    markUpdated("Saved");
-    toast(`Added <strong>${name}</strong>`, "good");
-    renderAll();
-  }
-
-// Load week from backend (single canonical implementation)
-async function loadWeekFromBackend({ silent = false } = {}) {
-  const { year, term, weekStartISO } = state.settings;
-  let raw;
-  try {
-    raw = await apiPost("loadWeek", { year, term, weekStartISO });
-  } catch (e) {
-    setBackendStatus(false);
-    toast(`Load failed: ${e.message}`, "bad");
-    return;
-  }
-
-  setBackendStatus(true);
-
-  // Support both shapes: { data: {...} } or top-level {...}
-  let payload = (raw && raw.data) ? raw.data : raw;
-
-  // If backend returned empty object or malformed response, synthesize an empty week payload
-  if (!payload || typeof payload !== "object" || !payload.scopeKey) {
-    const fallbackScopeKey = `${year}::${term}::${weekStartISO}`;
-    console.warn(
-      "loadWeekFromBackend: backend returned empty/malformed payload; using empty fallback",
-      { raw, fallbackScopeKey }
-    );
-    payload = { scopeKey: fallbackScopeKey, slots: {} };
-    // optional: persist this empty-week to the sheet by calling a create-week endpoint
-  }
-
-  applyWeekFromBackend(payload);
-  renderAll();
-  markUpdated("Loaded");
-
-  if (!silent) toast("Refreshed from shared Sheet.", "good");
-}
 
   // -----------------------
-  // Single correct saveSlotToBackend
+  // Updated saveSlotToBackend — send flattened slot fields (backend accepts this)
   // -----------------------
-// Replace existing saveSlotToBackend with this defensive, multi-shape retry implementation
+  async function saveSlotToBackend(slot, opts){
+    opts = (typeof opts==="object" && opts!==null) ? opts : { optimistic:true };
+    const optimistic = (opts.optimistic === undefined) ? true : !!opts.optimistic;
 
-  // Replace existing saveSlotToBackend with this defensive, multi-shape retry implementation
-async function saveSlotToBackend(slot, opts) {
-  opts = (typeof opts === "object" && opts !== null) ? opts : { optimistic: true };
-  const optimistic = (opts.optimistic === undefined) ? true : !!opts.optimistic;
+    // ensure state/settings
+    window.state = window.state || {}; state.settings = state.settings || {};
+    let { year, term, weekStartISO } = state.settings || {};
 
-  // Ensure state/settings
-  window.state = window.state || {};
-  state.settings = state.settings || {};
-  let { year, term, weekStartISO } = state.settings || {};
-
-  // try to infer missing pieces from provided slot
-  if ((!year || !term || !weekStartISO) && slot && slot.scopeKey) {
-    const parts = String(slot.scopeKey).split("::");
-    if (parts.length >= 3) {
-      year = year || parts[0];
-      term = term || parts[1];
-      weekStartISO = weekStartISO || parts.slice(2).join("::");
+    // try to parse scopeKey fallback
+    if((!year || !term || !weekStartISO) && slot && slot.scopeKey){
+      const parts = String(slot.scopeKey).split("::");
+      if(parts.length >=3){ year = year || parts[0]; term = term || parts[1]; weekStartISO = weekStartISO || parts.slice(2).join("::"); }
     }
-  }
-  // fallback to state.scopeKey
-  if ((!year || !term || !weekStartISO) && state && state.scopeKey) {
-    const parts = String(state.scopeKey).split("::");
-    if (parts.length >= 3) {
-      year = year || parts[0];
-      term = term || parts[1];
-      weekStartISO = weekStartISO || parts.slice(2).join("::");
+    if((!year || !term || !weekStartISO) && state && state.scopeKey){
+      const parts = String(state.scopeKey).split("::");
+      if(parts.length>=3){ year = year || parts[0]; term = term || parts[1]; weekStartISO = weekStartISO || parts.slice(2).join("::"); }
     }
-  }
-  // final fallback to today
-  if (!year || !term || !weekStartISO) {
-    const d = new Date();
-    year = year || String(d.getFullYear());
-    term = term || "Unknown";
-    weekStartISO = weekStartISO || d.toISOString().slice(0,10);
-    console.warn("saveSlotToBackend: missing year/term/weekStartISO — using fallback", { year, term, weekStartISO });
-  }
-  state.settings.year = year;
-  state.settings.term = term;
-  state.settings.weekStartISO = weekStartISO;
-
-  // Determine final coordinates & normalize time
-  const finalRange = slot.range || slot.r || activeRange || "";
-  const finalContext = slot.context || slot.ctx || "";
-  const finalDay = slot.day || "";
-  const rawTime = slot.time || slot.timeRaw || "";
-
-  if (!finalRange || !finalContext || !finalDay || !rawTime) {
-    const missing = [];
-    if (!finalRange) missing.push("range");
-    if (!finalContext) missing.push("context");
-    if (!finalDay) missing.push("day");
-    if (!rawTime) missing.push("time");
-    const msg = `Missing slot coordinates: ${missing.join(", ")}`;
-    console.warn("saveSlotToBackend:", msg, slot);
-    throw new Error(msg);
-  }
-
-  const timeKey = normalizeToInternalTimeKey(rawTime) || rawTime;
-  if (!timeKey) {
-    const msg = `Invalid time key: ${rawTime}`;
-    console.warn("saveSlotToBackend:", msg);
-    throw new Error(msg);
-  }
-
-  const participantCount = (typeof slot.participantCount !== "undefined") ? Number(slot.participantCount) : (slot.participantScheduled ? 1 : 0);
-  const normalizedParticipantCount = Number.isFinite(participantCount) ? Math.max(0, Math.floor(participantCount)) : (slot.participantScheduled ? 1 : 0);
-
-  // canonical payload object we'll try to save
-  const canonicalSlot = {
-    scopeKey: `${year}::${term}::${weekStartISO}`,
-    range: finalRange,
-    context: finalContext,
-    day: finalDay,
-    time: timeKey,
-    timeRaw: rawTime,
-    slotKey: `${finalRange}::${finalContext}::${finalDay}::${timeKey}`,
-    person: slot.person || "",
-    participantScheduled: !!slot.participantScheduled,
-    participantCount: normalizedParticipantCount,
-    updatedAtISO: (new Date()).toISOString(),
-    updatedBy: (state.settings.yourName || "").trim()
-  };
-
-  // OPTIMISTIC UI update
-  if (optimistic) {
-    const s = currentLocalSlots();
-    if (s && s[canonicalSlot.range] && s[canonicalSlot.range][canonicalSlot.context] && s[canonicalSlot.range][canonicalSlot.context][canonicalSlot.day]) {
-      s[canonicalSlot.range][canonicalSlot.context][canonicalSlot.day][canonicalSlot.time] = {
-        person: canonicalSlot.person,
-        participantScheduled: canonicalSlot.participantScheduled,
-        participantCount: canonicalSlot.participantCount
-      };
-      saveCache();
-      renderAll();
+    if(!year || !term || !weekStartISO){
+      const d = new Date(); year = year || String(d.getFullYear()); term = term || "Unknown"; weekStartISO = weekStartISO || d.toISOString().slice(0,10);
+      console.warn("saveSlotToBackend: missing year/term/weekStartISO — using fallback", {year,term,weekStartISO});
     }
-  }
+    state.settings.year = year; state.settings.term = term; state.settings.weekStartISO = weekStartISO; state.settings.yourName = state.settings.yourName || "";
 
-  // Try multiple payload shapes if backend rejects
-  const attempts = [
-    { desc: "nested slot object", payload: { slot: canonicalSlot } },
-    { desc: "slot as JSON string", payload: { slot: JSON.stringify(canonicalSlot) } },
-    { desc: "flattened slot fields", payload: Object.assign({}, canonicalSlot) }
-  ];
+    // Build canonical fields
+    const finalRange = slot.range || slot.r || activeRange || "";
+    const finalContext = slot.context || slot.ctx || "";
+    const finalDay = slot.day || "";
+    const rawTime = slot.time || slot.timeRaw || "";
 
-  pendingSaves++;
-  try {
-    for (let i = 0; i < attempts.length; i++) {
-      const attempt = attempts[i];
-      // we always include top-level identifying fields (apiPost will also ensure them)
-      const sendPayload = Object.assign({}, attempt.payload, { year, term, weekStartISO });
-      console.debug(`saveSlotToBackend: attempt ${i+1} (${attempt.desc}) ->`, sendPayload);
+    if(!finalRange || !finalContext || !finalDay || !rawTime){
+      const missing=[]; if(!finalRange) missing.push("range"); if(!finalContext) missing.push("context"); if(!finalDay) missing.push("day"); if(!rawTime) missing.push("time");
+      const msg = `Missing slot coordinates: ${missing.join(", ")}`; console.warn("saveSlotToBackend:", msg, slot); throw new Error(msg);
+    }
 
-      // use apiPost so we keep standard headers & logging; apiPost will attach year/term/weekStartISO as needed
-      let resp;
-      try {
-        resp = await apiPost("saveSlot", sendPayload);
-      } catch (e) {
-        console.warn("saveSlotToBackend: network/apiPost error on attempt", i+1, e);
-        // if network error, surface and rethrow after rollback
-        throw e;
+    const timeKey = normalizeToInternalTimeKey(rawTime) || rawTime;
+    if(!timeKey){ const msg = `Invalid time key: ${rawTime}`; console.warn("saveSlotToBackend:", msg); throw new Error(msg); }
+
+    const participantCount = (typeof slot.participantCount !== "undefined") ? Number(slot.participantCount) : (slot.participantScheduled ? 1 : 0);
+    const normalizedParticipantCount = Number.isFinite(participantCount) ? Math.max(0, Math.floor(participantCount)) : (slot.participantScheduled ? 1 : 0);
+
+    const canonicalSlot = {
+      action: "saveSlot",             // apiPost will also add an action if needed; including here for clarity
+      scopeKey: `${year}::${term}::${weekStartISO}`,
+      range: finalRange,
+      context: finalContext,
+      day: finalDay,
+      time: timeKey,
+      timeRaw: rawTime,
+      slotKey: `${finalRange}::${finalContext}::${finalDay}::${timeKey}`,
+      person: slot.person || "",
+      participantScheduled: !!slot.participantScheduled,
+      participantCount: normalizedParticipantCount,
+      updatedAtISO: (new Date()).toISOString(),
+      updatedBy: (state.settings.yourName || "").trim(),
+      // year/term/weekStartISO will be added by apiPost if missing
+      year, term, weekStartISO
+    };
+
+    // optimistic UI update
+    if(optimistic){
+      const s = currentLocalSlots();
+      if(s && s[canonicalSlot.range] && s[canonicalSlot.range][canonicalSlot.context] && s[canonicalSlot.range][canonicalSlot.context][canonicalSlot.day]){
+        const t = canonicalSlot.time;
+        s[canonicalSlot.range][canonicalSlot.context][canonicalSlot.day][t] = {
+          person: canonicalSlot.person,
+          participantScheduled: canonicalSlot.participantScheduled,
+          participantCount: canonicalSlot.participantCount
+        };
+        saveCache();
+        renderAll();
       }
+    }
 
-      console.debug(`saveSlotToBackend: server response (attempt ${i+1}):`, resp);
+    pendingSaves++;
+    try{
+      // Send flattened payload (top-level fields) — backend accepted this shape in your test
+      // Use apiPost to ensure year/term/weekStartISO headers and logging
+      // Note: apiPost wraps action automatically, but canonicalSlot already contains action — no harm.
+      const payloadToSend = Object.assign({}, canonicalSlot);
+      // Remove top-level action property inside apiPost: apiPost will wrap again; but server accepted top-level fields — we keep them
+      const resp = await apiPost("saveSlot", payloadToSend);
 
-      if (resp && resp.ok === true) {
+      console.debug("saveSlotToBackend: server response ->", resp);
+
+      if(resp && resp.ok === true){
         setBackendStatus(true);
         markUpdated("Saved");
         return resp;
-      }
-
-      // If server explicitly says missing coordinates, continue to next attempt
-      const errMsg = (resp && resp.error) ? String(resp.error) : (resp && typeof resp === "object" ? JSON.stringify(resp) : String(resp));
-      // If not last attempt, log and retry
-      if (i < attempts.length - 1) {
-        console.warn(`saveSlotToBackend: attempt ${i+1} rejected (${errMsg}); retrying with next payload shape.`);
-        toast(`Save rejected (${attempt.desc}). Retrying...`, "info");
-        // small delay to avoid rapid-fire
-        await new Promise(resolve => setTimeout(resolve, 250));
-        continue;
       } else {
-        // last attempt failed -> surface error and rollback
-        toast(`Save failed: ${errMsg}`, "bad");
-        // reload authoritative state to rollback optimistic changes
-        try { await loadWeekFromBackend({ silent: true }); } catch(_) {}
-        throw new Error(`Save failed after retries: ${errMsg}`);
+        // show server error if available
+        const errMsg = resp && resp.error ? resp.error : (resp ? JSON.stringify(resp) : "Unknown error");
+        toast(`Save rejected: ${errMsg}`, "bad");
+        // reload authoritative state to rollback optimistic change
+        try { await loadWeekFromBackend({ silent:true }); } catch(_) {}
+        // throw so callers get rejection
+        throw new Error(`Server rejected save: ${errMsg}`);
       }
-    }
-  } finally {
-    pendingSaves = Math.max(0, pendingSaves - 1);
-  }
-}
-
-  // Week navigation & admin & export/import (same as before)...
-  function shiftWeek(deltaWeeks){
-    const { year, term } = state.settings;
-    let ws = parseISODate(state.settings.weekStartISO);
-    ws = addDays(ws, deltaWeeks * 7);
-    ws = clampWeekStartToTerm(mondayOfWeek(ws), year, term);
-    state.settings.weekStartISO = toISODate(ws);
-    saveCache();
-    loadWeekFromBackend().catch(e => toast(`Load failed: ${e.message}`, "bad"));
-  }
-  function jumpToCurrentWeek(){
-    const now = new Date();
-    const { year, term } = state.settings;
-    const wsNow = clampWeekStartToTerm(mondayOfWeek(now), year, term);
-    state.settings.weekStartISO = toISODate(wsNow);
-    saveCache();
-    loadWeekFromBackend().catch(e => toast(`Load failed: ${e.message}`, "bad"));
-  }
-  function toggleAdminMenu(force){
-    const show = (typeof force === "boolean") ? force : !ui.adminMenu.classList.contains("show");
-    ui.adminMenu.classList.toggle("show", show);
-  }
-  function populateYearSelect(){
-    const now = new Date().getFullYear();
-    ui.yearSelect.innerHTML = "";
-    for(let y = now - 2; y <= now + 4; y++){
-      const opt = document.createElement("option");
-      opt.value = String(y);
-      opt.textContent = String(y);
-      ui.yearSelect.appendChild(opt);
-    }
-  }
-  function syncAdminFields(){
-    ui.yearSelect.value = String(state.settings.year);
-    ui.termSelect.value = state.settings.term;
-    ui.adminKeyInput.value = state.settings.adminKey || "";
-    ui.yourNameInput.value = state.settings.yourName || "";
-  }
-  function applyYearTerm(){
-    const year = Number(ui.yearSelect.value);
-    const term = ui.termSelect.value;
-    state.settings.year = year;
-    state.settings.term = term;
-    state.settings.adminKey = ui.adminKeyInput.value || "";
-    state.settings.yourName = ui.yourNameInput.value || "";
-    let ws = parseISODate(state.settings.weekStartISO);
-    ws = clampWeekStartToTerm(mondayOfWeek(ws), year, term);
-    state.settings.weekStartISO = toISODate(ws);
-    saveCache();
-    renderAll();
-    loadWeekFromBackend().catch(e => toast(`Load failed: ${e.message}`, "bad"));
-    toast(`Applied <strong>${year}</strong> • <strong>${term}</strong>.`, "good");
-  }
-
-  async function resetWeek(){
-    const ok = confirm("Reset ONLY the current week for this Year/Term (both contexts, weekdays + weekend) in the shared Sheet?");
-    if(!ok) return;
-    const { year, term, weekStartISO } = state.settings;
-    const adminKey = ui.adminKeyInput.value || state.settings.adminKey || "";
-    try{
-      await apiPost("resetWeek", { year, term, weekStartISO, adminKey });
-      await loadWeekFromBackend({ silent:true });
-      toast("Reset current week (shared).", "good");
     }catch(e){
-      toast(`Reset failed: ${e.message}`, "bad");
+      setBackendStatus(false);
+      toast(`Save failed: ${e.message}`, "bad");
+      throw e;
+    }finally{
+      pendingSaves = Math.max(0, pendingSaves - 1);
     }
   }
 
-  async function resetAll(){
-    const ok = confirm("Reset ALL data (names + all schedules) in the shared Sheet?");
-    if(!ok) return;
-    const adminKey = ui.adminKeyInput.value || state.settings.adminKey || "";
-    try{
-      await apiPost("resetAll", { adminKey });
-      await loadNamesFromBackend();
-      await loadWeekFromBackend({ silent:true });
-      toast("Reset ALL data (shared).", "good");
-    }catch(e){
-      toast(`Reset failed: ${e.message}`, "bad");
-    }
-  }
+  // Week navigation & admin & export/import
+  function shiftWeek(deltaWeeks){ const { year, term } = state.settings; let ws = parseISODate(state.settings.weekStartISO); ws = addDays(ws, deltaWeeks*7); ws = clampWeekStartToTerm(mondayOfWeek(ws), year, term); state.settings.weekStartISO = toISODate(ws); saveCache(); loadWeekFromBackend().catch(e=>toast(`Load failed: ${e.message}`,"bad")); }
+  function jumpToCurrentWeek(){ const now=new Date(); const { year, term } = state.settings; const wsNow = clampWeekStartToTerm(mondayOfWeek(now), year, term); state.settings.weekStartISO = toISODate(wsNow); saveCache(); loadWeekFromBackend().catch(e=>toast(`Load failed: ${e.message}`,"bad")); }
+  function toggleAdminMenu(force){ const show = (typeof force==="boolean") ? force : !ui.adminMenu.classList.contains("show"); ui.adminMenu.classList.toggle("show", show); }
+  function populateYearSelect(){ const now = new Date().getFullYear(); ui.yearSelect.innerHTML=""; for(let y=now-2;y<=now+4;y++){ const opt=document.createElement("option"); opt.value=String(y); opt.textContent=String(y); ui.yearSelect.appendChild(opt);} }
+  function syncAdminFields(){ ui.yearSelect.value = String(state.settings.year); ui.termSelect.value = state.settings.term; ui.adminKeyInput.value = state.settings.adminKey || ""; ui.yourNameInput.value = state.settings.yourName || ""; }
+  function applyYearTerm(){ const year = Number(ui.yearSelect.value); const term = ui.termSelect.value; state.settings.year = year; state.settings.term = term; state.settings.adminKey = ui.adminKeyInput.value || ""; state.settings.yourName = ui.yourNameInput.value || ""; let ws = parseISODate(state.settings.weekStartISO); ws = clampWeekStartToTerm(mondayOfWeek(ws), year, term); state.settings.weekStartISO = toISODate(ws); saveCache(); renderAll(); loadWeekFromBackend().catch(e=>toast(`Load failed: ${e.message}`,"bad")); toast(`Applied <strong>${year}</strong> • <strong>${term}</strong>.`, "good"); }
 
-  function downloadText(filename, text){
-    const blob = new Blob([text], {type:"application/json"});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-  }
+  async function resetWeek(){ const ok = confirm("Reset ONLY the current week for this Year/Term (both contexts, weekdays + weekend) in the shared Sheet?"); if(!ok) return; const { year, term, weekStartISO } = state.settings; const adminKey = ui.adminKeyInput.value || state.settings.adminKey || ""; try{ await apiPost("resetWeek", { year, term, weekStartISO, adminKey }); await loadWeekFromBackend({ silent:true }); toast("Reset current week (shared).","good"); }catch(e){ toast(`Reset failed: ${e.message}`,"bad"); } }
+  async function resetAll(){ const ok = confirm("Reset ALL data (names + all schedules) in the shared Sheet?"); if(!ok) return; const adminKey = ui.adminKeyInput.value || state.settings.adminKey || ""; try{ await apiPost("resetAll", { adminKey }); await loadNamesFromBackend(); await loadWeekFromBackend({ silent:true }); toast("Reset ALL data (shared).","good"); }catch(e){ toast(`Reset failed: ${e.message}`,"bad"); } }
 
-  function exportLocal(){
-    const payload = {
-      exportedAt: new Date().toISOString(),
-      names: state.names,
-      settings: state.settings,
-      meta: state.meta,
-      cachedScope: scopeKey(),
-      cachedSlots: currentLocalSlots()
-    };
-    downloadText("abc-lab-schedule-local-export.json", JSON.stringify(payload, null, 2));
-    toast("Exported local snapshot.", "good");
-  }
+  function downloadText(filename, text){ const blob = new Blob([text], {type:"application/json"}); const url = URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); }
+  function exportLocal(){ const payload={ exportedAt:new Date().toISOString(), names:state.names, settings:state.settings, meta:state.meta, cachedScope:scopeKey(), cachedSlots: currentLocalSlots() }; downloadText("abc-lab-schedule-local-export.json", JSON.stringify(payload,null,2)); toast("Exported local snapshot.","good"); }
+  async function importLocal(){ const input=document.createElement("input"); input.type="file"; input.accept="application/json"; input.addEventListener("change", async ()=>{ const file = input.files && input.files[0]; if(!file) return; try{ const text = await file.text(); const parsed = JSON.parse(text); if(!parsed || typeof parsed !== "object") throw new Error("Invalid JSON."); if(!Array.isArray(parsed.names) || !parsed.settings) throw new Error("Missing names/settings."); state.names = parsed.names; state.settings = { ...state.settings, ...parsed.settings }; state.meta = { ...state.meta, ...(parsed.meta || {}) }; if(parsed.cachedScope && parsed.cachedSlots) state.cacheSlotsByScope[parsed.cachedScope] = parsed.cachedSlots; saveCache(); renderAll(); await loadNamesFromBackend(); await loadWeekFromBackend({ silent:true }); toast("Imported local snapshot and refreshed from backend.","good"); }catch(e){ toast(`Import failed: ${e.message}`,"bad"); } }); input.click(); }
 
-  async function importLocal(){
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = "application/json";
-    input.addEventListener("change", async () => {
-      const file = input.files && input.files[0];
-      if(!file) return;
-      try{
-        const text = await file.text();
-        const parsed = JSON.parse(text);
-        if(!parsed || typeof parsed !== "object") throw new Error("Invalid JSON.");
-        if(!Array.isArray(parsed.names) || !parsed.settings) throw new Error("Missing names/settings.");
-        state.names = parsed.names;
-        state.settings = { ...state.settings, ...parsed.settings };
-        state.meta = { ...state.meta, ...(parsed.meta || {}) };
-        if(parsed.cachedScope && parsed.cachedSlots){
-          state.cacheSlotsByScope[parsed.cachedScope] = parsed.cachedSlots;
-        }
-        saveCache();
-        renderAll();
-        await loadNamesFromBackend();
-        await loadWeekFromBackend({ silent:true });
-        toast("Imported local snapshot and refreshed from backend.", "good");
-      }catch(e){
-        toast(`Import failed: ${e.message}`, "bad");
-      }
-    });
-    input.click();
-  }
-
-  function startAutoRefresh(){
-    if(autoTimer) clearInterval(autoTimer);
-    ui.autoRefreshLabel.textContent = `${Math.round(AUTO_REFRESH_MS/1000)}s`;
-    autoTimer = setInterval(async () => {
-      if(!backendOk) return;
-      if(pendingSaves > 0) return;
-      try{
-        await loadWeekFromBackend({ silent:true });
-      }catch{
-        setBackendStatus(false);
-      }
-    }, AUTO_REFRESH_MS);
-  }
+  function startAutoRefresh(){ if(autoTimer) clearInterval(autoTimer); ui.autoRefreshLabel.textContent=`${Math.round(AUTO_REFRESH_MS/1000)}s`; autoTimer = setInterval(async ()=>{ if(!backendOk) return; if(pendingSaves>0) return; try{ await loadWeekFromBackend({ silent:true }); }catch{ setBackendStatus(false); } }, AUTO_REFRESH_MS); }
 
   // Wire UI
-  ui.tabWeekdays.addEventListener("click", () => setRange("weekdays"));
-  ui.tabWeekend.addEventListener("click",  () => setRange("weekend"));
-  ui.viewBoth.addEventListener("click", () => setView("both"));
-  ui.viewABC.addEventListener("click", () => setView("ABC"));
-  ui.viewHF.addEventListener("click", () => setView("HF"));
+  ui.tabWeekdays.addEventListener("click", ()=>setRange("weekdays"));
+  ui.tabWeekend.addEventListener("click", ()=>setRange("weekend"));
+  ui.viewBoth.addEventListener("click", ()=>setView("both"));
+  ui.viewABC.addEventListener("click", ()=>setView("ABC"));
+  ui.viewHF.addEventListener("click", ()=>setView("HF"));
   ui.currentWeekBtn.addEventListener("click", jumpToCurrentWeek);
-  ui.prevWeekBtn.addEventListener("click", () => shiftWeek(-1));
-  ui.nextWeekBtn.addEventListener("click", () => shiftWeek(1));
-  ui.refreshBtn.addEventListener("click", () => loadWeekFromBackend().catch(e => toast(`Refresh failed: ${e.message}`, "bad")));
-  ui.addNameBtn.addEventListener("click", async () => {
-    const v = ui.nameInput.value;
-    ui.nameInput.value = "";
-    ui.nameInput.focus();
-    try { await addNameToBackend(v); }
-    catch(e){ toast(`Add failed: ${e.message}`, "bad"); }
-  });
-  ui.nameInput.addEventListener("keydown", async (e) => {
-    if(e.key === "Enter"){
-      const v = ui.nameInput.value;
-      ui.nameInput.value = "";
-      try { await addNameToBackend(v); }
-      catch(err){ toast(`Add failed: ${err.message}`, "bad"); }
-    }
-  });
+  ui.prevWeekBtn.addEventListener("click", ()=>shiftWeek(-1));
+  ui.nextWeekBtn.addEventListener("click", ()=>shiftWeek(1));
+  ui.refreshBtn.addEventListener("click", ()=>loadWeekFromBackend().catch(e=>toast(`Refresh failed: ${e.message}`,"bad")));
+  ui.addNameBtn.addEventListener("click", async ()=>{ const v = ui.nameInput.value; ui.nameInput.value=""; ui.nameInput.focus(); try{ await addNameToBackend(v);}catch(e){ toast(`Add failed: ${e.message}`,"bad"); }});
+  ui.nameInput.addEventListener("keydown", async (e)=>{ if(e.key==="Enter"){ const v = ui.nameInput.value; ui.nameInput.value=""; try{ await addNameToBackend(v); }catch(err){ toast(`Add failed: ${err.message}`,"bad"); } }});
   ui.exportBtn.addEventListener("click", exportLocal);
   ui.importBtn.addEventListener("click", importLocal);
-  ui.adminBtn.addEventListener("click", () => { syncAdminFields(); toggleAdminMenu(); });
-  ui.applyTermBtn.addEventListener("click", () => applyYearTerm());
-  ui.resetWeekBtn.addEventListener("click", () => resetWeek());
-  ui.resetAllBtn.addEventListener("click", () => resetAll());
-  ui.yourNameInput.addEventListener("input", () => { state.settings.yourName = ui.yourNameInput.value || ""; saveCache(); });
-  document.addEventListener("click", (e) => {
-    const inside = ui.adminMenu.contains(e.target) || ui.adminBtn.contains(e.target);
-    if(!inside) toggleAdminMenu(false);
-  });
-  ui.blockerHelpBtn?.addEventListener("click", () => {
-    const isShown = ui.blockerHelp.style.display === "block";
-    ui.blockerHelp.style.display = isShown ? "none" : "block";
-  });
+  ui.adminBtn.addEventListener("click", ()=>{ syncAdminFields(); toggleAdminMenu(); });
+  ui.applyTermBtn.addEventListener("click", ()=>applyYearTerm());
+  ui.resetWeekBtn.addEventListener("click", ()=>resetWeek());
+  ui.resetAllBtn.addEventListener("click", ()=>resetAll());
+  ui.yourNameInput.addEventListener("input", ()=>{ state.settings.yourName = ui.yourNameInput.value || ""; saveCache(); });
+  document.addEventListener("click", (e)=>{ const inside = ui.adminMenu.contains(e.target) || ui.adminBtn.contains(e.target); if(!inside) toggleAdminMenu(false); });
 
   // Init
   populateYearSelect();
-  {
-    const { year, term } = state.settings;
-    let ws = parseISODate(state.settings.weekStartISO);
-    ws = clampWeekStartToTerm(mondayOfWeek(ws), year, term);
-    state.settings.weekStartISO = toISODate(ws);
-    saveCache();
-  }
+  { const { year, term } = state.settings; let ws = parseISODate(state.settings.weekStartISO); ws = clampWeekStartToTerm(mondayOfWeek(ws), year, term); state.settings.weekStartISO = toISODate(ws); saveCache(); }
   renderAll();
   startAutoRefresh();
 
-  (async () => {
+  (async ()=> {
     try{
       await backendPing();
       await loadNamesFromBackend();
       await loadWeekFromBackend({ silent:true });
       markUpdated("Loaded");
-      toast("Connected. Loaded shared data.", "good");
-      window.appReady = { loaded: true };
+      toast("Connected. Loaded shared data.","good");
+      window.appReady = { loaded:true };
     }catch(e){
       toast(`Backend not reachable: ${e.message}. Showing local cache.`, "bad");
       renderAll();
-      window.appReady = { loaded: true };
+      window.appReady = { loaded:true };
     }
   })();
-  // expose debug helpers to the console
-  window.saveSlotToBackend = saveSlotToBackend;
-  window.apiPost = apiPost;
+
+  // Expose debug helpers
+  window.saveSlotToBackend = saveSlotToBackend; window.apiPost = apiPost;
 })();
 </script>
 </body>
-
 </html>
-
