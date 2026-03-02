@@ -1367,57 +1367,61 @@ tbody th {
   // -----------------------
   // Single correct saveSlotToBackend
   // -----------------------
-  async function saveSlotToBackend(slot, { optimistic } = { optimistic: true }) {
-    const { year, term, weekStartISO, yourName } = state.settings;
+async function saveSlotToBackend(slot, opts) {
+  // normalize opts and default optimistic = true
+  opts = (typeof opts === "object" && opts !== null) ? opts : { optimistic: true };
+  const optimistic = (opts.optimistic === undefined) ? true : !!opts.optimistic;
 
-    // Defensive normalization for participantCount
-    const normalizedParticipantCount = Math.max(0, Number(slot.participantCount || 0));
+  const { year, term, weekStartISO, yourName } = state.settings;
 
-    // Normalize time *to the internal canonical key* (preserve en-dash)
-    const timeKey = normalizeToInternalTimeKey(slot.time) || String(slot.time || "").trim();
+  // Defensive normalization for participantCount
+  const normalizedParticipantCount = Math.max(0, Number(slot.participantCount || 0));
 
-    const payloadSlot = {
-      scopeKey: `${year}::${term}::${weekStartISO}`,
-      range: slot.range || "",
-      context: slot.context || "",
-      day: slot.day || "",
-      time: timeKey, // MUST match the same format used in applyWeek/from backend
-      person: slot.person || "",
-      participantScheduled: !!slot.participantScheduled,
-      participantCount: normalizedParticipantCount,
-      updatedAtISO: (new Date()).toISOString(),
-      updatedBy: (yourName || "").trim()
-    };
+  // Normalize time *to the internal canonical key* (preserve en-dash)
+  const timeKey = normalizeToInternalTimeKey(slot.time) || String(slot.time || "").trim();
 
-    // optimistic UI update (apply before network)
-    if (optimistic) {
-      const s = currentLocalSlots();
-      if (s && s[payloadSlot.range] && s[payloadSlot.range][payloadSlot.context] && s[payloadSlot.range][payloadSlot.context][payloadSlot.day]) {
-        const t = payloadSlot.time;
-        s[payloadSlot.range][payloadSlot.context][payloadSlot.day][t] = {
-          person: payloadSlot.person,
-          participantScheduled: payloadSlot.participantScheduled,
-          participantCount: payloadSlot.participantCount
-        };
-        saveCache();
-        renderAll();
-      }
-    }
+  const payloadSlot = {
+    scopeKey: `${year}::${term}::${weekStartISO}`,
+    range: slot.range || "",
+    context: slot.context || "",
+    day: slot.day || "",
+    time: timeKey, // MUST match the same format used in applyWeek/from backend
+    person: slot.person || "",
+    participantScheduled: !!slot.participantScheduled,
+    participantCount: normalizedParticipantCount,
+    updatedAtISO: (new Date()).toISOString(),
+    updatedBy: (yourName || "").trim()
+  };
 
-    pendingSaves++;
-    try {
-      await apiPost("saveSlot", { slot: payloadSlot });
-      setBackendStatus(true);
-      markUpdated("Saved");
-      return { ok: true };
-    } catch (e) {
-      setBackendStatus(false);
-      toast(`Save failed: ${e.message}. (Hit Refresh after unblocking.)`, "bad");
-      throw e;
-    } finally {
-      pendingSaves = Math.max(0, pendingSaves - 1);
+  // optimistic UI update (apply before network)
+  if (optimistic) {
+    const s = currentLocalSlots();
+    if (s && s[payloadSlot.range] && s[payloadSlot.range][payloadSlot.context] && s[payloadSlot.range][payloadSlot.context][payloadSlot.day]) {
+      const t = payloadSlot.time;
+      s[payloadSlot.range][payloadSlot.context][payloadSlot.day][t] = {
+        person: payloadSlot.person,
+        participantScheduled: payloadSlot.participantScheduled,
+        participantCount: payloadSlot.participantCount
+      };
+      saveCache();
+      renderAll();
     }
   }
+
+  pendingSaves++;
+  try {
+    await apiPost("saveSlot", { slot: payloadSlot });
+    setBackendStatus(true);
+    markUpdated("Saved");
+    return { ok: true };
+  } catch (e) {
+    setBackendStatus(false);
+    toast(`Save failed: ${e.message}. (Hit Refresh after unblocking.)`, "bad");
+    throw e;
+  } finally {
+    pendingSaves = Math.max(0, pendingSaves - 1);
+  }
+}
 
   // Week navigation & admin & export/import (same as before)...
   function shiftWeek(deltaWeeks){
@@ -1643,4 +1647,5 @@ tbody th {
 </body>
 
 </html>
+
 
