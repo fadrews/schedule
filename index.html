@@ -6,20 +6,17 @@
   <title>ABC Lab Schedule (Sheets)</title>
   <style>
     :root{
-      /* Light palette (white background, dark text) */
       --bg: #ffffff;
       --text: #111827;
       --muted: #6b7280;
-      --accent: #2563eb; /* blue accent */
-      --accent2: #3b82c6; /* darker blue for HF label */
+      --accent: #2563eb;
+      --accent2: #3b82c6;
       --good: #047857;
-      --bad: #7f1d1d; /* stronger/darker red */
-
+      --bad: #7f1d1d;
       --panel: #ffffff;
       --panel2: #f8fafc;
       --border: rgba(17,24,39,.08);
       --border2: rgba(17,24,39,.06);
-
       --shadow: 0 6px 18px rgba(17,24,39,.06);
       --radius:10px;
       --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
@@ -59,430 +56,115 @@
       width:100%;
     }
 
-    h1{
-      margin:0;
-      font-size:18px;
-      font-weight:700;
-      letter-spacing:.2px;
-      color:var(--text);
-    }
-    .subtitle{
-      margin:6px 0 0;
-      font-size:13px;
-      color:var(--muted);
-      line-height:1.35;
-      max-width:980px;
-    }
+    h1{ margin:0; font-size:18px; font-weight:700; letter-spacing:.2px; color:var(--text); }
+    .subtitle{ margin:6px 0 0; font-size:13px; color:var(--muted); line-height:1.35; max-width:980px; }
 
-    .weekBig{
-      font-size:18px;
-      font-weight:800;
-      letter-spacing:.2px;
-      color:var(--text);
-      line-height:1.1;
-      margin-top:2px;
-      text-align:right;
-    }
-    .weekBig small{
-      display:block;
-      font-size:12px;
-      font-weight:600;
-      color:var(--muted);
-      margin-top:6px;
-    }
+    .weekBig{ font-size:18px; font-weight:800; letter-spacing:.2px; color:var(--text); line-height:1.1; margin-top:2px; text-align:right; }
+    .weekBig small{ display:block; font-size:12px; font-weight:600; color:var(--muted); margin-top:6px; }
 
-    .panel{
-      background: linear-gradient(180deg, var(--panel), var(--panel2));
-      border:1px solid var(--border2);
-      box-shadow:var(--shadow);
-      border-radius:var(--radius);
-      padding:12px;
-      width:100%;
-      max-width:100%;
-      box-sizing:border-box;
-    }
+    .panel{ background: linear-gradient(180deg, var(--panel), var(--panel2)); border:1px solid var(--border2); box-shadow:var(--shadow); border-radius:var(--radius); padding:12px; width:100%; max-width:100%; box-sizing:border-box; }
 
-    /* Context-specific panel frames + distinct backgrounds */
-    #panelABC{
-      border-color: rgba(17,24,39,.06);
-      background: #ffffff; /* solid white */
-    }
-    /* HF: darker solid background, gradient removed as requested */
-    #panelHF{
-      border-color: rgba(17,24,39,.06);
-      background-color: #d3ebfd; /* slightly darker pale blue, solid */
-    }
+    #panelABC{ border-color: rgba(17,24,39,.06); background: #ffffff; }
+    #panelHF{ border-color: rgba(17,24,39,.06); background-color: #d3ebfd; }
 
     .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;}
     .leftControls,.rightControls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
 
-    .tabs{
-      display:inline-flex;
-      background:transparent;
-      border:1px solid rgba(17,24,39,.04);
-      border-radius:999px;
-      padding:4px;
-      gap:4px;
-    }
-    .tab{
-      border:0;color:var(--muted);background:transparent;
-      padding:7px 10px;border-radius:999px;font-size:12px;cursor:pointer;user-select:none;
-    }
-    .tab.active{
-      background: rgba(37,99,235,0.08);
-      color:var(--text);
-      box-shadow: inset 0 0 0 1px rgba(37,99,235,0.06);
-    }
+    .tabs{ display:inline-flex; background:transparent; border:1px solid rgba(17,24,39,.04); border-radius:999px; padding:4px; gap:4px; }
+    .tab{ border:0;color:var(--muted);background:transparent; padding:7px 10px;border-radius:999px;font-size:12px;cursor:pointer;user-select:none; }
+    .tab.active{ background: rgba(37,99,235,0.08); color:var(--text); box-shadow: inset 0 0 0 1px rgba(37,99,235,0.06); }
 
-    .btn{
-      border:1px solid rgba(17,24,39,.06);
-      background:transparent;
-      color:var(--text);
-      padding:8px 10px;
-      border-radius:8px;
-      cursor:pointer;
-      font-size:12px;
-    }
+    .btn{ border:1px solid rgba(17,24,39,.06); background:transparent; color:var(--text); padding:8px 10px; border-radius:8px; cursor:pointer; font-size:12px; }
     .btn:hover{border-color:rgba(17,24,39,.12)}
-    .btn.primary{
-      background:var(--accent);
-      color:#fff;
-      border-color:transparent;
-    }
-    .btn.danger{
-      background:transparent;
-      color:var(--bad);
-      border-color:rgba(185,28,28,.08);
-    }
+    .btn.primary{ background:var(--accent); color:#fff; border-color:transparent; }
+    .btn.danger{ background:transparent; color:var(--bad); border-color:rgba(185,28,28,.08); }
 
     .field{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
-    input[type="text"], input[type="password"]{
-      background: #fff;
-      color:var(--text);
-      border:1px solid rgba(17,24,39,.06);
-      border-radius:8px;
-      padding:8px 10px;
-      font-size:13px;
-      min-width:220px;
-      outline:none;
-    }
+    input[type="text"], input[type="password"]{ background: #fff; color:var(--text); border:1px solid rgba(17,24,39,.06); border-radius:8px; padding:8px 10px; font-size:13px; min-width:220px; outline:none; }
     input[type="text"]::placeholder, input[type="password"]::placeholder{color:var(--muted)}
     .compactInput{min-width:180px}
 
-    .chip{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      background:transparent;
-      border-radius:999px;
-      padding:6px 10px;
-      font-size:13px;
-      color:var(--muted);
-      white-space:nowrap;
-    }
-    .chip strong{color:var(--text); font-weight:800}
+    .chip{ display:inline-flex; align-items:center; gap:8px; background:transparent; border-radius:999px; padding:6px 10px; font-size:13px; color:var(--muted); white-space:nowrap; }
+    .chip strong{ color:var(--text); font-weight:800 }
 
     .note{font-size:13px;color:var(--muted);margin-top:10px;line-height:1.35;}
 
-    /* === Match bottom panels to top frame width & centering ===
-      main uses max-width:1200px; mirror that here so panels align with topbar */
-    .twoCol{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:16px;
-      margin-top:12px;
-      width:100%;
-      max-width:1200px; /* match main */
-      margin-left:auto;
-      margin-right:auto;
-      justify-content:start;
-      align-items:start;
-    }
+    .twoCol{ display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-top:12px; width:100%; max-width:1200px; margin-left:auto; margin-right:auto; justify-content:start; align-items:start; }
     @media (max-width: 1100px){.twoCol{grid-template-columns:1fr}}
-    .twoCol.single{
-      grid-template-columns: 1fr;
-      justify-items: center;
-    }
-    .twoCol.single #panelABC,
-    .twoCol.single #panelHF{
-      grid-column: 1 / -1;
-    }
-    .twoCol.single .panel{
-      width:100%;
-      max-width:1200px;
-    }
+    .twoCol.single{ grid-template-columns: 1fr; justify-items: center; }
+    .twoCol.single #panelABC, .twoCol.single #panelHF{ grid-column: 1 / -1; }
+    .twoCol.single .panel{ width:100%; max-width:1200px; }
 
-    .gridWrap{
-      overflow:auto;
-      border-radius:12px;
-      border:1px solid rgba(17,24,39,.04);
-      margin-top:12px;
-      background:transparent;
-      width:100%;
-      padding:8px;
-    }
+    .gridWrap{ overflow:auto; border-radius:12px; border:1px solid rgba(17,24,39,.04); margin-top:12px; background:transparent; width:100%; padding:8px; }
 
-    table{
-      border-collapse:collapse;
-      width:100%;
-      font-size:13px;
-      table-layout: fixed;
-    }
-    /* Narrow the time column (was 120px). Tweak width as needed. */
-    thead th:first-child,
-    tbody th{
-      width: 78px; /* narrower time column */
-      padding:6px 8px;
-      text-align:left;
-      vertical-align:top;
-      color:var(--muted);
-      font-weight:600;
-      min-width:64px;
-      box-sizing:border-box;
-    }
-    thead th,
-    td{
-      overflow:hidden;
-      text-overflow:ellipsis;
-      padding:6px;
-      vertical-align:top;
-      border-collapse:separate;
-    }
+    table{ border-collapse:collapse; width:100%; font-size:13px; table-layout: fixed; }
+    thead th:first-child, tbody th{ width: 78px; padding:6px 8px; text-align:left; vertical-align:top; color:var(--muted); font-weight:600; min-width:64px; box-sizing:border-box; }
+    thead th, td{ overflow:hidden; text-overflow:ellipsis; padding:6px; vertical-align:top; border-collapse:separate; }
+    tr{ } td{ min-width:0; padding:8px; }
 
-    tr{ }
-    td{ min-width:0; padding:8px; }
-
-    /* Boxed matrix look for each schedule "cell" */
-    .slot{
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-      min-height:92px;
-      background: #fff;
-      border:1px solid rgba(17,24,39,.06);
-      border-radius:8px;
-      padding:10px;
-      box-shadow: 0 2px 8px rgba(17,24,39,.03);
-    }
-
-    /* Participant flag: stronger red visuals */
-    .slot.participant{
-      border-color: rgba(127,29,29,.30);
-      background: rgba(255,230,230,0.95);
-    }
+    .slot{ display:flex; flex-direction:column; gap:8px; min-height:92px; background: #fff; border:1px solid rgba(17,24,39,.06); border-radius:8px; padding:10px; box-shadow: 0 2px 8px rgba(17,24,39,.03); }
+    .slot.participant{ border-color: rgba(127,29,29,.30); background: rgba(255,230,230,0.95); }
 
     .slotTop{display:flex;gap:8px;align-items:center;justify-content:space-between;}
     .who{font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:180px;font-size:13px;}
-    .smallBtn{
-      border:1px solid rgba(17,24,39,.06);
-      background:transparent;
-      color:var(--text);
-      padding:6px 8px;
-      border-radius:8px;
-      font-size:12px;
-      cursor:pointer;
-    }
+    .smallBtn{ border:1px solid rgba(17,24,39,.06); background:transparent; color:var(--text); padding:6px 8px; border-radius:8px; font-size:12px; cursor:pointer; }
     .smallBtn:hover{border-color:rgba(17,24,39,.12)}
 
-    .badge{
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-      border-radius:999px;
-      padding:4px 8px;
-      font-size:12px;
-      background:transparent;
-      border:1px solid rgba(17,24,39,.04);
-      color:var(--muted);
-      width:max-content;
-    }
-    .badge.bad{
-      background: rgba(127,29,29,0.18); /* stronger red background */
-      border-color: rgba(127,29,29,0.25);
-      color: var(--bad);
-      font-weight:800;
-    }
-    .badge.good{
-      background: rgba(237,250,236,0.9);
-      border-color: rgba(4,120,87,.08);
-      color:var(--good);
-      font-weight:700;
-    }
+    .badge{ display:inline-flex; align-items:center; gap:6px; border-radius:999px; padding:4px 8px; font-size:12px; background:transparent; border:1px solid rgba(17,24,39,.04); color:var(--muted); width:max-content; }
+    .badge.bad{ background: rgba(127,29,29,0.18); border-color: rgba(127,29,29,0.25); color: var(--bad); font-weight:800; }
+    .badge.good{ background: rgba(237,250,236,0.9); border-color: rgba(4,120,87,.08); color:var(--good); font-weight:700; }
 
     .inline{display:flex; gap:8px; align-items:center; flex-wrap:wrap;}
     label{display:flex; gap:8px; align-items:center; cursor:pointer; user-select:none; color:var(--muted); font-size:13px;}
     input[type="checkbox"]{width:16px;height:16px;accent-color:var(--accent);}
 
-    .selRow{
-      display:grid;
-      grid-template-columns: 1fr auto 1fr;
-      gap:8px;
-      align-items:center;
-      width:100%;
-    }
+    .selRow{ display:grid; grid-template-columns: 1fr auto 1fr; gap:8px; align-items:center; width:100%; }
     .selRow.one{ grid-template-columns: 1fr auto; }
-    .selRow select{
-      width:100%;
-      font-size:13px;
-      border:1px solid rgba(17,24,39,.06);
-      border-radius:8px;
-      padding:8px;
-      background:#fff;
-      color:var(--text);
-    }
-    .addBtn{
-      min-width:34px;
-      padding:6px 8px;
-      text-align:center;
-      border-radius:8px;
-      border:1px solid rgba(17,24,39,.06);
-      background:transparent;
-    }
+    .selRow select{ width:100%; font-size:13px; border:1px solid rgba(17,24,39,.06); border-radius:8px; padding:8px; background:#fff; color:var(--text); }
+    .addBtn{ min-width:34px; padding:6px 8px; text-align:center; border-radius:8px; border:1px solid rgba(17,24,39,.06); background:transparent; }
 
     .hidden{display:none !important}
 
-    .toast{
-      position:fixed;bottom:16px;right:16px;
-      background:rgba(17,24,39,.96);
-      color:#fff;
-      padding:10px 12px;
-      border-radius:8px;
-      font-size:13px;
-      display:none;
-    }
+    .toast{ position:fixed;bottom:16px;right:16px; background:rgba(17,24,39,.96); color:#fff; padding:10px 12px; border-radius:8px; font-size:13px; display:none; }
     .toast.show{display:block}
 
     .menuWrap{position:relative; display:inline-block;}
-    .menu{
-      position:absolute;right:0;top:42px;width:min(440px, calc(100vw - 24px));
-      background:#fff;
-      border:1px solid rgba(17,24,39,.06);
-      border-radius:10px;
-      box-shadow:var(--shadow);
-      padding:12px;
-      z-index:50;
-      display:none;
-    }
+    .menu{ position:absolute;right:0;top:42px;width:min(440px, calc(100vw - 24px)); background:#fff; border:1px solid rgba(17,24,39,.06); border-radius:10px; box-shadow:var(--shadow); padding:12px; z-index:50; display:none; }
     .menu.show{display:block}
     .menu h3{margin:0 0 10px 0;font-size:13px;color:var(--text);}
     .menuRow{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:10px;}
     .menuRow > div{flex:1;min-width:160px;}
     .menu small{color:var(--muted); display:block; line-height:1.35;}
 
-    .statusDot{
-      display:inline-block;width:9px;height:9px;border-radius:999px;background:rgba(17,24,39,.14);
-      margin-right:6px;
-    }
+    .statusDot{ display:inline-block;width:9px;height:9px;border-radius:999px;background:rgba(17,24,39,.14); margin-right:6px; }
     .dotGood{background:var(--good)}
     .dotBad{background:var(--bad)}
 
-    /* Context label: larger and more prominent */
-    #panelABC .chip strong{
-      color: var(--accent);   /* ABC Lab */
-      font-size:16px;
-      text-shadow: none;
-    }
+    #panelABC .chip strong{ color: var(--accent); font-size:16px; }
+    #panelHF .chip strong{ color: var(--accent2); font-size:16px; }
 
-    #panelHF .chip strong{
-      color: var(--accent2);  /* HF Project */
-      font-size:16px;
-      text-shadow: none;
-    }
-
-    /* Panel header spacing tweaks */
     .panel > .inline { margin-bottom:6px; align-items:center; }
     .panel .badge { margin-left:6px; }
 
-    /* Make table cells appear as a grid by separating with gaps via border-collapse trick:
-      put a thin gutter by using cell background same as container, and slot boxed inside */
     thead th, tbody th, td { background: transparent; }
 
-    /* Responsive tweak for very narrow screens */
     @media (max-width: 900px){
-      thead th:first-child,
-      tbody th {
-        width: 64px;
-        padding: 6px 6px;
-      }
+      thead th:first-child, tbody th { width: 64px; padding: 6px 6px; }
       .twoCol { gap: 12px; max-width: 100%; padding: 0 12px; }
       .twoCol.single .panel { max-width: 100%; }
     }
-    /* ========== Alignment fix: make topbar and panels share same centered width ========== */
-.topbar {
-  max-width: 1200px;  /* same as main */
-  margin: 0 auto;     /* center it */
-  padding-left: 16px; /* align inner content with panels */
-  padding-right: 16px;
-}
 
-/* Ensure the twoCol itself sits at same max width and shares the same horizontal padding
-   so the left edges of the panels line up with the inner content of the topbar. */
-.twoCol {
-  max-width: 1200px;  /* same as main */
-  margin-left: auto;
-  margin-right: auto;
-  padding-left: 16px; /* same inner gutter as topbar */
-  padding-right: 16px;
-  gap: 16px;
-}
-
-/* Make each panel use full available width inside the twoCol padding */
-.panel {
-  width: 100%;
-  box-sizing: border-box;
-  /* keep visual padding inside panel but don't offset overall alignment */
-  padding: 12px 12px; /* slightly narrower horizontal padding so inner table lines up */
-}
-
-/* gridWrap already has padding:8px; keep it but ensure box-sizing respects outer padding */
+.topbar { max-width: 1200px;  margin: 0 auto; padding-left: 16px; padding-right: 16px; }
+.twoCol { max-width: 1200px; margin-left: auto; margin-right: auto; padding-left: 16px; padding-right: 16px; gap: 16px; }
+.panel { width: 100%; box-sizing: border-box; padding: 12px 12px; }
 .gridWrap { box-sizing: border-box; }
-
-/* Narrow the time column so it doesn't dominate the layout */
-thead th:first-child,
-tbody th {
-  width: 64px;     /* tighter width for Time column */
-  min-width: 56px; /* prevents collapse on small screens */
-  padding: 6px 8px;
-  box-sizing: border-box;
-}
-
-/* If panels are shown single-column, keep them centered and same max width as topbar */
-.twoCol.single {
-  grid-template-columns: 1fr;
-  justify-items: center;
-}
-.twoCol.single .panel {
-  max-width: 1200px;
-  width: 100%;
-}
-
-/* Small responsive tweak so everything remains aligned on narrow screens */
-@media (max-width: 980px) {
-  .topbar, .twoCol, .twoCol.single .panel { max-width: 100%; padding-left: 12px; padding-right: 12px; }
-  thead th:first-child, tbody th { width: 56px; min-width:48px; }
-}
-/* Strong override to ensure HF shows a solid pastel blue when visible */
-#panelHF:not(.hidden) {
-  background-image: none !important;        /* remove gradient/image */
-  background-color: #e6f8ff !important;     /* pastel blue */
-  background-repeat: no-repeat !important;
-  background-position: 0 0 !important;
-  border-color: rgba(59,130,246,0.10) !important;
-  box-shadow: 0 6px 18px rgba(17,24,39,.04) !important;
-  color: var(--text) !important;
-}
-
-/* If there are child elements (chip strong) you want to recolor for contrast */
-#panelHF:not(.hidden) .chip strong {
-  color: #1e6fb8 !important;
-}
-
-/* If your panel uses a gradient rule with higher specificity somewhere else,
-   add this even-more-specific rule as a fallback */
-.twoCol #panelHF:not(.hidden) {
-  background-image: none !important;
-  background-color: #e6f8ff !important;
-}
+thead th:first-child, tbody th { width: 64px; min-width: 56px; padding: 6px 8px; box-sizing: border-box; }
+.twoCol.single { grid-template-columns: 1fr; justify-items: center; }
+.twoCol.single .panel { max-width: 1200px; width: 100%; }
+@media (max-width: 980px) { .topbar, .twoCol, .twoCol.single .panel { max-width: 100%; padding-left: 12px; padding-right: 12px; } thead th:first-child, tbody th { width: 56px; min-width:48px; } }
+#panelHF:not(.hidden) { background-image: none !important; background-color: #e6f8ff !important; background-repeat: no-repeat !important; background-position: 0 0 !important; border-color: rgba(59,130,246,0.10) !important; box-shadow: 0 6px 18px rgba(17,24,39,.04) !important; color: var(--text) !important; }
+#panelHF:not(.hidden) .chip strong { color: #1e6fb8 !important; }
+.twoCol #panelHF:not(.hidden) { background-image: none !important; background-color: #e6f8ff !important; }
 
   </style>
 </head>
@@ -639,7 +321,6 @@ tbody th {
   const TIMES_DISPLAY = [];
   for (let h = 9; h < 17; h++) {
     const pad = (n) => String(n).padStart(2, "0");
-    // Keep en-dash (U+2013) used internally to match backend keys
     TIMES.push(`${pad(h)}:00–${pad(h+1)}:00`);
     TIMES_DISPLAY.push(`${h}-${h+1}`);
   }
@@ -688,7 +369,6 @@ tbody th {
     blockerHelp: el("blockerHelp"),
   };
 
-
   function toast(msg, kind="info"){
     ui.toast.innerHTML = msg;
     ui.toast.classList.add("show");
@@ -701,7 +381,6 @@ tbody th {
     toast._t = setTimeout(() => ui.toast.classList.remove("show"), 3000);
   }
 
-  // People parsing (2 RAs max)
   const PEOPLE_DELIM = " / ";
   function splitPeople(s){
     const raw = String(s || "").trim();
@@ -719,17 +398,14 @@ tbody th {
   }
 
   // -----------------------
-  // Robust API helper
+  // Robust API helper (logs outgoing body for debugging)
   // -----------------------
   async function apiPost(action, payload = {}) {
-    // Ensure state/settings exist
     window.state = window.state || {};
     state.settings = state.settings || {};
 
-    // Ensure minimal identifying fields (try multiple fallbacks)
     let { year, term, weekStartISO, yourName } = state.settings;
 
-    // If payload contains a slot with a scopeKey, try parse
     const maybeScopeKey = (payload && payload.slot && payload.slot.scopeKey) || state.settings.scopeKey || state.scopeKey;
     if ((!year || !term || !weekStartISO) && maybeScopeKey) {
       const parts = String(maybeScopeKey).split("::");
@@ -740,25 +416,28 @@ tbody th {
       }
     }
 
-    // Final fallback: synthesize from today's date (prevents hard throws)
     if (!year || !term || !weekStartISO) {
       const d = new Date();
       year = year || String(d.getFullYear());
       term = term || "Unknown";
       weekStartISO = weekStartISO || d.toISOString().slice(0,10);
       console.warn("apiPost: missing year/term/weekStartISO, synthesizing fallback", { action, year, term, weekStartISO });
-      // Also write back safe defaults so subsequent calls use them
       state.settings.year = year;
       state.settings.term = term;
       state.settings.weekStartISO = weekStartISO;
     }
 
-    // Attach the identifying fields to payload where required by backend
     if (!payload.year) payload.year = year;
     if (!payload.term) payload.term = term;
     if (!payload.weekStartISO) payload.weekStartISO = weekStartISO;
 
-    // Standard fetch to proxy
+    // Debug log for network-level visibility
+    try {
+      console.debug("apiPost: outgoing", action, JSON.parse(JSON.stringify(payload)));
+    } catch (e) {
+      console.debug("apiPost: outgoing (unserializable payload)", action, payload);
+    }
+
     const res = await fetch("/api/exec", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -794,7 +473,6 @@ tbody th {
     }
   }
 
-  // Helpers
   function pad2(n){ return String(n).padStart(2,"0"); }
   function toISODate(d){ return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`; }
   function toMDY(d){ return `${pad2(d.getMonth()+1)}/${pad2(d.getDate())}/${d.getFullYear()}`; }
@@ -830,9 +508,7 @@ tbody th {
     return x;
   }
   function termBounds(year, term){
-    if(term === "Spring"){
-      return { start: new Date(year, 0, 1), end: new Date(year, 3, 30) };
-    }
+    if(term === "Spring"){ return { start: new Date(year, 0, 1), end: new Date(year, 3, 30) }; }
     return { start: new Date(year, 8, 1), end: new Date(year, 11, 31) };
   }
   function clampWeekStartToTerm(weekStart, year, term){
@@ -850,7 +526,6 @@ tbody th {
     return `${dayAbbrev} (${toMMDDdash(d)})`;
   }
 
-  // State
   function defaultState(){
     const now = new Date();
     const year = now.getFullYear();
@@ -859,17 +534,8 @@ tbody th {
     return {
       version: 3,
       names: [],
-      settings: {
-        year,
-        term: termGuess,
-        weekStartISO: toISODate(ws),
-        adminKey: "",
-        yourName: ""
-      },
-      meta: {
-        lastUpdatedAt: 0,
-        lastUpdatedKind: ""
-      },
+      settings: { year, term: termGuess, weekStartISO: toISODate(ws), adminKey: "", yourName: "" },
+      meta: { lastUpdatedAt: 0, lastUpdatedKind: "" },
       cacheSlotsByScope: {}
     };
   }
@@ -898,10 +564,7 @@ tbody th {
   let activeRange = "weekdays";
   let activeView  = "both";
 
-  function scopeKey(){
-    const { year, term, weekStartISO } = state.settings;
-    return `${year}::${term}::${weekStartISO}`;
-  }
+  function scopeKey(){ const { year, term, weekStartISO } = state.settings; return `${year}::${term}::${weekStartISO}`; }
 
   (function snapToCurrentWeekOnOpen(){
     const nowWS = mondayOfWeek(new Date());
@@ -935,7 +598,6 @@ tbody th {
     return state.cacheSlotsByScope[s];
   }
 
-  // Time normalization helper (unchanged logic)
   function normalizeToInternalTimeKey(raw) {
     if (!raw && raw !== "") return null;
     const s = String(raw).trim();
@@ -949,22 +611,22 @@ tbody th {
     let h2 = Number(mTimeRange[3]), m2 = mTimeRange[4] ? Number(mTimeRange[4]) : 0;
     if (Number.isNaN(h1) || Number.isNaN(h2)) return null;
     const pad2 = (n) => String(n).padStart(2, "0");
-    const key = `${pad2(h1)}:${pad2(m1)}–${pad2(h2)}:${pad2(m2)}`;
+    // Use en-dash in constructed key to match server-side keys
+    const EN_DASH = "\u2013";
+    const key = `${pad2(h1)}:${pad2(m1)}${EN_DASH}${pad2(h2)}:${pad2(m2)}`;
     for (const t of TIMES) if (t === key) return key;
     if (m1 === 0 && m2 === 0) {
-      const alt = `${pad2(h1)}:00–${pad2(h2)}:00`;
+      const alt = `${pad2(h1)}:00${EN_DASH}${pad2(h2)}:00`;
       for (const t of TIMES) if (t === alt) return alt;
     }
     if (m1 === 0 && m2 === 0 && (h2 === h1 + 1 || Math.abs(h2 - h1) === 1)) {
-      const alt2 = `${pad2(h1)}:00–${pad2(h1+1)}:00`;
+      const alt2 = `${pad2(h1)}:00${EN_DASH}${pad2(h1+1)}:00`;
       for (const t of TIMES) if (t === alt2) return alt2;
     }
     return null;
   }
 
-  // Single, correct applyWeekFromBackend
   function applyWeekFromBackend(data){
-    // data expected: { scopeKey, slots: { "range::ctx::day::time": { person, participantScheduled, participantCount } } }
     const sKey = data.scopeKey;
     ensureLocalScopeStructure(sKey);
 
@@ -978,7 +640,6 @@ tbody th {
       return dayObj;
     };
 
-    // Reset scope to clean slate
     slotsStruct.weekdays.ABC = makeSlots(WEEKDAYS);
     slotsStruct.weekdays.HF  = makeSlots(WEEKDAYS);
     slotsStruct.weekend.ABC  = makeSlots(WEEKEND);
@@ -1024,7 +685,6 @@ tbody th {
     saveCache();
   }
 
-  // Rendering
   function setRange(range){
     activeRange = range;
     ui.tabWeekdays.classList.toggle("active", range === "weekdays");
@@ -1193,7 +853,6 @@ tbody th {
 
         function commitPeople(newP1, newP2){
           const combined = joinPeople([newP1, newP2]);
-          // Guard: ensure state/settings are present and weekStartISO exists
           if (!state || !state.settings || !state.settings.weekStartISO) {
             console.warn("commitPeople called before state.settings populated — ignoring");
             return Promise.resolve(null);
@@ -1349,7 +1008,6 @@ tbody th {
     setView(activeView);
   }
 
-  // Backend ops
   async function loadNamesFromBackend(){
     const data = await apiPost("listNames", {});
     state.names = Array.isArray(data.names) ? data.names : [];
@@ -1366,7 +1024,6 @@ tbody th {
     renderAll();
   }
 
-  // Load week from backend (single canonical implementation)
   async function loadWeekFromBackend({ silent = false } = {}) {
     const { year, term, weekStartISO } = state.settings;
     let raw;
@@ -1380,18 +1037,12 @@ tbody th {
 
     setBackendStatus(true);
 
-    // Support both shapes: { data: {...} } or top-level {...}
     let payload = (raw && raw.data) ? raw.data : raw;
 
-    // If backend returned empty object or malformed response, synthesize an empty week payload
     if (!payload || typeof payload !== "object" || !payload.scopeKey) {
       const fallbackScopeKey = `${year}::${term}::${weekStartISO}`;
-      console.warn(
-        "loadWeekFromBackend: backend returned empty/malformed payload; using empty fallback",
-        { raw, fallbackScopeKey }
-      );
+      console.warn("loadWeekFromBackend: backend returned empty/malformed payload; using empty fallback", { raw, fallbackScopeKey });
       payload = { scopeKey: fallbackScopeKey, slots: {} };
-      // optional: persist this empty-week to the sheet by calling a create-week endpoint
     }
 
     applyWeekFromBackend(payload);
@@ -1402,22 +1053,18 @@ tbody th {
   }
 
   // -----------------------
-  // Single corrected saveSlotToBackend
+  // Debuggable saveSlotToBackend (includes slotKey, timeRaw, and logs)
   // -----------------------
   async function saveSlotToBackend(slot = {}, opts) {
-    // Normalize opts
     opts = (typeof opts === "object" && opts !== null) ? opts : {};
     const optimistic = opts.optimistic !== undefined ? !!opts.optimistic : true;
 
-    // Defensive state
     window.state = window.state || {};
     state.settings = state.settings || {};
-    let { year, term, weekStartISO, yourName } = state.settings || {};
+    let { year, term, weekStartISO } = state.settings || {};
 
-    // Accept slot fields (slot.time expected to be same format used in renderContext's `time`)
     const rawTime = slot.time || slot.timeRaw || "";
 
-    // Try to infer missing identifying fields from slot.scopeKey or state.scopeKey
     const maybeScopeKey = slot.scopeKey || state.settings.scopeKey || state.scopeKey;
     if ((!year || !term || !weekStartISO) && maybeScopeKey) {
       const parts = String(maybeScopeKey).split("::");
@@ -1427,52 +1074,43 @@ tbody th {
         weekStartISO = weekStartISO || parts.slice(2).join("::");
       }
     }
-
-    // Fallback to values on state (if any)
     if ((!year || !term || !weekStartISO) && state && state.settings) {
       year = year || state.settings.year;
       term = term || state.settings.term;
       weekStartISO = weekStartISO || state.settings.weekStartISO;
     }
-
-    // Final fallback to today (keeps app from throwing uncaught exceptions); warn loudly
     if (!year || !term || !weekStartISO) {
       const d = new Date();
       year = year || String(d.getFullYear());
       term = term || "Unknown";
       weekStartISO = weekStartISO || d.toISOString().slice(0,10);
-      console.warn("saveSlotToBackend: missing year/term/weekStartISO — using fallback", { year, term, weekStartISO });
+      console.warn("saveSlotToBackend: missing identifiers; using fallback", { year, term, weekStartISO });
     }
-
-    // Persist safe values back to state so subsequent calls see the same identifiers
     state.settings.year = year;
     state.settings.term = term;
     state.settings.weekStartISO = weekStartISO;
-    state.settings.yourName = state.settings.yourName || yourName || "";
 
-    // Normalize the time key reliably
     const timeKey = normalizeToInternalTimeKey(rawTime) || rawTime || null;
     if (!timeKey) {
-      // We cannot proceed without a valid time key — abort but don't throw uncaught
-      const msg = `Invalid time value: "${rawTime}"`;
+      const msg = `Invalid time: "${rawTime}"`;
       console.warn("saveSlotToBackend: " + msg);
       toast("Save aborted: invalid time format.", "bad");
       return Promise.reject(new Error(msg));
     }
 
-    // Normalize participantCount
     const participantCount = (slot.participantCount !== undefined)
       ? Number(slot.participantCount)
       : (slot.participantScheduled ? 1 : 0);
     const normalizedParticipantCount = Number.isFinite(participantCount) ? Math.max(0, Math.floor(participantCount)) : (slot.participantScheduled ? 1 : 0);
 
-    // Build payload slot object expected by backend
     const payloadSlot = {
       scopeKey: `${year}::${term}::${weekStartISO}`,
       range: slot.range || "",
       context: slot.context || "",
       day: slot.day || "",
       time: timeKey,
+      timeRaw: rawTime,
+      slotKey: `${slot.range || ""}::${slot.context || ""}::${slot.day || ""}::${timeKey}`,
       person: slot.person || "",
       participantScheduled: !!slot.participantScheduled,
       participantCount: normalizedParticipantCount,
@@ -1480,7 +1118,10 @@ tbody th {
       updatedBy: (state.settings.yourName || "").trim()
     };
 
-    // Optimistic UI update
+    // Log the outgoing payload to console
+    try { console.debug("saveSlotToBackend: outgoing payloadSlot:", JSON.parse(JSON.stringify(payloadSlot))); }
+    catch(e){ console.debug("saveSlotToBackend: outgoing payloadSlot (raw)", payloadSlot); }
+
     if (optimistic) {
       try {
         const s = currentLocalSlots();
@@ -1499,32 +1140,41 @@ tbody th {
           saveCache();
           renderAll();
         } else {
-          // If local structure is missing, log for debugging but continue to attempt save
-          console.warn("saveSlotToBackend: optimistic update skipped due to missing local slot structure", payloadSlot);
+          console.warn("saveSlotToBackend: optimistic update skipped (missing local slot)", payloadSlot.slotKey);
         }
       } catch (e) {
-        console.warn("saveSlotToBackend: optimistic update failed", e);
+        console.warn("saveSlotToBackend optimistic update error", e);
       }
     }
 
-    // Throttle/lock counters
     pendingSaves++;
-
     try {
       const resp = await apiPost("saveSlot", { slot: payloadSlot });
+
+      console.debug("saveSlotToBackend: server response:", resp);
+
+      if (resp && resp.ok === false) {
+        const emsg = resp.error || resp.message || "server rejected save";
+        toast(`Save failed: ${emsg}`, "bad");
+        throw new Error(emsg);
+      }
+
+      if (resp && resp.data && resp.data.slots) {
+        try { applyWeekFromBackend(resp.data); saveCache(); renderAll(); } catch(e){ console.warn("applyWeekFromBackend after save failed", e); }
+      }
+
       setBackendStatus(true);
       markUpdated("Saved");
       return resp;
     } catch (e) {
       setBackendStatus(false);
-      toast(`Save failed: ${e.message}. Please Refresh.`, "bad");
+      toast(`Save failed: ${e.message}`, "bad");
       throw e;
     } finally {
       pendingSaves = Math.max(0, pendingSaves - 1);
     }
   }
 
-  // Week navigation & admin & export/import (same as before)...
   function shiftWeek(deltaWeeks){
     const { year, term } = state.settings;
     let ws = parseISODate(state.settings.weekStartISO);
@@ -1735,7 +1385,6 @@ tbody th {
       await loadWeekFromBackend({ silent:true });
       markUpdated("Loaded");
       toast("Connected. Loaded shared data.", "good");
-      // mark app as ready (debug helper)
       window.appReady = { loaded: true };
     }catch(e){
       toast(`Backend not reachable: ${e.message}. Showing local cache.`, "bad");
@@ -1743,7 +1392,7 @@ tbody th {
       window.appReady = { loaded: true };
     }
   })();
-  // expose debug helpers to the console
+  // expose debug helpers for console
   window.saveSlotToBackend = saveSlotToBackend;
   window.apiPost = apiPost;
 })();
