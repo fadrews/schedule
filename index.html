@@ -416,7 +416,7 @@
       participantScheduled: !!slot.participantScheduled,
       participantCount: normalizedParticipantCount,
       updatedAtISO: (new Date()).toISOString(),
-      updatedBy: (state.settings.yourName || "").trim(),
+      updatedBy: (state.settings.yourName && String(state.settings.yourName).trim()) ? String(state.settings.yourName).trim() : "web",
       // year/term/weekStartISO will be added by apiPost if missing
       year, term, weekStartISO
     };
@@ -534,3 +534,4 @@
 </script>
 </body>
 </html>
+
