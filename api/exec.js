@@ -3,7 +3,7 @@ console.log('APPS_SCRIPT_WEBAPP_URL=', process.env.APPS_SCRIPT_WEBAPP_URL);
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const APPS_SCRIPT_WEBAPP_URL = process.env.APPS_SCRIPT_WEBAPP_URL || 'https://script.google.com/macros/s/AKfycbxdb6WturRZuUTSDKSS43jBDXITzDhHb1yQ-oG7QRH4H30YZft6e4mEa69pFtKzkoosRA/exec';
+  const APPS_SCRIPT_WEBAPP_URL = process.env.APPS_SCRIPT_WEBAPP_URL || 'https://script.google.com/macros/s/AKfycbzuOED5RJUuiYTrKwNHco3QO2av7dEmkx0qNFi-5XvrCF9zJSuR5Mi6SNqiEPMopz56tw/exec';
 
   try {
     const forward = await fetch(APPS_SCRIPT_WEBAPP_URL, {
