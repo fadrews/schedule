@@ -5,16 +5,483 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>ABC Lab Schedule (Sheets)</title>
   <style>
-    /* (styles identical to your working file) */
     :root{
-      --bg:#fff; --text:#111827; --muted:#6b7280; --accent:#2563eb; --accent2:#3b82c6;
-      --good:#047857; --bad:#7f1d1d; --panel:#fff; --panel2:#f8fafc; --border:rgba(17,24,39,.08);
-      --border2:rgba(17,24,39,.06); --shadow:0 6px 18px rgba(17,24,39,.06); --radius:10px;
-      --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
-      --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;
+      /* Light palette (white background, dark text) */
+      --bg: #ffffff;
+      --text: #111827;
+      --muted: #6b7280;
+      --accent: #2563eb; /* blue accent */
+      --accent2: #3b82c6; /* darker blue for HF label */
+      --good: #047857;
+      --bad: #7f1d1d; /* stronger/darker red */
+
+      --panel: #ffffff;
+      --panel2: #f8fafc;
+      --border: rgba(17,24,39,.08);
+      --border2: rgba(17,24,39,.06);
+
+      --shadow: 0 6px 18px rgba(17,24,39,.06);
+      --radius:10px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
     }
-    *{box-sizing:border-box} html,body{height:100%} body{margin:0;font-family:var(--sans);background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;padding:20px;}
-    /* ... keep the same CSS you had; omitted here for brevity in this snippet block, but included fully in actual file */
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:var(--sans);
+      background: var(--bg);
+      color:var(--text);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      padding:20px;
+    }
+
+    header{padding:8px 0 0;max-width:none;margin:0;}
+    main{padding:8px 0 24px;max-width:1200px;margin:0 auto;}
+
+    .topbar{
+      background: linear-gradient(180deg, rgba(255,255,255,1), rgba(250,250,250,1));
+      border-bottom:1px solid var(--border);
+      box-shadow: 0 6px 18px rgba(17,24,39,.03);
+      padding:14px 16px;
+      border-radius: 10px;
+      margin-bottom:16px;
+    }
+
+    .titlebar{
+      display:flex;
+      gap:14px;
+      align-items:flex-start;
+      justify-content:space-between;
+      flex-wrap:wrap;
+      width:100%;
+    }
+
+    h1{
+      margin:0;
+      font-size:18px;
+      font-weight:700;
+      letter-spacing:.2px;
+      color:var(--text);
+    }
+    .subtitle{
+      margin:6px 0 0;
+      font-size:13px;
+      color:var(--muted);
+      line-height:1.35;
+      max-width:980px;
+    }
+
+    .weekBig{
+      font-size:18px;
+      font-weight:800;
+      letter-spacing:.2px;
+      color:var(--text);
+      line-height:1.1;
+      margin-top:2px;
+      text-align:right;
+    }
+    .weekBig small{
+      display:block;
+      font-size:12px;
+      font-weight:600;
+      color:var(--muted);
+      margin-top:6px;
+    }
+
+    .panel{
+      background: linear-gradient(180deg, var(--panel), var(--panel2));
+      border:1px solid var(--border2);
+      box-shadow:var(--shadow);
+      border-radius:var(--radius);
+      padding:12px;
+      width:100%;
+      max-width:100%;
+      box-sizing:border-box;
+    }
+
+    /* Context-specific panel frames + distinct backgrounds */
+    #panelABC{
+      border-color: rgba(17,24,39,.06);
+      background: #ffffff; /* solid white */
+    }
+    /* HF: darker solid background, gradient removed as requested */
+    #panelHF{
+      border-color: rgba(17,24,39,.06);
+      background-color: #d3ebfd; /* slightly darker pale blue, solid */
+    }
+
+    .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;}
+    .leftControls,.rightControls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+
+    .tabs{
+      display:inline-flex;
+      background:transparent;
+      border:1px solid rgba(17,24,39,.04);
+      border-radius:999px;
+      padding:4px;
+      gap:4px;
+    }
+    .tab{
+      border:0;color:var(--muted);background:transparent;
+      padding:7px 10px;border-radius:999px;font-size:12px;cursor:pointer;user-select:none;
+    }
+    .tab.active{
+      background: rgba(37,99,235,0.08);
+      color:var(--text);
+      box-shadow: inset 0 0 0 1px rgba(37,99,235,0.06);
+    }
+
+    .btn{
+      border:1px solid rgba(17,24,39,.06);
+      background:transparent;
+      color:var(--text);
+      padding:8px 10px;
+      border-radius:8px;
+      cursor:pointer;
+      font-size:12px;
+    }
+    .btn:hover{border-color:rgba(17,24,39,.12)}
+    .btn.primary{
+      background:var(--accent);
+      color:#fff;
+      border-color:transparent;
+    }
+    .btn.danger{
+      background:transparent;
+      color:var(--bad);
+      border-color:rgba(185,28,28,.08);
+    }
+
+    .field{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+    input[type="text"], input[type="password"]{
+      background: #fff;
+      color:var(--text);
+      border:1px solid rgba(17,24,39,.06);
+      border-radius:8px;
+      padding:8px 10px;
+      font-size:13px;
+      min-width:220px;
+      outline:none;
+    }
+    input[type="text"]::placeholder, input[type="password"]::placeholder{color:var(--muted)}
+    .compactInput{min-width:180px}
+
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      background:transparent;
+      border-radius:999px;
+      padding:6px 10px;
+      font-size:13px;
+      color:var(--muted);
+      white-space:nowrap;
+    }
+    .chip strong{color:var(--text); font-weight:800}
+
+    .note{font-size:13px;color:var(--muted);margin-top:10px;line-height:1.35;}
+
+    .twoCol{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:16px;
+      margin-top:12px;
+      width:100%;
+      max-width:1200px; /* match main */
+      margin-left:auto;
+      margin-right:auto;
+      justify-content:start;
+      align-items:start;
+    }
+    @media (max-width: 1100px){.twoCol{grid-template-columns:1fr}}
+    .twoCol.single{
+      grid-template-columns: 1fr;
+      justify-items: center;
+    }
+    .twoCol.single #panelABC,
+    .twoCol.single #panelHF{
+      grid-column: 1 / -1;
+    }
+    .twoCol.single .panel{
+      width:100%;
+      max-width:1200px;
+    }
+
+    .gridWrap{
+      overflow:auto;
+      border-radius:12px;
+      border:1px solid rgba(17,24,39,.04);
+      margin-top:12px;
+      background:transparent;
+      width:100%;
+      padding:8px;
+    }
+
+    table{
+      border-collapse:collapse;
+      width:100%;
+      font-size:13px;
+      table-layout: fixed;
+    }
+    /* Narrow the time column (was 120px). Tweak width as needed. */
+    thead th:first-child,
+    tbody th{
+      width: 78px; /* narrower time column */
+      padding:6px 8px;
+      text-align:left;
+      vertical-align:top;
+      color:var(--muted);
+      font-weight:600;
+      min-width:64px;
+      box-sizing:border-box;
+    }
+    thead th,
+    td{
+      overflow:hidden;
+      text-overflow:ellipsis;
+      padding:6px;
+      vertical-align:top;
+      border-collapse:separate;
+    }
+
+    tr{ }
+    td{ min-width:0; padding:8px; }
+
+    /* Boxed matrix look for each schedule "cell" */
+    .slot{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      min-height:92px;
+      background: #fff;
+      border:1px solid rgba(17,24,39,.06);
+      border-radius:8px;
+      padding:10px;
+      box-shadow: 0 2px 8px rgba(17,24,39,.03);
+    }
+
+    /* Participant flag: stronger red visuals */
+    .slot.participant{
+      border-color: rgba(127,29,29,.30);
+      background: rgba(255,230,230,0.95);
+    }
+
+    .slotTop{display:flex;gap:8px;align-items:center;justify-content:space-between;}
+    .who{font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:180px;font-size:13px;}
+    .smallBtn{
+      border:1px solid rgba(17,24,39,.06);
+      background:transparent;
+      color:var(--text);
+      padding:6px 8px;
+      border-radius:8px;
+      font-size:12px;
+      cursor:pointer;
+    }
+    .smallBtn:hover{border-color:rgba(17,24,39,.12)}
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      border-radius:999px;
+      padding:4px 8px;
+      font-size:12px;
+      background:transparent;
+      border:1px solid rgba(17,24,39,.04);
+      color:var(--muted);
+      width:max-content;
+    }
+    .badge.bad{
+      background: rgba(127,29,29,0.18); /* stronger red background */
+      border-color: rgba(127,29,29,0.25);
+      color: var(--bad);
+      font-weight:800;
+    }
+    .badge.good{
+      background: rgba(237,250,236,0.9);
+      border-color: rgba(4,120,87,.08);
+      color:var(--good);
+      font-weight:700;
+    }
+
+    .inline{display:flex; gap:8px; align-items:center; flex-wrap:wrap;}
+    label{display:flex; gap:8px; align-items:center; cursor:pointer; user-select:none; color:var(--muted); font-size:13px;}
+    input[type="checkbox"]{width:16px;height:16px;accent-color:var(--accent);}
+
+    .selRow{
+      display:grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap:8px;
+      align-items:center;
+      width:100%;
+    }
+    .selRow.one{ grid-template-columns: 1fr auto; }
+    .selRow select{
+      width:100%;
+      font-size:13px;
+      border:1px solid rgba(17,24,39,.06);
+      border-radius:8px;
+      padding:8px;
+      background:#fff;
+      color:var(--text);
+    }
+    .addBtn{
+      min-width:34px;
+      padding:6px 8px;
+      text-align:center;
+      border-radius:8px;
+      border:1px solid rgba(17,24,39,.06);
+      background:transparent;
+    }
+
+    .hidden{display:none !important}
+
+    .toast{
+      position:fixed;bottom:16px;right:16px;
+      background:rgba(17,24,39,.96);
+      color:#fff;
+      padding:10px 12px;
+      border-radius:8px;
+      font-size:13px;
+      display:none;
+    }
+    .toast.show{display:block}
+
+    .menuWrap{position:relative; display:inline-block;}
+    .menu{
+      position:absolute;right:0;top:42px;width:min(440px, calc(100vw - 24px));
+      background:#fff;
+      border:1px solid rgba(17,24,39,.06);
+      border-radius:10px;
+      box-shadow:var(--shadow);
+      padding:12px;
+      z-index:50;
+      display:none;
+    }
+    .menu.show{display:block}
+    .menu h3{margin:0 0 10px 0;font-size:13px;color:var(--text);}
+    .menuRow{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:10px;}
+    .menuRow > div{flex:1;min-width:160px;}
+    .menu small{color:var(--muted); display:block; line-height:1.35;}
+
+    .statusDot{
+      display:inline-block;width:9px;height:9px;border-radius:999px;background:rgba(17,24,39,.14);
+      margin-right:6px;
+    }
+    .dotGood{background:var(--good)}
+    .dotBad{background:var(--bad)}
+
+    /* Context label: larger and more prominent */
+    #panelABC .chip strong{
+      color: var(--accent);   /* ABC Lab */
+      font-size:16px;
+      text-shadow: none;
+    }
+
+    #panelHF .chip strong{
+      color: var(--accent2);  /* HF Project */
+      font-size:16px;
+      text-shadow: none;
+    }
+
+    /* Panel header spacing tweaks */
+    .panel > .inline { margin-bottom:6px; align-items:center; }
+    .panel .badge { margin-left:6px; }
+
+    /* Make table cells appear as a grid by separating with gaps via border-collapse trick:
+      put a thin gutter by using cell background same as container, and slot boxed inside */
+    thead th, tbody th, td { background: transparent; }
+
+    /* Responsive tweak for very narrow screens */
+    @media (max-width: 900px){
+      thead th:first-child,
+      tbody th {
+        width: 64px;
+        padding: 6px 6px;
+      }
+      .twoCol { gap: 12px; max-width: 100%; padding: 0 12px; }
+      .twoCol.single .panel { max-width: 100%; }
+    }
+    /* ========== Alignment fix: make topbar and panels share same centered width ========== */
+.topbar {
+  max-width: 1200px;  /* same as main */
+  margin: 0 auto;     /* center it */
+  padding-left: 16px; /* align inner content with panels */
+  padding-right: 16px;
+}
+
+/* Ensure the twoCol itself sits at same max width and shares the same horizontal padding
+   so the left edges of the panels line up with the inner content of the topbar. */
+.twoCol {
+  max-width: 1200px;  /* same as main */
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 16px; /* same inner gutter as topbar */
+  padding-right: 16px;
+  gap: 16px;
+}
+
+/* Make each panel use full available width inside the twoCol padding */
+.panel {
+  width: 100%;
+  box-sizing: border-box;
+  /* keep visual padding inside panel but don't offset overall alignment */
+  padding: 12px 12px; /* slightly narrower horizontal padding so inner table lines up */
+}
+
+/* gridWrap already has padding:8px; keep it but ensure box-sizing respects outer padding */
+.gridWrap { box-sizing: border-box; }
+
+/* Narrow the time column so it doesn't dominate the layout */
+thead th:first-child,
+tbody th {
+  width: 64px;     /* tighter width for Time column */
+  min-width: 56px; /* prevents collapse on small screens */
+  padding: 6px 8px;
+  box-sizing: border-box;
+}
+
+/* If panels are shown single-column, keep them centered and same max width as topbar */
+.twoCol.single {
+  grid-template-columns: 1fr;
+  justify-items: center;
+}
+.twoCol.single .panel {
+  max-width: 1200px;
+  width: 100%;
+}
+
+/* Small responsive tweak so everything remains aligned on narrow screens */
+@media (max-width: 980px) {
+  .topbar, .twoCol, .twoCol.single .panel { max-width: 100%; padding-left: 12px; padding-right: 12px; }
+  thead th:first-child, tbody th { width: 56px; min-width:48px; }
+}
+/* Strong override to ensure HF shows a solid pastel blue when visible */
+#panelHF:not(.hidden) {
+  background-image: none !important;        /* remove gradient/image */
+  background-color: #e6f8ff !important;     /* pastel blue */
+  background-repeat: no-repeat !important;
+  background-position: 0 0 !important;
+  border-color: rgba(59,130,246,0.10) !important;
+  box-shadow: 0 6px 18px rgba(17,24,39,.04) !important;
+  color: var(--text) !important;
+}
+
+/* If there are child elements (chip strong) you want to recolor for contrast */
+#panelHF:not(.hidden) .chip strong {
+  color: #1e6fb8 !important;
+}
+
+/* If your panel uses a gradient rule with higher specificity somewhere else,
+   add this even-more-specific rule as a fallback */
+.twoCol #panelHF:not(.hidden) {
+  background-image: none !important;
+  background-color: #e6f8ff !important;
+}
+
   </style>
 </head>
 
@@ -23,7 +490,9 @@
     <div class="titlebar">
       <div>
         <h1>ABC Lab Schedule</h1>
-        <p class="subtitle">Shared schedule backed by Google Sheets. Auto-refresh is enabled. Scope: <strong>Year + Term + Week</strong>.</p>
+        <p class="subtitle">
+          Shared schedule backed by Google Sheets. Auto-refresh is enabled. Scope: <strong>Year + Term + Week</strong>.
+        </p>
       </div>
 
       <div class="weekBig" id="weekBigLabel">
@@ -39,6 +508,7 @@
           <button class="btn" id="adminBtn" type="button">Admin ▾</button>
           <div class="menu" id="adminMenu" aria-label="Admin menu">
             <h3>Admin</h3>
+
             <div class="menuRow">
               <div>
                 <small>Your name (optional; stored locally)</small>
@@ -76,7 +546,9 @@
               <button class="btn danger" id="resetAllBtn" type="button">Reset ALL data</button>
             </div>
 
-            <small style="margin-top:10px;">Reset actions modify the shared Sheet. If enabled, enter the Admin key.</small>
+            <small style="margin-top:10px;">
+              Reset actions modify the shared Sheet. If enabled, enter the Admin key.
+            </small>
           </div>
         </div>
       </div>
@@ -118,13 +590,18 @@
       </div>
     </div>
 
-    <p class="note">Weekdays are <strong>Mon–Fri, 09:00–17:00</strong>. Weekend scheduling is separate. Auto-refresh pulls changes from other users periodically (skips while your saves are pending).</p>
+    <p class="note">
+      Weekdays are <strong>Mon–Fri, 09:00–17:00</strong>. Weekend scheduling is separate.
+      Auto-refresh pulls changes from other users periodically (skips while your saves are pending).
+    </p>
   </div>
 
   <div class="twoCol">
     <section class="panel" id="panelABC">
       <div class="inline" style="justify-content:space-between;">
-        <div class="inline"><span class="chip">Context: <strong>ABC Lab</strong></span></div>
+        <div class="inline">
+          <span class="chip">Context: <strong>ABC Lab</strong></span>
+        </div>
         <span class="badge" id="abcSummary">0 filled</span>
       </div>
       <div class="gridWrap" id="gridWrapABC"></div>
@@ -132,7 +609,9 @@
 
     <section class="panel" id="panelHF">
       <div class="inline" style="justify-content:space-between;">
-        <div class="inline"><span class="chip">Context: <strong>HF Project</strong></span></div>
+        <div class="inline">
+          <span class="chip">Context: <strong>HF Project</strong></span>
+        </div>
         <span class="badge" id="hfSummary">0 filled</span>
       </div>
       <div class="gridWrap" id="gridWrapHF"></div>
@@ -158,7 +637,8 @@
   const TIMES_DISPLAY = [];
   for (let h = 9; h < 17; h++) {
     const pad = (n) => String(n).padStart(2, "0");
-    TIMES.push(`${pad(h)}:00\u2013${pad(h+1)}:00`); // en-dash
+    // Keep en-dash (U+2013) used internally to match backend keys
+    TIMES.push(`${pad(h)}:00–${pad(h+1)}:00`);
     TIMES_DISPLAY.push(`${h}-${h+1}`);
   }
 
@@ -206,7 +686,55 @@
     blockerHelp: el("blockerHelp"),
   };
 
-  // small toast helper
+
+    // Minimal loader shim — inserts state.settings and applies backend payload
+  async function loadWeekFromBackend({ silent = false } = {}) {
+    // Ensure state exists
+    window.state = window.state || {};
+    state.settings = state.settings || { year: null, term: null, weekStartISO: null, yourName: "" };
+  
+    const { year, term, weekStartISO } = state.settings;
+    if (!year || !term || !weekStartISO) {
+      // nothing to load for — caller should set state.settings first
+      console.warn("loadWeekFromBackend: missing year/term/weekStartISO; skipping fetch");
+      return null;
+    }
+  
+    try {
+      const res = await fetch("/api/exec", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "loadWeek", year, term, weekStartISO })
+      });
+      const text = await res.text();
+      const parsed = JSON.parse(text);
+      const payload = (parsed && parsed.data) ? parsed.data : parsed;
+      if (!payload || typeof payload !== "object") {
+        console.warn("loadWeekFromBackend: invalid payload", parsed);
+        return null;
+      }
+  
+      // Set canonical settings.scopeKey if present
+      if (!state.settings.scopeKey && payload.scopeKey) state.settings.scopeKey = payload.scopeKey;
+  
+      // Apply to UI
+      if (typeof applyWeekFromBackend === "function") {
+        applyWeekFromBackend(payload);
+      } else {
+        console.warn("applyWeekFromBackend not found; payload received but not applied");
+      }
+  
+      if (typeof renderAll === "function") renderAll();
+      if (!silent && typeof toast === "function") toast("Refreshed from shared Sheet.", "good");
+      return payload;
+    } catch (err) {
+      console.error("loadWeekFromBackend fetch error:", err);
+      if (typeof setBackendStatus === "function") setBackendStatus(false);
+      if (!silent && typeof toast === "function") toast("Load failed: " + String(err), "bad");
+      throw err;
+    }
+  }
+  
   function toast(msg, kind="info"){
     ui.toast.innerHTML = msg;
     ui.toast.classList.add("show");
@@ -237,14 +765,17 @@
   }
 
   // -----------------------
-  // Robust API helper (logs outgoing body for debugging)
+  // Robust API helper
   // -----------------------
   async function apiPost(action, payload = {}) {
+    // Ensure state/settings exist
     window.state = window.state || {};
     state.settings = state.settings || {};
-
-    let { year, term, weekStartISO } = state.settings;
-
+  
+    // Ensure minimal identifying fields (try multiple fallbacks)
+    let { year, term, weekStartISO, yourName } = state.settings;
+  
+    // If payload contains a slot with a scopeKey, try parse
     const maybeScopeKey = (payload && payload.slot && payload.slot.scopeKey) || state.settings.scopeKey || state.scopeKey;
     if ((!year || !term || !weekStartISO) && maybeScopeKey) {
       const parts = String(maybeScopeKey).split("::");
@@ -254,32 +785,39 @@
         weekStartISO = weekStartISO || parts.slice(2).join("::");
       }
     }
-
+  
+    // Final fallback: synthesize from today's date (prevents hard throws)
     if (!year || !term || !weekStartISO) {
       const d = new Date();
       year = year || String(d.getFullYear());
       term = term || "Unknown";
       weekStartISO = weekStartISO || d.toISOString().slice(0,10);
       console.warn("apiPost: missing year/term/weekStartISO, synthesizing fallback", { action, year, term, weekStartISO });
+      // Also write back safe defaults so subsequent calls use them
       state.settings.year = year;
       state.settings.term = term;
       state.settings.weekStartISO = weekStartISO;
     }
-
+  
+    // Attach the identifying fields to payload where required by backend
     if (!payload.year) payload.year = year;
     if (!payload.term) payload.term = term;
     if (!payload.weekStartISO) payload.weekStartISO = weekStartISO;
-
+  
     // Debug log for network-level visibility
-    try { console.debug("apiPost: outgoing", action, JSON.parse(JSON.stringify(payload))); }
-    catch (e) { console.debug("apiPost: outgoing (unserializable payload)", action, payload); }
-
+    try {
+      console.debug("apiPost: outgoing", action, JSON.parse(JSON.stringify(payload)));
+    } catch (e) {
+      console.debug("apiPost: outgoing (unserializable payload)", action, payload);
+    }
+  
+    // Standard fetch to proxy
     const res = await fetch(API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(Object.assign({ action }, payload))
     });
-
+  
     const text = await res.text();
     try {
       return JSON.parse(text);
@@ -345,7 +883,9 @@
     return x;
   }
   function termBounds(year, term){
-    if(term === "Spring"){ return { start: new Date(year, 0, 1), end: new Date(year, 3, 30) }; }
+    if(term === "Spring"){
+      return { start: new Date(year, 0, 1), end: new Date(year, 3, 30) };
+    }
     return { start: new Date(year, 8, 1), end: new Date(year, 11, 31) };
   }
   function clampWeekStartToTerm(weekStart, year, term){
@@ -411,7 +951,10 @@
   let activeRange = "weekdays";
   let activeView  = "both";
 
-  function scopeKey(){ const { year, term, weekStartISO } = state.settings; return `${year}::${term}::${weekStartISO}`; }
+  function scopeKey(){
+    const { year, term, weekStartISO } = state.settings;
+    return `${year}::${term}::${weekStartISO}`;
+  }
 
   (function snapToCurrentWeekOnOpen(){
     const nowWS = mondayOfWeek(new Date());
@@ -445,7 +988,7 @@
     return state.cacheSlotsByScope[s];
   }
 
-  // Time normalization helper (uses en-dash)
+  // Time normalization helper (unchanged logic)
   function normalizeToInternalTimeKey(raw) {
     if (!raw && raw !== "") return null;
     const s = String(raw).trim();
@@ -459,22 +1002,22 @@
     let h2 = Number(mTimeRange[3]), m2 = mTimeRange[4] ? Number(mTimeRange[4]) : 0;
     if (Number.isNaN(h1) || Number.isNaN(h2)) return null;
     const pad2 = (n) => String(n).padStart(2, "0");
-    const EN_DASH = "\u2013";
-    const key = `${pad2(h1)}:${pad2(m1)}${EN_DASH}${pad2(h2)}:${pad2(m2)}`;
-    for (const t of TIMES) if (t === key) return key;
+    const key = `${pad2(h1)}:${pad2(m1)}–${pad2(h2)}:${pad2(m2)}`;
+    for (const t of TIMES) if (t === key) return t;
     if (m1 === 0 && m2 === 0) {
-      const alt = `${pad2(h1)}:00${EN_DASH}${pad2(h2)}:00`;
+      const alt = `${pad2(h1)}:00–${pad2(h2)}:00`;
       for (const t of TIMES) if (t === alt) return alt;
     }
     if (m1 === 0 && m2 === 0 && (h2 === h1 + 1 || Math.abs(h2 - h1) === 1)) {
-      const alt2 = `${pad2(h1)}:00${EN_DASH}${pad2(h1+1)}:00`;
+      const alt2 = `${pad2(h1)}:00–${pad2(h1+1)}:00`;
       for (const t of TIMES) if (t === alt2) return alt2;
     }
     return null;
   }
 
-  // Apply backend payload into local cache (same as before)
+  // Single, correct applyWeekFromBackend
   function applyWeekFromBackend(data){
+    // data expected: { scopeKey, slots: { "range::ctx::day::time": { person, participantScheduled, participantCount } } }
     const sKey = data.scopeKey;
     ensureLocalScopeStructure(sKey);
 
@@ -488,6 +1031,7 @@
       return dayObj;
     };
 
+    // Reset scope to clean slate
     slotsStruct.weekdays.ABC = makeSlots(WEEKDAYS);
     slotsStruct.weekdays.HF  = makeSlots(WEEKDAYS);
     slotsStruct.weekend.ABC  = makeSlots(WEEKEND);
@@ -533,7 +1077,7 @@
     saveCache();
   }
 
-  // Rendering utilities (unchanged logic)
+  // Rendering
   function setRange(range){
     activeRange = range;
     ui.tabWeekdays.classList.toggle("active", range === "weekdays");
@@ -593,7 +1137,6 @@
     if(c.HF.flagged)  ui.hfSummary.classList.add("bad");
   }
 
-  // Render the tabular context (ABC / HF)
   function renderContext(ctxId, wrapEl){
     const days = activeRange === "weekdays" ? WEEKDAYS : WEEKEND;
     const slots = currentLocalSlots()[activeRange][ctxId];
@@ -701,13 +1244,12 @@
           addBtn.title = has2 ? "Remove second RA" : "Add second RA";
         }
 
-        // commitPeople uses the consistent API for save
         function commitPeople(newP1, newP2){
           const combined = joinPeople([newP1, newP2]);
-          // guard: if state not loaded yet, no-op but return resolved promise
-          if (!state || !state.settings || !state.settings.weekStartISO) {
-            console.warn("commitPeople called before state.settings populated — ignoring");
-            return Promise.resolve(null);
+          // At top of commitPeople function:
+          if (!window.appReady || !window.appReady.loaded) {
+            console.warn("commitPeople called before app ready — ignoring");
+            return;
           }
           return saveSlotToBackend({
             range: activeRange, context: ctxId, day, time,
@@ -860,7 +1402,7 @@
     setView(activeView);
   }
 
-  // Load names, add name
+  // Backend ops
   async function loadNamesFromBackend(){
     const data = await apiPost("listNames", {});
     state.names = Array.isArray(data.names) ? data.names : [];
@@ -877,196 +1419,165 @@
     renderAll();
   }
 
-  async function loadWeekFromBackend({ silent = false } = {}) {
-    const { year, term, weekStartISO } = state.settings;
-    let raw;
-    try {
-      raw = await apiPost("loadWeek", { year, term, weekStartISO });
-    } catch (e) {
-      setBackendStatus(false);
-      toast(`Load failed: ${e.message}`, "bad");
-      return;
-    }
+// Load week from backend (single canonical implementation)
+async function loadWeekFromBackend({ silent = false } = {}) {
+  const { year, term, weekStartISO } = state.settings;
+  let raw;
+  try {
+    raw = await apiPost("loadWeek", { year, term, weekStartISO });
+  } catch (e) {
+    setBackendStatus(false);
+    toast(`Load failed: ${e.message}`, "bad");
+    return;
+  }
 
+  setBackendStatus(true);
+
+  // Support both shapes: { data: {...} } or top-level {...}
+  let payload = (raw && raw.data) ? raw.data : raw;
+
+  // If backend returned empty object or malformed response, synthesize an empty week payload
+  if (!payload || typeof payload !== "object" || !payload.scopeKey) {
+    const fallbackScopeKey = `${year}::${term}::${weekStartISO}`;
+    console.warn(
+      "loadWeekFromBackend: backend returned empty/malformed payload; using empty fallback",
+      { raw, fallbackScopeKey }
+    );
+    payload = { scopeKey: fallbackScopeKey, slots: {} };
+    // optional: persist this empty-week to the sheet by calling a create-week endpoint
+  }
+
+  applyWeekFromBackend(payload);
+  renderAll();
+  markUpdated("Loaded");
+
+  if (!silent) toast("Refreshed from shared Sheet.", "good");
+}
+
+  // -----------------------
+  // Single correct saveSlotToBackend
+  // -----------------------
+async function saveSlotToBackend(slot, opts) {
+  // Defensive beginning of saveSlotToBackend — paste at start of that function
+  // normalize opts and default optimistic = true
+  opts = (typeof opts === "object" && opts !== null) ? opts : { optimistic: true };
+  const optimistic = (opts.optimistic === undefined) ? true : !!opts.optimistic;
+  
+  // ensure state/settings
+  window.state = window.state || {};
+  state.settings = state.settings || {};
+  let { year, term, weekStartISO, yourName } = state.settings || {};
+  
+  // try slot.scopeKey if available
+  if ((!year || !term || !weekStartISO) && slot && slot.scopeKey) {
+    const parts = String(slot.scopeKey).split("::");
+    if (parts.length >= 3) {
+      year = year || parts[0];
+      term = term || parts[1];
+      weekStartISO = weekStartISO || parts.slice(2).join("::");
+    }
+  }
+  
+  // try global fallback
+  if ((!year || !term || !weekStartISO) && (state && state.scopeKey)) {
+    const parts = String(state.scopeKey).split("::");
+    if (parts.length >= 3) {
+      year = year || parts[0];
+      term = term || parts[1];
+      weekStartISO = weekStartISO || parts.slice(2).join("::");
+    }
+  }
+  
+  // final fallback (today)
+  if (!year || !term || !weekStartISO) {
+    const d = new Date();
+    year = year || String(d.getFullYear());
+    term = term || "Unknown";
+    weekStartISO = weekStartISO || d.toISOString().slice(0,10);
+    console.warn("saveSlotToBackend: missing year/term/weekStartISO — using fallback", { year, term, weekStartISO });
+  }
+  
+  // ensure state.settings updated so subsequent calls see same values
+  state.settings.year = year;
+  state.settings.term = term;
+  state.settings.weekStartISO = weekStartISO;
+  state.settings.yourName = state.settings.yourName || yourName || "";
+  
+  // then proceed to build payloadSlot as before
+  // validate coordinates & normalize time
+  const finalRange = slot.range || slot.r || activeRange || "";
+  const finalContext = slot.context || slot.ctx || "";
+  const finalDay = slot.day || "";
+  const rawTime = slot.time || slot.timeRaw || "";
+
+  if (!finalRange || !finalContext || !finalDay || !rawTime) {
+    const missing = [];
+    if (!finalRange) missing.push("range");
+    if (!finalContext) missing.push("context");
+    if (!finalDay) missing.push("day");
+    if (!rawTime) missing.push("time");
+    const msg = `Missing slot coordinates: ${missing.join(", ")}`;
+    console.warn("saveSlotToBackend:", msg, slot);
+    throw new Error(msg);
+  }
+
+  const timeKey = normalizeToInternalTimeKey(rawTime) || rawTime;
+  if (!timeKey) {
+    const msg = `Invalid time key: ${rawTime}`;
+    console.warn("saveSlotToBackend:", msg);
+    throw new Error(msg);
+  }
+
+  const participantCount = (typeof slot.participantCount !== "undefined") ? Number(slot.participantCount) : (slot.participantScheduled ? 1 : 0);
+  const normalizedParticipantCount = Number.isFinite(participantCount) ? Math.max(0, Math.floor(participantCount)) : (slot.participantScheduled ? 1 : 0);
+
+  const payloadSlot = {
+    scopeKey: `${year}::${term}::${weekStartISO}`,
+    range: finalRange,
+    context: finalContext,
+    day: finalDay,
+    time: timeKey, // MUST match the same format used in applyWeek/from backend
+    timeRaw: rawTime,
+    slotKey: `${finalRange}::${finalContext}::${finalDay}::${timeKey}`,
+    person: slot.person || "",
+    participantScheduled: !!slot.participantScheduled,
+    participantCount: normalizedParticipantCount,
+    updatedAtISO: (new Date()).toISOString(),
+    updatedBy: (state.settings.yourName || "").trim()
+  };
+
+  // optimistic UI update (apply before network)
+  if (optimistic) {
+    const s = currentLocalSlots();
+    if (s && s[payloadSlot.range] && s[payloadSlot.range][payloadSlot.context] && s[payloadSlot.range][payloadSlot.context][payloadSlot.day]) {
+      const t = payloadSlot.time;
+      s[payloadSlot.range][payloadSlot.context][payloadSlot.day][t] = {
+        person: payloadSlot.person,
+        participantScheduled: payloadSlot.participantScheduled,
+        participantCount: payloadSlot.participantCount
+      };
+      saveCache();
+      renderAll();
+    }
+  }
+
+  pendingSaves++;
+  try {
+    const resp = await apiPost("saveSlot", { slot: payloadSlot });
+    console.debug("saveSlotToBackend server response:", resp);
     setBackendStatus(true);
-
-    let payload = (raw && raw.data) ? raw.data : raw;
-
-    if (!payload || typeof payload !== "object" || !payload.scopeKey) {
-      const fallbackScopeKey = `${year}::${term}::${weekStartISO}`;
-      console.warn("loadWeekFromBackend: backend returned empty/malformed payload; using empty fallback", { raw, fallbackScopeKey });
-      payload = { scopeKey: fallbackScopeKey, slots: {} };
-    }
-
-    applyWeekFromBackend(payload);
-    renderAll();
-    markUpdated("Loaded");
-
-    if (!silent) toast("Refreshed from shared Sheet.", "good");
+    markUpdated("Saved");
+    return resp;
+  } catch (e) {
+    setBackendStatus(false);
+    toast(`Save failed: ${e.message}. (Hit Refresh after unblocking.)`, "bad");
+    throw e;
+  } finally {
+    pendingSaves = Math.max(0, pendingSaves - 1);
   }
+}
 
-  // -----------------------
-  // Robust saveSlotToBackend
-  // -----------------------
-  async function saveSlotToBackend(slot = {}, opts) {
-    // opts and optimistic default
-    opts = (typeof opts === "object" && opts !== null) ? opts : {};
-    const optimistic = opts.optimistic !== undefined ? !!opts.optimistic : true;
-
-    // ensure state exists
-    window.state = window.state || {};
-    state.settings = state.settings || {};
-    let { year, term, weekStartISO } = state.settings || {};
-
-    // extract coordinates (accept either 'time' or 'timeRaw')
-    const range = slot.range || slot.r || activeRange || "";
-    const context = slot.context || slot.ctx || "";
-    const day = slot.day || "";
-    const rawTime = slot.time || slot.timeRaw || "";
-
-    // Validate coordinates; attempt to recover from scopeKey if possible
-    if ((!range || !context || !day || !rawTime) && (slot && slot.scopeKey)) {
-      const parts = String(slot.scopeKey).split("::");
-      if (parts.length === 4) {
-        // scopeKey may be "range::ctx::day::time"
-        // if slot.scopeKey actually holds full slotKey, override missing coordinates
-        const [_r, _c, _d, _t] = parts;
-        if (!range) slot.range = _r;
-        if (!context) slot.context = _c;
-        if (!day) slot.day = _d;
-        if (!rawTime) slot.time = _t;
-      } else if (parts.length >= 3) {
-        // fallback scopeKey with year::term::week
-        year = year || parts[0];
-        term = term || parts[1];
-        weekStartISO = weekStartISO || parts.slice(2).join("::");
-      }
-    }
-
-    // At this point derive variables again
-    const finalRange = slot.range || range || "";
-    const finalContext = slot.context || context || "";
-    const finalDay = slot.day || day || "";
-    const finalRawTime = slot.time || slot.timeRaw || rawTime || "";
-
-    // If still missing coordinates, abort gracefully and surface error (no uncaught exception)
-    if (!finalRange || !finalContext || !finalDay || !finalRawTime) {
-      const missing = [];
-      if (!finalRange) missing.push("range");
-      if (!finalContext) missing.push("context");
-      if (!finalDay) missing.push("day");
-      if (!finalRawTime) missing.push("time");
-      const msg = `Missing slot coordinates: ${missing.join(", ")}`;
-      console.warn("saveSlotToBackend:", msg, { slot });
-      return Promise.reject(new Error(msg));
-    }
-
-    // Ensure identifying fields (try to infer from slot.scopeKey or state)
-    const maybeScopeKey = slot.scopeKey || state.settings.scopeKey || state.scopeKey;
-    if ((!year || !term || !weekStartISO) && maybeScopeKey) {
-      const parts = String(maybeScopeKey).split("::");
-      if (parts.length >= 3) {
-        year = year || parts[0];
-        term = term || parts[1];
-        weekStartISO = weekStartISO || parts.slice(2).join("::");
-      }
-    }
-    if (!year || !term || !weekStartISO) {
-      year = year || state.settings.year || String((new Date()).getFullYear());
-      term = term || state.settings.term || "Unknown";
-      weekStartISO = weekStartISO || state.settings.weekStartISO || (new Date()).toISOString().slice(0,10);
-      console.warn("saveSlotToBackend: synthesizing identifying fields", { year, term, weekStartISO });
-    }
-    // write back to settings so subsequent calls use consistent values
-    state.settings.year = year;
-    state.settings.term = term;
-    state.settings.weekStartISO = weekStartISO;
-    state.settings.yourName = state.settings.yourName || "";
-
-    // Normalize time key to internal canonical form
-    const timeKey = normalizeToInternalTimeKey(finalRawTime) || finalRawTime;
-    if (!timeKey) {
-      const msg = `Invalid time format: "${finalRawTime}"`;
-      console.warn("saveSlotToBackend:", msg);
-      toast("Save aborted: invalid time format.", "bad");
-      return Promise.reject(new Error(msg));
-    }
-
-    // Normalize participant count
-    const rawParticipantCount = (slot.participantCount !== undefined) ? slot.participantCount : (slot.participantScheduled ? 1 : undefined);
-    const participantCount = rawParticipantCount !== undefined ? Number(rawParticipantCount) : (slot.participantScheduled ? 1 : 0);
-    const normalizedParticipantCount = Number.isFinite(participantCount) ? Math.max(0, Math.floor(participantCount)) : (slot.participantScheduled ? 1 : 0);
-
-    // Build payloadSlot
-    const payloadSlot = {
-      scopeKey: `${year}::${term}::${weekStartISO}`,
-      range: finalRange,
-      context: finalContext,
-      day: finalDay,
-      time: timeKey,
-      timeRaw: finalRawTime,
-      slotKey: `${finalRange}::${finalContext}::${finalDay}::${timeKey}`,
-      person: slot.person || "",
-      participantScheduled: !!slot.participantScheduled,
-      participantCount: normalizedParticipantCount,
-      updatedAtISO: (new Date()).toISOString(),
-      updatedBy: (state.settings.yourName || "").trim()
-    };
-
-    // Log outgoing payload for inspection
-    try { console.debug("saveSlotToBackend: outgoing payloadSlot:", JSON.parse(JSON.stringify(payloadSlot))); }
-    catch(e){ console.debug("saveSlotToBackend: outgoing payloadSlot (raw)", payloadSlot); }
-
-    // Optimistic update (safe-guarded)
-    if (optimistic) {
-      try {
-        const s = currentLocalSlots();
-        if (s && s[payloadSlot.range] && s[payloadSlot.range][payloadSlot.context] && s[payloadSlot.range][payloadSlot.context][payloadSlot.day] && payloadSlot.time in s[payloadSlot.range][payloadSlot.context][payloadSlot.day]) {
-          s[payloadSlot.range][payloadSlot.context][payloadSlot.day][payloadSlot.time] = {
-            person: payloadSlot.person,
-            participantScheduled: payloadSlot.participantScheduled,
-            participantCount: payloadSlot.participantCount
-          };
-          saveCache();
-          renderAll();
-        } else {
-          console.warn("saveSlotToBackend: optimistic update skipped (missing local slot)", payloadSlot.slotKey);
-        }
-      } catch (e) {
-        console.warn("saveSlotToBackend optimistic update error", e);
-      }
-    }
-
-    pendingSaves++;
-    try {
-      const resp = await apiPost("saveSlot", { slot: payloadSlot });
-
-      console.debug("saveSlotToBackend: server response:", resp);
-
-      if (resp && resp.ok === false) {
-        const emsg = resp.error || resp.message || "server rejected save";
-        toast(`Save failed: ${emsg}`, "bad");
-        throw new Error(emsg);
-      }
-
-      // If backend returns slice of updated slots, merge it in
-      if (resp && resp.data && resp.data.slots) {
-        try { applyWeekFromBackend(resp.data); saveCache(); renderAll(); } catch(e){ console.warn("applyWeekFromBackend after save failed", e); }
-      }
-
-      setBackendStatus(true);
-      markUpdated("Saved");
-      return resp;
-    } catch (e) {
-      setBackendStatus(false);
-      toast(`Save failed: ${e.message}`, "bad");
-      throw e;
-    } finally {
-      pendingSaves = Math.max(0, pendingSaves - 1);
-    }
-  }
-
-  // Navigation & admin functions (same as before)
+  // Week navigation & admin & export/import (same as before)...
   function shiftWeek(deltaWeeks){
     const { year, term } = state.settings;
     let ws = parseISODate(state.settings.weekStartISO);
@@ -1222,7 +1733,7 @@
   ui.tabWeekend.addEventListener("click",  () => setRange("weekend"));
   ui.viewBoth.addEventListener("click", () => setView("both"));
   ui.viewABC.addEventListener("click", () => setView("ABC"));
-  ui.viewHF.addEventListener("click",   () => setView("HF"));
+  ui.viewHF.addEventListener("click", () => setView("HF"));
   ui.currentWeekBtn.addEventListener("click", jumpToCurrentWeek);
   ui.prevWeekBtn.addEventListener("click", () => shiftWeek(-1));
   ui.nextWeekBtn.addEventListener("click", () => shiftWeek(1));
@@ -1284,11 +1795,11 @@
       window.appReady = { loaded: true };
     }
   })();
-
-  // Expose debug helpers for console
+  // expose debug helpers to the console
   window.saveSlotToBackend = saveSlotToBackend;
   window.apiPost = apiPost;
 })();
 </script>
 </body>
+
 </html>
