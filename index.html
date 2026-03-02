@@ -483,28 +483,48 @@
     return adminSettings.backendUrl || FALLBACK_APPS_SCRIPT_URL;
   }
 
-  // =============================
-  // API (blocker-friendly: text/plain)
-  // =============================
-  async function apiPost(action, payload = {}) {
-    const API_URL = getEffectiveApiUrl();
-    const body = JSON.stringify({ action, ...payload });
-    const res = await fetch(API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body,
-      // include credentials only when calling same-origin proxy (helps some setups)
-      credentials: adminSettings.useProxy ? "same-origin" : "omit"
-    });
-
-    const txt = await res.text();
-    let data;
-    try { data = JSON.parse(txt); }
-    catch { data = { ok:false, error:"Non-JSON response from backend." }; }
-
-    if (!data.ok) throw new Error(data.error || "Backend error");
-    return data;
+// =============================
+// API (use JSON; credentials only for same-origin proxy)
+// =============================
+function isSameOriginUrl(url) {
+  try {
+    // relative path ("/api/exec") is same-origin
+    if (url.startsWith("/")) return true;
+    const u = new URL(url, window.location.href);
+    return u.origin === window.location.origin;
+  } catch (e) {
+    return false;
   }
+}
+
+async function apiPost(action, payload = {}) {
+  const API_URL = getEffectiveApiUrl(); // keep your existing helper
+  const body = JSON.stringify({ action, ...payload });
+
+  const res = await fetch(API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json;charset=utf-8" },
+    body,
+    // include credentials only when calling same-origin proxy (helps some setups)
+    credentials: isSameOriginUrl(API_URL) ? "same-origin" : "omit"
+  });
+
+  const txt = await res.text();
+
+  // If HTTP status is not 2xx, include raw body in the error to help debugging
+  if (!res.ok) {
+    let attempt = "";
+    try { attempt = JSON.parse(txt); } catch (e) { attempt = txt; }
+    throw new Error(`HTTP ${res.status} ${res.statusText}: ${JSON.stringify(attempt)}`);
+  }
+
+  let data;
+  try { data = JSON.parse(txt); }
+  catch { data = { ok:false, error:"Non-JSON response from backend.", raw: txt }; }
+
+  if (!data.ok) throw new Error(data.error || "Backend error");
+  return data;
+}
 
   // =============================
   // State (unchanged)
@@ -1417,3 +1437,4 @@
 </script>
 </body>
 </html>
+
