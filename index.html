@@ -689,54 +689,6 @@ tbody th {
   };
 
 
-    // Minimal loader shim — inserts state.settings and applies backend payload
-  async function loadWeekFromBackend({ silent = false } = {}) {
-    // Ensure state exists
-    window.state = window.state || {};
-    state.settings = state.settings || { year: null, term: null, weekStartISO: null, yourName: "" };
-  
-    const { year, term, weekStartISO } = state.settings;
-    if (!year || !term || !weekStartISO) {
-      // nothing to load for — caller should set state.settings first
-      console.warn("loadWeekFromBackend: missing year/term/weekStartISO; skipping fetch");
-      return null;
-    }
-  
-    try {
-      const res = await fetch("/api/exec", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "loadWeek", year, term, weekStartISO })
-      });
-      const text = await res.text();
-      const parsed = JSON.parse(text);
-      const payload = (parsed && parsed.data) ? parsed.data : parsed;
-      if (!payload || typeof payload !== "object") {
-        console.warn("loadWeekFromBackend: invalid payload", parsed);
-        return null;
-      }
-  
-      // Set canonical settings.scopeKey if present
-      if (!state.settings.scopeKey && payload.scopeKey) state.settings.scopeKey = payload.scopeKey;
-  
-      // Apply to UI
-      if (typeof applyWeekFromBackend === "function") {
-        applyWeekFromBackend(payload);
-      } else {
-        console.warn("applyWeekFromBackend not found; payload received but not applied");
-      }
-  
-      if (typeof renderAll === "function") renderAll();
-      if (!silent && typeof toast === "function") toast("Refreshed from shared Sheet.", "good");
-      return payload;
-    } catch (err) {
-      console.error("loadWeekFromBackend fetch error:", err);
-      if (typeof setBackendStatus === "function") setBackendStatus(false);
-      if (!silent && typeof toast === "function") toast("Load failed: " + String(err), "bad");
-      throw err;
-    }
-  }
-  
   function toast(msg, kind="info"){
     ui.toast.innerHTML = msg;
     ui.toast.classList.add("show");
@@ -769,15 +721,14 @@ tbody th {
   // -----------------------
   // Robust API helper
   // -----------------------
-// Defensive apiPost wrapper — paste/replace in index.html
   async function apiPost(action, payload = {}) {
     // Ensure state/settings exist
     window.state = window.state || {};
     state.settings = state.settings || {};
-  
+
     // Ensure minimal identifying fields (try multiple fallbacks)
     let { year, term, weekStartISO, yourName } = state.settings;
-  
+
     // If payload contains a slot with a scopeKey, try parse
     const maybeScopeKey = (payload && payload.slot && payload.slot.scopeKey) || state.settings.scopeKey || state.scopeKey;
     if ((!year || !term || !weekStartISO) && maybeScopeKey) {
@@ -788,7 +739,7 @@ tbody th {
         weekStartISO = weekStartISO || parts.slice(2).join("::");
       }
     }
-  
+
     // Final fallback: synthesize from today's date (prevents hard throws)
     if (!year || !term || !weekStartISO) {
       const d = new Date();
@@ -801,19 +752,19 @@ tbody th {
       state.settings.term = term;
       state.settings.weekStartISO = weekStartISO;
     }
-  
+
     // Attach the identifying fields to payload where required by backend
     if (!payload.year) payload.year = year;
     if (!payload.term) payload.term = term;
     if (!payload.weekStartISO) payload.weekStartISO = weekStartISO;
-  
+
     // Standard fetch to proxy
     const res = await fetch("/api/exec", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(Object.assign({ action }, payload))
     });
-  
+
     const text = await res.text();
     try {
       return JSON.parse(text);
@@ -999,7 +950,7 @@ tbody th {
     if (Number.isNaN(h1) || Number.isNaN(h2)) return null;
     const pad2 = (n) => String(n).padStart(2, "0");
     const key = `${pad2(h1)}:${pad2(m1)}–${pad2(h2)}:${pad2(m2)}`;
-    for (const t of TIMES) if (t === key) return t;
+    for (const t of TIMES) if (t === key) return key;
     if (m1 === 0 && m2 === 0) {
       const alt = `${pad2(h1)}:00–${pad2(h2)}:00`;
       for (const t of TIMES) if (t === alt) return alt;
@@ -1242,10 +1193,10 @@ tbody th {
 
         function commitPeople(newP1, newP2){
           const combined = joinPeople([newP1, newP2]);
-          // At top of commitPeople function:
-          if (!window.appReady || !window.appReady.loaded) {
-            console.warn("commitPeople called before app ready — ignoring");
-            return;
+          // Guard: ensure state/settings are present and weekStartISO exists
+          if (!state || !state.settings || !state.settings.weekStartISO) {
+            console.warn("commitPeople called before state.settings populated — ignoring");
+            return Promise.resolve(null);
           }
           return saveSlotToBackend({
             range: activeRange, context: ctxId, day, time,
@@ -1415,133 +1366,163 @@ tbody th {
     renderAll();
   }
 
-// Load week from backend (single canonical implementation)
-async function loadWeekFromBackend({ silent = false } = {}) {
-  const { year, term, weekStartISO } = state.settings;
-  let raw;
-  try {
-    raw = await apiPost("loadWeek", { year, term, weekStartISO });
-  } catch (e) {
-    setBackendStatus(false);
-    toast(`Load failed: ${e.message}`, "bad");
-    return;
-  }
-
-  setBackendStatus(true);
-
-  // Support both shapes: { data: {...} } or top-level {...}
-  let payload = (raw && raw.data) ? raw.data : raw;
-
-  // If backend returned empty object or malformed response, synthesize an empty week payload
-  if (!payload || typeof payload !== "object" || !payload.scopeKey) {
-    const fallbackScopeKey = `${year}::${term}::${weekStartISO}`;
-    console.warn(
-      "loadWeekFromBackend: backend returned empty/malformed payload; using empty fallback",
-      { raw, fallbackScopeKey }
-    );
-    payload = { scopeKey: fallbackScopeKey, slots: {} };
-    // optional: persist this empty-week to the sheet by calling a create-week endpoint
-  }
-
-  applyWeekFromBackend(payload);
-  renderAll();
-  markUpdated("Loaded");
-
-  if (!silent) toast("Refreshed from shared Sheet.", "good");
-}
-
-  // -----------------------
-  // Single correct saveSlotToBackend
-  // -----------------------
-async function saveSlotToBackend(slot, opts) {
-  // Defensive beginning of saveSlotToBackend — paste at start of that function
-  // normalize opts and default optimistic = true
-  opts = (typeof opts === "object" && opts !== null) ? opts : { optimistic: true };
-  const optimistic = (opts.optimistic === undefined) ? true : !!opts.optimistic;
-  
-  // ensure state/settings
-  window.state = window.state || {};
-  state.settings = state.settings || {};
-  let { year, term, weekStartISO, yourName } = state.settings || {};
-  
-  // try slot.scopeKey if available
-  if ((!year || !term || !weekStartISO) && slot && slot.scopeKey) {
-    const parts = String(slot.scopeKey).split("::");
-    if (parts.length >= 3) {
-      year = year || parts[0];
-      term = term || parts[1];
-      weekStartISO = weekStartISO || parts.slice(2).join("::");
+  // Load week from backend (single canonical implementation)
+  async function loadWeekFromBackend({ silent = false } = {}) {
+    const { year, term, weekStartISO } = state.settings;
+    let raw;
+    try {
+      raw = await apiPost("loadWeek", { year, term, weekStartISO });
+    } catch (e) {
+      setBackendStatus(false);
+      toast(`Load failed: ${e.message}`, "bad");
+      return;
     }
-  }
-  
-  // try global fallback
-  if ((!year || !term || !weekStartISO) && (state && state.scopeKey)) {
-    const parts = String(state.scopeKey).split("::");
-    if (parts.length >= 3) {
-      year = year || parts[0];
-      term = term || parts[1];
-      weekStartISO = weekStartISO || parts.slice(2).join("::");
-    }
-  }
-  
-  // final fallback (today)
-  if (!year || !term || !weekStartISO) {
-    const d = new Date();
-    year = year || String(d.getFullYear());
-    term = term || "Unknown";
-    weekStartISO = weekStartISO || d.toISOString().slice(0,10);
-    console.warn("saveSlotToBackend: missing year/term/weekStartISO — using fallback", { year, term, weekStartISO });
-  }
-  
-  // ensure state.settings updated so subsequent calls see same values
-  state.settings.year = year;
-  state.settings.term = term;
-  state.settings.weekStartISO = weekStartISO;
-  state.settings.yourName = state.settings.yourName || yourName || "";
-  
-  // then proceed to build payloadSlot as before
-  const payloadSlot = {
-    scopeKey: `${year}::${term}::${weekStartISO}`,
-    range: slot.range || "",
-    context: slot.context || "",
-    day: slot.day || "",
-    time: timeKey, // MUST match the same format used in applyWeek/from backend
-    person: slot.person || "",
-    participantScheduled: !!slot.participantScheduled,
-    participantCount: normalizedParticipantCount,
-    updatedAtISO: (new Date()).toISOString(),
-    updatedBy: (yourName || "").trim()
-  };
 
-  // optimistic UI update (apply before network)
-  if (optimistic) {
-    const s = currentLocalSlots();
-    if (s && s[payloadSlot.range] && s[payloadSlot.range][payloadSlot.context] && s[payloadSlot.range][payloadSlot.context][payloadSlot.day]) {
-      const t = payloadSlot.time;
-      s[payloadSlot.range][payloadSlot.context][payloadSlot.day][t] = {
-        person: payloadSlot.person,
-        participantScheduled: payloadSlot.participantScheduled,
-        participantCount: payloadSlot.participantCount
-      };
-      saveCache();
-      renderAll();
-    }
-  }
-
-  pendingSaves++;
-  try {
-    await apiPost("saveSlot", { slot: payloadSlot });
     setBackendStatus(true);
-    markUpdated("Saved");
-    return { ok: true };
-  } catch (e) {
-    setBackendStatus(false);
-    toast(`Save failed: ${e.message}. (Hit Refresh after unblocking.)`, "bad");
-    throw e;
-  } finally {
-    pendingSaves = Math.max(0, pendingSaves - 1);
+
+    // Support both shapes: { data: {...} } or top-level {...}
+    let payload = (raw && raw.data) ? raw.data : raw;
+
+    // If backend returned empty object or malformed response, synthesize an empty week payload
+    if (!payload || typeof payload !== "object" || !payload.scopeKey) {
+      const fallbackScopeKey = `${year}::${term}::${weekStartISO}`;
+      console.warn(
+        "loadWeekFromBackend: backend returned empty/malformed payload; using empty fallback",
+        { raw, fallbackScopeKey }
+      );
+      payload = { scopeKey: fallbackScopeKey, slots: {} };
+      // optional: persist this empty-week to the sheet by calling a create-week endpoint
+    }
+
+    applyWeekFromBackend(payload);
+    renderAll();
+    markUpdated("Loaded");
+
+    if (!silent) toast("Refreshed from shared Sheet.", "good");
   }
-}
+
+  // -----------------------
+  // Single corrected saveSlotToBackend
+  // -----------------------
+  async function saveSlotToBackend(slot = {}, opts) {
+    // Normalize opts
+    opts = (typeof opts === "object" && opts !== null) ? opts : {};
+    const optimistic = opts.optimistic !== undefined ? !!opts.optimistic : true;
+
+    // Defensive state
+    window.state = window.state || {};
+    state.settings = state.settings || {};
+    let { year, term, weekStartISO, yourName } = state.settings || {};
+
+    // Accept slot fields (slot.time expected to be same format used in renderContext's `time`)
+    const rawTime = slot.time || slot.timeRaw || "";
+
+    // Try to infer missing identifying fields from slot.scopeKey or state.scopeKey
+    const maybeScopeKey = slot.scopeKey || state.settings.scopeKey || state.scopeKey;
+    if ((!year || !term || !weekStartISO) && maybeScopeKey) {
+      const parts = String(maybeScopeKey).split("::");
+      if (parts.length >= 3) {
+        year = year || parts[0];
+        term = term || parts[1];
+        weekStartISO = weekStartISO || parts.slice(2).join("::");
+      }
+    }
+
+    // Fallback to values on state (if any)
+    if ((!year || !term || !weekStartISO) && state && state.settings) {
+      year = year || state.settings.year;
+      term = term || state.settings.term;
+      weekStartISO = weekStartISO || state.settings.weekStartISO;
+    }
+
+    // Final fallback to today (keeps app from throwing uncaught exceptions); warn loudly
+    if (!year || !term || !weekStartISO) {
+      const d = new Date();
+      year = year || String(d.getFullYear());
+      term = term || "Unknown";
+      weekStartISO = weekStartISO || d.toISOString().slice(0,10);
+      console.warn("saveSlotToBackend: missing year/term/weekStartISO — using fallback", { year, term, weekStartISO });
+    }
+
+    // Persist safe values back to state so subsequent calls see the same identifiers
+    state.settings.year = year;
+    state.settings.term = term;
+    state.settings.weekStartISO = weekStartISO;
+    state.settings.yourName = state.settings.yourName || yourName || "";
+
+    // Normalize the time key reliably
+    const timeKey = normalizeToInternalTimeKey(rawTime) || rawTime || null;
+    if (!timeKey) {
+      // We cannot proceed without a valid time key — abort but don't throw uncaught
+      const msg = `Invalid time value: "${rawTime}"`;
+      console.warn("saveSlotToBackend: " + msg);
+      toast("Save aborted: invalid time format.", "bad");
+      return Promise.reject(new Error(msg));
+    }
+
+    // Normalize participantCount
+    const participantCount = (slot.participantCount !== undefined)
+      ? Number(slot.participantCount)
+      : (slot.participantScheduled ? 1 : 0);
+    const normalizedParticipantCount = Number.isFinite(participantCount) ? Math.max(0, Math.floor(participantCount)) : (slot.participantScheduled ? 1 : 0);
+
+    // Build payload slot object expected by backend
+    const payloadSlot = {
+      scopeKey: `${year}::${term}::${weekStartISO}`,
+      range: slot.range || "",
+      context: slot.context || "",
+      day: slot.day || "",
+      time: timeKey,
+      person: slot.person || "",
+      participantScheduled: !!slot.participantScheduled,
+      participantCount: normalizedParticipantCount,
+      updatedAtISO: (new Date()).toISOString(),
+      updatedBy: (state.settings.yourName || "").trim()
+    };
+
+    // Optimistic UI update
+    if (optimistic) {
+      try {
+        const s = currentLocalSlots();
+        if (
+          s &&
+          s[payloadSlot.range] &&
+          s[payloadSlot.range][payloadSlot.context] &&
+          s[payloadSlot.range][payloadSlot.context][payloadSlot.day] &&
+          payloadSlot.time in s[payloadSlot.range][payloadSlot.context][payloadSlot.day]
+        ) {
+          s[payloadSlot.range][payloadSlot.context][payloadSlot.day][payloadSlot.time] = {
+            person: payloadSlot.person,
+            participantScheduled: payloadSlot.participantScheduled,
+            participantCount: payloadSlot.participantCount
+          };
+          saveCache();
+          renderAll();
+        } else {
+          // If local structure is missing, log for debugging but continue to attempt save
+          console.warn("saveSlotToBackend: optimistic update skipped due to missing local slot structure", payloadSlot);
+        }
+      } catch (e) {
+        console.warn("saveSlotToBackend: optimistic update failed", e);
+      }
+    }
+
+    // Throttle/lock counters
+    pendingSaves++;
+
+    try {
+      const resp = await apiPost("saveSlot", { slot: payloadSlot });
+      setBackendStatus(true);
+      markUpdated("Saved");
+      return resp;
+    } catch (e) {
+      setBackendStatus(false);
+      toast(`Save failed: ${e.message}. Please Refresh.`, "bad");
+      throw e;
+    } finally {
+      pendingSaves = Math.max(0, pendingSaves - 1);
+    }
+  }
 
   // Week navigation & admin & export/import (same as before)...
   function shiftWeek(deltaWeeks){
@@ -1754,9 +1735,12 @@ async function saveSlotToBackend(slot, opts) {
       await loadWeekFromBackend({ silent:true });
       markUpdated("Loaded");
       toast("Connected. Loaded shared data.", "good");
+      // mark app as ready (debug helper)
+      window.appReady = { loaded: true };
     }catch(e){
       toast(`Backend not reachable: ${e.message}. Showing local cache.`, "bad");
       renderAll();
+      window.appReady = { loaded: true };
     }
   })();
   // expose debug helpers to the console
@@ -1767,8 +1751,3 @@ async function saveSlotToBackend(slot, opts) {
 </body>
 
 </html>
-
-
-
-
-
