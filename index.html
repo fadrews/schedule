@@ -1,61 +1,1419 @@
-<!-- index.html -->
 <!doctype html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>Schedule demo</title>
-</head>
-<body>
-  <h3>Schedule demo — save and remove</h3>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ABC Lab Schedule (Sheets)</title>
+  <style>
+    :root{
+      /* Brighter palette */
+      --bg:#0a0f1f;
+      --text:#f3f6ff;
+      --muted:#c9d3f2;
+      --accent:#8fb2ff;
+      --accent2:#9df2c6;
+      --good:#4be29b;
+      --bad:#ff6b93;
 
-  <div>
-    <label>Person: <input id="person" value="Frank"></label><br>
-    <label>ScopeKey: <input id="scopeKey" value="2026::Spring::2026-03-02"></label><br>
-    <label>Day: <input id="day" value="Mon"></label><br>
-    <label>Time: <input id="time" value="09:00–10:00"></label><br>
-    <label>Count: <input id="count" type="number" value="2"></label><br>
-    <button id="saveBtn">Save slot</button>
-    <button id="removeBtn">Remove slot</button>
-  </div>
+      --panel: rgba(255,255,255,.08);
+      --panel2: rgba(255,255,255,.04);
+      --border: rgba(255,255,255,.14);
+      --border2: rgba(255,255,255,.10);
 
-  <pre id="out"></pre>
-
-  <script>
-    const api = '/api/exec'; // Vercel proxy
-    const out = document.getElementById('out');
-
-    async function postAction(action, body) {
-      const res = await fetch(api, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(Object.assign({ action }, body))
-      });
-      const j = await res.json();
-      out.textContent = JSON.stringify(j, null, 2);
+      --shadow: 0 12px 30px rgba(0,0,0,.32);
+      --radius:16px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:var(--sans);
+      background:
+        radial-gradient(1100px 800px at 18% 0%, rgba(143,178,255,.55) 0%, rgba(10,15,31,.0) 60%),
+        radial-gradient(900px 700px at 92% 18%, rgba(157,242,198,.30) 0%, rgba(10,15,31,.0) 55%),
+        linear-gradient(180deg, #0a0f1f 0%, #070b16 100%);
+      color:var(--text);
     }
 
-    document.getElementById('saveBtn').addEventListener('click', () => {
-      const payload = {
-        scopeKey: document.getElementById('scopeKey').value,
-        day: document.getElementById('day').value,
-        time: document.getElementById('time').value,
-        person: document.getElementById('person').value,
-        participantScheduled: true,
-        participantCount: Number(document.getElementById('count').value),
-        updatedAtISO: new Date().toISOString(),
-        updatedBy: 'demo-ui'
-      };
-      postAction('saveSlot', payload);
+    header{padding:16px 16px 0;max-width:none;margin:0;}
+    main{padding:12px 16px 24px;max-width:none;margin:0;}
+
+    .topbar{
+      background: linear-gradient(180deg, rgba(255,255,255,.09), rgba(255,255,255,.04));
+      border-bottom:1px solid rgba(255,255,255,.10);
+      box-shadow: 0 10px 26px rgba(0,0,0,.22);
+      padding:14px 16px;
+      border-radius: 0 0 18px 18px;
+    }
+
+    .titlebar{
+      display:flex;
+      gap:14px;
+      align-items:flex-start;
+      justify-content:space-between;
+      flex-wrap:wrap;
+      width:100%;
+    }
+
+    h1{ margin:0; font-size:18px; font-weight:800; letter-spacing:.2px }
+    .subtitle{ margin:6px 0 0; font-size:13px; color:var(--muted); line-height:1.35; max-width:980px; }
+
+    .weekBig{ font-size:20px; font-weight:900; letter-spacing:.2px; color:var(--text); line-height:1.1; margin-top:2px; }
+    .weekBig small{ display:block; font-size:12px; font-weight:700; color:var(--muted); margin-top:6px; }
+
+    .panel{ background: linear-gradient(180deg, var(--panel), var(--panel2)); border:1px solid var(--border2); box-shadow:var(--shadow); border-radius:var(--radius); padding:14px; }
+
+    #panelABC{ border-color: rgba(255,255,255,.12); }
+    #panelHF{ border-color: rgba(255,255,255,.20); background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.05)); }
+
+    .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;}
+    .leftControls,.rightControls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+
+    .tabs{ display:inline-flex; background:rgba(0,0,0,.20); border:1px solid rgba(255,255,255,.12); border-radius:999px; padding:4px; gap:4px; }
+    .tab{ border:0;color:var(--muted);background:transparent; padding:7px 10px;border-radius:999px;font-size:12px;cursor:pointer;user-select:none; }
+    .tab.active{ background:rgba(143,178,255,.20); color:var(--text); box-shadow: inset 0 0 0 1px rgba(143,178,255,.32); }
+
+    .btn{ border:1px solid rgba(255,255,255,.14); background:rgba(0,0,0,.14); color:var(--text); padding:8px 10px; border-radius:12px; cursor:pointer; font-size:12px; }
+    .btn:hover{border-color:rgba(255,255,255,.22)}
+    .btn.primary{ background:rgba(143,178,255,.22); border-color:rgba(143,178,255,.34); }
+    .btn.danger{ background:rgba(255,107,147,.14); border-color:rgba(255,107,147,.30); }
+
+    .field{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+    input[type="text"], input[type="password"]{ background:rgba(0,0,0,.18); color:var(--text); border:1px solid rgba(255,255,255,.14); border-radius:12px; padding:8px 10px; font-size:12px; min-width:220px; outline:none; }
+    input[type="text"]::placeholder, input[type="password"]::placeholder{color:rgba(201,211,242,.78)}
+    .compactInput{min-width:180px}
+
+    .chip{ display:inline-flex; align-items:center; gap:8px; background:rgba(0,0,0,.14); border:1px solid rgba(255,255,255,.12); border-radius:999px; padding:6px 10px; font-size:12px; color:var(--muted); white-space:nowrap; }
+    .chip strong{color:var(--text); font-weight:800}
+
+    .note{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.35;}
+
+    .twoCol{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px; width:100%; justify-content:start; align-items:start; }
+    @media (max-width: 1100px){.twoCol{grid-template-columns:1fr}}
+    .twoCol.single #panelABC, .twoCol.single #panelHF{ grid-column: 1 / -1; }
+
+    .gridWrap{ overflow-x:auto; overflow-y:hidden; border-radius:14px; border:1px solid rgba(255,255,255,.12); margin-top:12px; background:rgba(0,0,0,.12); width:100%; }
+
+    table{ border-collapse:separate; border-spacing:0; width:100%; font-size:12px; table-layout: fixed; min-width: 0; }
+    thead th:first-child, tbody th{ width: 120px; }
+    thead th, td{ overflow:hidden; text-overflow:ellipsis; }
+    td{ min-width: 0; }
+
+    tr:last-child td{border-bottom:0}
+    td:last-child{border-right:0}
+
+    .slot{display:flex;flex-direction:column;gap:6px;min-height:92px;}
+    select{ width:100%; background:rgba(0,0,0,.18); color:var(--text); border:1px solid rgba(255,255,255,.14); border-radius:12px; padding:7px 8px; font-size:12px; outline:none; }
+    .slotTop{display:flex;gap:8px;align-items:center;justify-content:space-between;}
+    .who{font-weight:900;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:140px;}
+    .smallBtn{ border:1px solid rgba(255,255,255,.14); background:rgba(0,0,0,.14); color:var(--text); padding:6px 8px; border-radius:12px; font-size:11px; cursor:pointer; }
+    .smallBtn:hover{border-color:rgba(255,255,255,.22)}
+
+    .badge{ display:inline-flex; align-items:center; gap:6px; border-radius:999px; padding:5px 8px; font-size:11px; background:rgba(0,0,0,.14); border:1px solid rgba(255,255,255,.12); color:var(--muted); width:max-content; }
+    .badge.bad{ background:rgba(255,107,147,.16); border-color:rgba(255,107,147,.34); color:var(--text) }
+    .badge.good{ background:rgba(75,226,155,.14); border-color:rgba(75,226,155,.28); color:var(--text) }
+
+    .inline{display:flex; gap:8px; align-items:center; flex-wrap:wrap;}
+    label{display:flex; gap:8px; align-items:center; cursor:pointer; user-select:none; color:var(--muted);}
+    input[type="checkbox"]{width:15px;height:15px;accent-color:var(--accent);}
+
+    .selRow{ display:grid; grid-template-columns: 1fr auto 1fr; gap:8px; align-items:center; width:100%; }
+    .selRow.one{ grid-template-columns: 1fr auto; }
+    .selRow select{ width:100%; }
+    .addBtn{ min-width:34px; padding:6px 8px; text-align:center; }
+
+    .hidden{display:none !important}
+
+    .toast{ position:fixed;bottom:16px;right:16px; background:rgba(0,0,0,.30); border:1px solid rgba(255,255,255,.16); backdrop-filter: blur(10px); box-shadow:var(--shadow); padding:10px 12px; border-radius:14px; font-size:12px; color:var(--text); max-width:min(560px, calc(100vw - 32px)); display:none; }
+    .toast.show{display:block}
+
+    .menuWrap{position:relative; display:inline-block;}
+    .menu{ position:absolute; right:0; top:42px; width:min(520px, calc(100vw - 24px)); background:rgba(12,16,32,.96); border:1px solid rgba(255,255,255,.16); border-radius:16px; box-shadow:var(--shadow); padding:12px; z-index:50; display:none; }
+    .menu.show{display:block}
+    .menu h3{margin:0 0 10px 0;font-size:13px;color:var(--text);}
+    .menuRow{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:10px;}
+    .menuRow > div{flex:1;min-width:160px;}
+    .menu small{color:var(--muted); display:block; line-height:1.35;}
+
+    .statusDot{ display:inline-block;width:9px;height:9px;border-radius:999px;background:rgba(255,255,255,.25); box-shadow:0 0 0 2px rgba(0,0,0,.18) inset; margin-right:6px; }
+    .dotGood{background:rgba(75,226,155,.92)}
+    .dotBad{background:rgba(255,107,147,.92)}
+
+    #blockerBanner{ border-color: rgba(255,107,147,.34); background: linear-gradient(180deg, rgba(255,107,147,.12), rgba(255,255,255,.03)); }
+
+    .slot.participant{ border: 1px solid rgba(255,107,147,.55); background: linear-gradient(180deg, rgba(255,107,147,.18), rgba(0,0,0,.10)); border-radius: 14px; padding: 10px; box-shadow: 0 0 0 1px rgba(255,107,147,.25) inset; }
+    .slot.participant label{ color: var(--text); font-weight: 900; }
+    .slot.participant input[type="checkbox"]{ transform: scale(1.15); }
+
+    #panelABC .chip strong{ color: var(--accent); text-shadow: 0 0 10px rgba(143,178,255,.35); }
+    #panelHF .chip strong{ color: var(--accent2); text-shadow: 0 0 10px rgba(157,242,198,.30); }
+
+    /* count controls */
+    .countControls { display:inline-flex; gap:6px; align-items:center; margin-left:6px; }
+    .countDisplay { min-width:28px; text-align:center; font-weight:700; color:var(--text); }
+  </style>
+</head>
+
+<body>
+  <div class="topbar">
+    <div class="titlebar">
+      <div>
+        <h1>ABC Lab Schedule</h1>
+        <p class="subtitle">
+          Shared schedule backed by Google Sheets. Auto-refresh is enabled. Scope: <strong>Year + Term + Week</strong>.
+        </p>
+      </div>
+
+      <div class="weekBig" id="weekBigLabel">Week: —<small id="termBigLabel">—</small></div>
+
+      <div class="inline" style="align-items:center;">
+        <span class="chip"><span class="statusDot" id="connDot"></span>Backend: <strong id="connLabel">—</strong></span>
+        <span class="chip">Last updated: <strong id="lastUpdatedLabel">—</strong></span>
+
+        <div class="menuWrap">
+          <button class="btn" id="adminBtn" type="button">Admin ▾</button>
+          <div class="menu" id="adminMenu" aria-label="Admin menu">
+            <h3>Admin</h3>
+
+            <div class="menuRow">
+              <div>
+                <small>Your name (optional; stored locally)</small>
+                <input id="yourNameInput" class="compactInput" type="text" placeholder="e.g., Frank Drews" />
+              </div>
+              <div style="min-width:180px;">
+                <small>Use Vercel proxy</small>
+                <label style="display:flex;align-items:center;gap:8px;">
+                  <input id="useProxyCheckbox" type="checkbox" />
+                  <small style="color:var(--muted)">When checked uses <code>/api/exec</code></small>
+                </label>
+              </div>
+            </div>
+
+            <div class="menuRow">
+              <div>
+                <small>Backend URL (Apps Script Web App)</small>
+                <input id="backendUrlInput" type="text" placeholder="https://script.google.com/.../exec" />
+              </div>
+              <div>
+                <small>Sheets/Form URL</small>
+                <input id="formUrlInput" type="text" placeholder="https://docs.google.com/forms/..." />
+              </div>
+            </div>
+
+            <div class="menuRow">
+              <div style="flex:1">
+                <small>Year</small>
+                <select id="yearSelect"></select>
+              </div>
+              <div style="flex:1">
+                <small>Term</small>
+                <select id="termSelect">
+                  <option value="Spring">Jan–Apr (Spring)</option>
+                  <option value="Fall">Sep–Dec (Fall)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="menuRow">
+              <div style="flex:1;min-width:220px;">
+                <small>Admin key (only needed for reset if enabled in Apps Script)</small>
+                <input id="adminKeyInput" type="password" placeholder="Admin key (optional)" />
+              </div>
+              <div style="display:flex;gap:8px;align-items:flex-end;">
+                <button class="btn" id="openFormBtn" type="button">Open Sheets/Form</button>
+                <button class="btn" id="saveAdminSettingsBtn" type="button">Save</button>
+              </div>
+            </div>
+
+            <div class="menuRow">
+              <button class="btn primary" id="applyTermBtn" type="button">Apply Year/Term</button>
+              <button class="btn danger" id="resetWeekBtn" type="button">Reset this week</button>
+            </div>
+
+            <div class="menuRow" style="margin-bottom:0;">
+              <button class="btn danger" id="resetAllBtn" type="button">Reset ALL data</button>
+            </div>
+
+            <small style="margin-top:10px;">Reset actions modify the shared Sheet. If enabled, enter the Admin key. Backend and form URLs persist locally.</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<main>
+  <div class="panel" style="display:none; margin-bottom:12px;" id="blockerBanner">
+    <div class="inline" style="justify-content:space-between; align-items:flex-start;">
+      <div>
+        <div style="font-weight:900; margin-bottom:6px;">Saving/Loading is blocked</div>
+        <div style="color:var(--muted); font-size:12px; line-height:1.35;">
+          This page can’t reach the shared Google Sheets backend. The most common cause is an ad/tracker blocker or Firefox Enhanced Tracking Protection.
+          <br>
+          <span style="font-family:var(--mono); font-size:11px;">Backend: <span id="backendUrlText"></span></span>
+        </div>
+      </div>
+      <button class="btn" id="blockerHelpBtn" type="button">How to fix</button>
+    </div>
+
+    <div id="blockerHelp" class="note" style="display:none; margin-top:10px;">
+      <strong>Try this:</strong>
+      <ol style="margin:8px 0 0 18px; padding:0; color:var(--muted);">
+        <li><strong>Disable blockers for this site</strong> (uBlock/AdBlock/Ghostery/etc.) or allowlist the origin you use to host this page plus <span style="font-family:var(--mono)">script.google.com</span>.</li>
+        <li><strong>Firefox Enhanced Tracking Protection:</strong> click the shield icon near the address bar → turn protection off for this site → reload.</li>
+        <li>Reload the page and click <strong>Refresh</strong>.</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="controls">
+      <div class="leftControls">
+        <div class="tabs" role="tablist" aria-label="Schedule range">
+          <button class="tab active" id="tab-weekdays" type="button">Weekdays</button>
+          <button class="tab" id="tab-weekend" type="button">Weekend</button>
+        </div>
+
+        <div class="tabs" role="tablist" aria-label="Context display">
+          <button class="tab active" id="view-both" type="button">Both</button>
+          <button class="tab" id="view-abc" type="button">ABC only</button>
+          <button class="tab" id="view-hf" type="button">HF only</button>
+        </div>
+
+        <div class="inline">
+          <button class="btn" id="prevWeekBtn" type="button">◀ Prev week</button>
+          <button class="btn" id="currentWeekBtn" type="button">Current week</button>
+          <button class="btn" id="nextWeekBtn" type="button">Next week ▶</button>
+          <button class="btn" id="refreshBtn" type="button">Refresh</button>
+        </div>
+
+        <span class="chip">Auto-refresh: <strong id="autoRefreshLabel">—</strong></span>
+      </div>
+
+      <div class="rightControls">
+        <div class="field">
+          <input id="nameInput" type="text" placeholder="Add RA name and press Enter" />
+          <button class="btn primary" id="addNameBtn" type="button">Add</button>
+        </div>
+        <button class="btn" id="exportBtn" type="button">Export</button>
+        <button class="btn" id="importBtn" type="button">Import</button>
+      </div>
+    </div>
+
+    <p class="note">
+      Weekdays are <strong>Mon–Fri, 09:00–17:00</strong>. Weekend scheduling is separate.
+      Auto-refresh pulls changes from other users periodically (skips while your saves are pending).
+    </p>
+  </div>
+
+  <div class="twoCol">
+    <section class="panel" id="panelABC">
+      <div class="inline" style="justify-content:space-between;">
+        <div class="inline"><span class="chip">Context: <strong>ABC Lab</strong></span></div>
+        <span class="badge" id="abcSummary">0 filled</span>
+      </div>
+      <div class="gridWrap" id="gridWrapABC"></div>
+    </section>
+
+    <section class="panel" id="panelHF">
+      <div class="inline" style="justify-content:space-between;">
+        <div class="inline"><span class="chip">Context: <strong>HF Project</strong></span></div>
+        <span class="badge" id="hfSummary">0 filled</span>
+      </div>
+      <div class="gridWrap" id="gridWrapHF"></div>
+    </section>
+  </div>
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+  // =============================
+  // CONFIG / BACKEND SETTINGS
+  // =============================
+  // Default fallback Apps Script Web App (kept for convenience; replace with your deployment if needed).
+  const FALLBACK_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwfNCwtEJmeWsP9bTaa6xXYTLSRWCuXb86An5EemgP1SIAnTYiJLx55MP92m2fArwXv5A/exec";
+
+  // Local storage keys for persisted admin settings
+  const LS_KEYS = {
+    adminSettings: "abc_lab_admin_settings_v1",
+    cache: "abc_lab_schedule_cache_v3_ui"
+  };
+
+  const LOCAL_CACHE_KEY = LS_KEYS.cache;
+  const AUTO_REFRESH_MS = 45000; // 45s
+
+  // UI constants
+  const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri"];
+  const WEEKEND  = ["Sat", "Sun"];
+  const TIMES = [];
+  for (let h = 9; h < 17; h++) {
+    const pad = (n) => String(n).padStart(2, "0");
+    TIMES.push(`${pad(h)}:00–${pad(h+1)}:00`);
+  }
+
+  // DOM helpers
+  const el = (id) => document.getElementById(id);
+
+  const ui = {
+    tabWeekdays: el("tab-weekdays"),
+    tabWeekend:  el("tab-weekend"),
+
+    viewBoth: el("view-both"),
+    viewABC:  el("view-abc"),
+    viewHF:   el("view-hf"),
+
+    prevWeekBtn: el("prevWeekBtn"),
+    currentWeekBtn: el("currentWeekBtn"),
+    nextWeekBtn: el("nextWeekBtn"),
+    refreshBtn:  el("refreshBtn"),
+
+    panelABC: el("panelABC"),
+    panelHF:  el("panelHF"),
+
+    nameInput: el("nameInput"),
+    addNameBtn: el("addNameBtn"),
+
+    exportBtn: el("exportBtn"),
+    importBtn: el("importBtn"),
+
+    gridWrapABC: el("gridWrapABC"),
+    gridWrapHF: el("gridWrapHF"),
+
+    abcSummary: el("abcSummary"),
+    hfSummary: el("hfSummary"),
+
+    toast: el("toast"),
+
+    connDot: el("connDot"),
+    connLabel: el("connLabel"),
+
+    lastUpdatedLabel: el("lastUpdatedLabel"),
+    autoRefreshLabel: el("autoRefreshLabel"),
+
+    weekBigLabel: el("weekBigLabel"),
+    termBigLabel: el("termBigLabel"),
+
+    adminBtn: el("adminBtn"),
+    adminMenu: el("adminMenu"),
+    yearSelect: el("yearSelect"),
+    termSelect: el("termSelect"),
+    adminKeyInput: el("adminKeyInput"),
+    yourNameInput: el("yourNameInput"),
+    applyTermBtn: el("applyTermBtn"),
+    resetWeekBtn: el("resetWeekBtn"),
+    resetAllBtn: el("resetAllBtn"),
+
+    blockerBanner: el("blockerBanner"),
+    backendUrlText: el("backendUrlText"),
+    blockerHelpBtn: el("blockerHelpBtn"),
+    blockerHelp: el("blockerHelp"),
+
+    // new admin controls
+    backendUrlInput: el("backendUrlInput"),
+    formUrlInput: el("formUrlInput"),
+    useProxyCheckbox: el("useProxyCheckbox"),
+    openFormBtn: el("openFormBtn"),
+    saveAdminSettingsBtn: el("saveAdminSettingsBtn")
+  };
+
+  function toast(msg, kind="info"){
+    ui.toast.innerHTML = msg;
+    ui.toast.classList.add("show");
+    ui.toast.style.borderColor = kind === "bad"
+      ? "rgba(255,107,147,.40)"
+      : kind === "good"
+        ? "rgba(75,226,155,.34)"
+        : "rgba(255,255,255,.18)";
+    clearTimeout(toast._t);
+    toast._t = setTimeout(() => ui.toast.classList.remove("show"), 3000);
+  }
+
+  // =============================
+  // People parsing (2 RAs max)
+  // =============================
+  const PEOPLE_DELIM = " / ";
+  function splitPeople(s){
+    const raw = String(s || "").trim();
+    if(!raw) return [];
+    return raw.split(PEOPLE_DELIM).map(x => x.trim()).filter(Boolean).slice(0,2);
+  }
+  function joinPeople(arr){
+    const clean = (arr || []).map(x => String(x||"").trim()).filter(Boolean);
+    const out = [];
+    for(const n of clean){
+      if(!out.includes(n)) out.push(n);
+      if(out.length >= 2) break;
+    }
+    return out.join(PEOPLE_DELIM);
+  }
+
+  // =============================
+  // Admin settings persistence
+  // =============================
+  function defaultAdminSettings(){
+    return {
+      useProxy: true,                       // default to using Vercel proxy at /api/exec
+      backendUrl: FALLBACK_APPS_SCRIPT_URL, // direct Apps Script fallback
+      formUrl: ""                           // optional form/sheets URL
+    };
+  }
+  function loadAdminSettings(){
+    try{
+      const raw = localStorage.getItem(LS_KEYS.adminSettings);
+      if(!raw) return defaultAdminSettings();
+      const parsed = JSON.parse(raw);
+      return Object.assign(defaultAdminSettings(), parsed || {});
+    }catch{
+      return defaultAdminSettings();
+    }
+  }
+  function saveAdminSettings(settings){
+    localStorage.setItem(LS_KEYS.adminSettings, JSON.stringify(settings));
+  }
+
+  let adminSettings = loadAdminSettings();
+
+  // compute effective API URL based on admin settings
+  function getEffectiveApiUrl(){
+    // If useProxy is true, use relative path so Vercel proxy handles it.
+    if(adminSettings.useProxy) return "/api/exec";
+    // otherwise, use the configured backendUrl (Apps Script)
+    return adminSettings.backendUrl || FALLBACK_APPS_SCRIPT_URL;
+  }
+
+  // =============================
+  // API (blocker-friendly: text/plain)
+  // =============================
+  async function apiPost(action, payload = {}) {
+    const API_URL = getEffectiveApiUrl();
+    const body = JSON.stringify({ action, ...payload });
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body,
+      // include credentials only when calling same-origin proxy (helps some setups)
+      credentials: adminSettings.useProxy ? "same-origin" : "omit"
     });
 
-    document.getElementById('removeBtn').addEventListener('click', () => {
-      const payload = {
-        scopeKey: document.getElementById('scopeKey').value,
-        day: document.getElementById('day').value,
-        time: document.getElementById('time').value
+    const txt = await res.text();
+    let data;
+    try { data = JSON.parse(txt); }
+    catch { data = { ok:false, error:"Non-JSON response from backend." }; }
+
+    if (!data.ok) throw new Error(data.error || "Backend error");
+    return data;
+  }
+
+  // =============================
+  // State (unchanged)
+  // =============================
+  function pad2(n){ return String(n).padStart(2,"0"); }
+  function toISODate(d){ return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`; }
+  function parseISODate(s){
+    const [y,m,dd] = s.split("-").map(Number);
+    return new Date(y, (m-1), dd);
+  }
+  function addDays(d, days){
+    const x = new Date(d.getTime());
+    x.setDate(x.getDate()+days);
+    return x;
+  }
+  function mondayOfWeek(d){
+    const x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    const day = x.getDay();
+    const diff = (day === 0 ? -6 : 1 - day);
+    x.setDate(x.getDate() + diff);
+    x.setHours(0,0,0,0);
+    return x;
+  }
+  function termBounds(year, term){
+    if(term === "Spring"){
+      return { start: new Date(year, 0, 1), end: new Date(year, 3, 30) };
+    }
+    return { start: new Date(year, 8, 1), end: new Date(year, 11, 31) };
+  }
+  function clampWeekStartToTerm(weekStart, year, term){
+    const { start, end } = termBounds(year, term);
+    const minWeek = mondayOfWeek(start);
+    const maxWeek = mondayOfWeek(end);
+    if(weekStart < minWeek) return minWeek;
+    if(weekStart > maxWeek) return maxWeek;
+    return weekStart;
+  }
+  function dayDateLabel(dayAbbrev, weekStartISO){
+    const ws = parseISODate(weekStartISO);
+    const map = { Mon:0, Tue:1, Wed:2, Thu:3, Fri:4, Sat:5, Sun:6 };
+    const d = addDays(ws, map[dayAbbrev]);
+    return `${dayAbbrev} (${toISODate(d)})`;
+  }
+
+  function fmtTime(ts){
+    if(!ts) return "—";
+    const d = new Date(ts);
+    return d.toLocaleString(undefined, { year:"numeric", month:"2-digit", day:"2-digit", hour:"2-digit", minute:"2-digit", second:"2-digit" });
+  }
+
+  function markUpdated(kind){
+    state.meta.lastUpdatedAt = Date.now();
+    state.meta.lastUpdatedKind = kind;
+    saveCache();
+    ui.lastUpdatedLabel.textContent = `${kind} @ ${fmtTime(state.meta.lastUpdatedAt)}`;
+  }
+
+  // =============================
+  // State + cache (unchanged)
+  // =============================
+  function defaultState(){
+    const now = new Date();
+    const year = now.getFullYear();
+    const termGuess = (now.getMonth() <= 3) ? "Spring" : (now.getMonth() >= 8 ? "Fall" : "Fall");
+    const ws = clampWeekStartToTerm(mondayOfWeek(now), year, termGuess);
+    return {
+      version: 3,
+      names: [],
+      settings: {
+        year,
+        term: termGuess,
+        weekStartISO: toISODate(ws),
+        adminKey: "",
+        yourName: ""
+      },
+      meta: {
+        lastUpdatedAt: 0,
+        lastUpdatedKind: ""
+      },
+      cacheSlotsByScope: {}
+    };
+  }
+
+  function loadCache(){
+    try{
+      const raw = localStorage.getItem(LOCAL_CACHE_KEY);
+      if(!raw) return defaultState();
+      const parsed = JSON.parse(raw);
+      if(!parsed || typeof parsed !== "object" || !parsed.settings) return defaultState();
+      if(!parsed.cacheSlotsByScope) parsed.cacheSlotsByScope = {};
+      if(!Array.isArray(parsed.names)) parsed.names = [];
+      if(!parsed.meta) parsed.meta = { lastUpdatedAt:0, lastUpdatedKind:"" };
+      if(typeof parsed.settings.yourName !== "string") parsed.settings.yourName = "";
+      return parsed;
+    }catch{
+      return defaultState();
+    }
+  }
+
+  function saveCache(){
+    localStorage.setItem(LOCAL_CACHE_KEY, JSON.stringify(state));
+  }
+
+  let state = loadCache();
+
+  // =============================
+  // Backend status and ping
+  // =============================
+  let backendOk = false;
+  let pendingSaves = 0;
+  let autoTimer = null;
+
+  function setBackendStatus(ok) {
+    backendOk = ok;
+    ui.connDot.classList.remove("dotGood","dotBad");
+    ui.connDot.classList.add(ok ? "dotGood" : "dotBad");
+    ui.connLabel.textContent = ok ? "Connected" : "Offline";
+
+    if (ui.blockerBanner) {
+      ui.backendUrlText.textContent = getEffectiveApiUrl();
+      ui.blockerBanner.style.display = ok ? "none" : "block";
+    }
+  }
+
+  async function backendPing() {
+    try {
+      // use a lightweight ping action that should exist server-side
+      await apiPost("ping", {});
+      setBackendStatus(true);
+    } catch (e) {
+      setBackendStatus(false);
+      throw e;
+    }
+  }
+
+  // =============================
+  // Local structure helpers (unchanged)
+  // =============================
+  function ensureLocalScopeStructure(scope){
+    if(state.cacheSlotsByScope[scope]) return;
+    const makeSlots = (days) => {
+      const dayObj = {};
+      for (const d of days) {
+        dayObj[d] = {};
+        for (const t of TIMES) dayObj[d][t] = { person: "", participantScheduled: false, participantCount: 0 };
+      }
+      return dayObj;
+    };
+    state.cacheSlotsByScope[scope] = {
+      weekdays: { ABC: makeSlots(WEEKDAYS), HF: makeSlots(WEEKDAYS) },
+      weekend:  { ABC: makeSlots(WEEKEND),  HF: makeSlots(WEEKEND)  }
+    };
+  }
+
+  function currentLocalSlots(){
+    const s = scopeKey();
+    ensureLocalScopeStructure(s);
+    return state.cacheSlotsByScope[s];
+  }
+
+  function applyWeekFromBackend(data){
+    const sKey = data.scopeKey;
+    ensureLocalScopeStructure(sKey);
+
+    const slotsStruct = state.cacheSlotsByScope[sKey];
+    const makeSlots = (days) => {
+      const dayObj = {};
+      for (const d of days) {
+        dayObj[d] = {};
+        for (const t of TIMES) dayObj[d][t] = { person: "", participantScheduled: false, participantCount: 0 };
+      }
+      return dayObj;
+    };
+
+    slotsStruct.weekdays.ABC = makeSlots(WEEKDAYS);
+    slotsStruct.weekdays.HF  = makeSlots(WEEKDAYS);
+    slotsStruct.weekend.ABC  = makeSlots(WEEKEND);
+    slotsStruct.weekend.HF   = makeSlots(WEEKEND);
+
+    const flat = data.slots || {};
+    for(const k of Object.keys(flat)){
+      const [range, ctx, day, time] = k.split("::");
+      if(!slotsStruct[range] || !slotsStruct[range][ctx] || !slotsStruct[range][ctx][day] || !slotsStruct[range][ctx][day][time]) continue;
+      slotsStruct[range][ctx][day][time] = {
+        person: flat[k].person || "",
+        participantScheduled: !!flat[k].participantScheduled,
+        participantCount: Number(flat[k].participantCount || 0)
       };
-      postAction('removeSlot', payload);
+    }
+    saveCache();
+  }
+
+  // =============================
+  // Rendering (unchanged)
+  // =============================
+  let activeRange = "weekdays";
+  let activeView  = "both";
+
+  function scopeKey(){
+    const { year, term, weekStartISO } = state.settings;
+    return `${year}::${term}::${weekStartISO}`;
+  }
+
+  (function snapToCurrentWeekOnOpen(){
+    const nowWS = mondayOfWeek(new Date());
+    const wsNowClamped = clampWeekStartToTerm(nowWS, state.settings.year, state.settings.term);
+    const nowISO = toISODate(wsNowClamped);
+
+    if(state.settings.weekStartISO !== nowISO){
+      state.settings.weekStartISO = nowISO;
+      saveCache();
+    }
+  })();
+
+  function setRange(range){
+    activeRange = range;
+    ui.tabWeekdays.classList.toggle("active", range === "weekdays");
+    ui.tabWeekend.classList.toggle("active",  range === "weekend");
+    renderAll();
+  }
+
+  function setView(view){
+    activeView = view;
+    ui.viewBoth.classList.toggle("active", view === "both");
+    ui.viewABC.classList.toggle("active",  view === "ABC");
+    ui.viewHF.classList.toggle("active",   view === "HF");
+    ui.panelABC.classList.toggle("hidden", view === "HF");
+    ui.panelHF.classList.toggle("hidden",  view === "ABC");
+    document.querySelector(".twoCol")?.classList.toggle("single", view !== "both");
+  }
+
+  function renderTop(){
+    const { year, term, weekStartISO } = state.settings;
+    const ws = parseISODate(weekStartISO);
+    const we = addDays(ws, 6);
+    const termLabel = term === "Spring" ? "Jan–Apr (Spring)" : "Sep–Dec (Fall)";
+
+    ui.weekBigLabel.innerHTML = `Week: ${toISODate(ws)} → ${toISODate(we)}<small></small>`;
+    ui.termBigLabel.textContent = `${year} • ${termLabel}`;
+
+    if(state.meta.lastUpdatedAt){
+      ui.lastUpdatedLabel.textContent = `${state.meta.lastUpdatedKind || "Updated"} @ ${fmtTime(state.meta.lastUpdatedAt)}`;
+    }else{
+      ui.lastUpdatedLabel.textContent = "—";
+    }
+    ui.autoRefreshLabel.textContent = `${Math.round(AUTO_REFRESH_MS/1000)}s`;
+  }
+
+  function countFilled(){
+    const slots = currentLocalSlots()[activeRange];
+    const countFor = (ctx) => {
+      let filled = 0, flagged = 0, participantSum = 0;
+      const days = Object.keys(slots[ctx]);
+      for(const d of days){
+        for(const t of Object.keys(slots[ctx][d])){
+          const s = slots[ctx][d][t];
+          if(s.person) filled++;
+          if(s.participantScheduled) flagged++;
+          participantSum += Number(s.participantCount || 0);
+        }
+      }
+      return { filled, flagged, participantSum };
+    };
+    return { ABC: countFor("ABC"), HF: countFor("HF") };
+  }
+
+  function renderSummary(){
+    const c = countFilled();
+    ui.abcSummary.className = "badge";
+    ui.hfSummary.className = "badge";
+    ui.abcSummary.textContent = `${c.ABC.filled} filled • ${c.ABC.participantSum} participants`;
+    ui.hfSummary.textContent  = `${c.HF.filled} filled • ${c.HF.participantSum} participants`;
+    if(c.ABC.flagged) ui.abcSummary.classList.add("bad");
+    if(c.HF.flagged)  ui.hfSummary.classList.add("bad");
+  }
+
+  function renderContext(ctxId, wrapEl){
+    const days = activeRange === "weekdays" ? WEEKDAYS : WEEKEND;
+    const slots = currentLocalSlots()[activeRange][ctxId];
+    const weekStartISO = state.settings.weekStartISO;
+
+    const table = document.createElement("table");
+    const thead = document.createElement("thead");
+    const hr = document.createElement("tr");
+
+    const th0 = document.createElement("th");
+    th0.textContent = "Time";
+    hr.appendChild(th0);
+
+    for(const d of days){
+      const th = document.createElement("th");
+      th.textContent = dayDateLabel(d, weekStartISO);
+      hr.appendChild(th);
+    }
+    thead.appendChild(hr);
+    table.appendChild(thead);
+
+    const tbody = document.createElement("tbody");
+
+    for(const time of TIMES){
+      const tr = document.createElement("tr");
+
+      const th = document.createElement("th");
+      th.textContent = time;
+      tr.appendChild(th);
+
+      for(const day of days){
+        const td = document.createElement("td");
+        const s = slots[day][time];
+
+        const people = splitPeople(s.person);
+        const p1 = people[0] || "";
+        const p2 = people[1] || "";
+
+        const slot = document.createElement("div");
+        slot.className = "slot" + (s.participantScheduled ? " participant" : "");
+
+        const top = document.createElement("div");
+        top.className = "slotTop";
+
+        const who = document.createElement("div");
+        who.className = "who";
+        who.title = s.person || "Unassigned";
+        who.textContent = s.person || "—";
+
+        const clearBtn = document.createElement("button");
+        clearBtn.className = "smallBtn";
+        clearBtn.type = "button";
+        clearBtn.textContent = "Clear";
+        clearBtn.disabled = !s.person && !s.participantScheduled && (!s.participantCount || s.participantCount === 0);
+        clearBtn.addEventListener("click", async () => {
+          await saveSlotToBackend({
+            range: activeRange, context: ctxId, day, time,
+            person: "", participantScheduled: false, participantCount: 0
+          }, { optimistic: true });
+        });
+
+        top.appendChild(who);
+        top.appendChild(clearBtn);
+
+        // --- RA row: sel1 + +/- + (optional) sel2 on same line
+        const selRow = document.createElement("div");
+        selRow.className = "selRow";
+
+        const sel1 = document.createElement("select");
+        {
+          const opt0 = document.createElement("option");
+          opt0.value = "";
+          opt0.textContent = "Select RA";
+          sel1.appendChild(opt0);
+
+          for(const name of state.names){
+            const opt = document.createElement("option");
+            opt.value = name;
+            opt.textContent = name;
+            sel1.appendChild(opt);
+          }
+        }
+        sel1.value = p1;
+
+        const sel2 = document.createElement("select");
+        {
+          const opt0 = document.createElement("option");
+          opt0.value = "";
+          opt0.textContent = "Select 2nd RA";
+          sel2.appendChild(opt0);
+
+          for(const name of state.names){
+            const opt = document.createElement("option");
+            opt.value = name;
+            opt.textContent = name;
+            sel2.appendChild(opt);
+          }
+        }
+        sel2.value = p2;
+
+        const addBtn = document.createElement("button");
+        addBtn.type = "button";
+        addBtn.className = "smallBtn addBtn";
+
+        function updateRowLayout() {
+          const has2 = !sel2.classList.contains("hidden");
+          selRow.classList.toggle("one", !has2);
+          addBtn.textContent = has2 ? "−" : "+";
+          addBtn.title = has2 ? "Remove second RA" : "Add second RA";
+        }
+
+        function commitPeople(newP1, newP2){
+          const combined = joinPeople([newP1, newP2]);
+          const cur = slots[day][time];
+          return saveSlotToBackend({
+            range: activeRange, context: ctxId, day, time,
+            person: combined,
+            participantScheduled: !!cur.participantScheduled,
+            participantCount: Number(cur.participantCount || 0)
+          }, { optimistic: true });
+        }
+
+        if (p2) sel2.classList.remove("hidden");
+        else sel2.classList.add("hidden");
+        updateRowLayout();
+
+        addBtn.addEventListener("click", async () => {
+          if (sel2.classList.contains("hidden")) {
+            sel2.classList.remove("hidden");
+            updateRowLayout();
+          } else {
+            sel2.value = "";
+            sel2.classList.add("hidden");
+            updateRowLayout();
+            await commitPeople(sel1.value, "");
+          }
+        });
+
+        sel1.addEventListener("change", async () => {
+          if (sel1.value && sel1.value === sel2.value) sel2.value = "";
+          await commitPeople(sel1.value, sel2.value);
+        });
+
+        sel2.addEventListener("change", async () => {
+          if (sel2.value && sel2.value === sel1.value) {
+            toast("Same RA already selected.", "bad");
+            sel2.value = "";
+            return;
+          }
+          await commitPeople(sel1.value, sel2.value);
+        });
+
+        selRow.appendChild(sel1);
+        selRow.appendChild(addBtn);
+        selRow.appendChild(sel2);
+
+        const inline = document.createElement("div");
+        inline.className = "inline";
+
+        // checkbox + label
+        const label = document.createElement("label");
+        const cb = document.createElement("input");
+        cb.type = "checkbox";
+        cb.checked = !!s.participantScheduled;
+        cb.addEventListener("change", async () => {
+          const currentCount = Number(slots[day][time].participantCount || 0);
+          const nextCount = cb.checked ? (currentCount || 1) : 0;
+
+          await saveSlotToBackend({
+            range: activeRange,
+            context: ctxId,
+            day,
+            time,
+            person: slots[day][time].person || "",
+            participantScheduled: cb.checked,
+            participantCount: nextCount
+          }, { optimistic: true });
+        });
+
+        const span = document.createElement("span");
+        span.textContent = "Participant scheduled";
+
+        label.appendChild(cb);
+        label.appendChild(span);
+        inline.appendChild(label);
+
+        // participant count controls
+        const countControls = document.createElement("span");
+        countControls.className = "countControls";
+
+        const minusBtn = document.createElement("button");
+        minusBtn.className = "smallBtn";
+        minusBtn.type = "button";
+        minusBtn.title = "Decrease participant count";
+        minusBtn.textContent = "−";
+
+        const countDisplay = document.createElement("span");
+        countDisplay.className = "countDisplay";
+        countDisplay.textContent = String(Number(s.participantCount || 0));
+
+        const plusBtn = document.createElement("button");
+        plusBtn.className = "smallBtn";
+        plusBtn.type = "button";
+        plusBtn.title = "Increase participant count";
+        plusBtn.textContent = "+";
+
+        minusBtn.addEventListener("click", async () => {
+          const current = Number(slots[day][time].participantCount || 0);
+          const next = Math.max(0, current - 1);
+          await saveSlotToBackend({
+            range: activeRange, context: ctxId, day, time,
+            person: slots[day][time].person || "",
+            participantScheduled: !!slots[day][time].participantScheduled,
+            participantCount: next
+          }, { optimistic: true });
+        });
+
+        plusBtn.addEventListener("click", async () => {
+          const current = Number(slots[day][time].participantCount || 0);
+          const next = current + 1;
+          await saveSlotToBackend({
+            range: activeRange, context: ctxId, day, time,
+            person: slots[day][time].person || "",
+            participantScheduled: !!slots[day][time].participantScheduled,
+            participantCount: next
+          }, { optimistic: true });
+        });
+
+        countControls.appendChild(minusBtn);
+        countControls.appendChild(countDisplay);
+        countControls.appendChild(plusBtn);
+
+        // badge
+        const badge = document.createElement("div");
+        badge.className = "badge";
+        const partCount = Number(s.participantCount || 0);
+        if(partCount > 0){
+          badge.classList.add("bad");
+          badge.textContent = `⚠ ${partCount} participant${partCount === 1 ? "" : "s"} scheduled`;
+        }else if(s.person){
+          badge.classList.add("good");
+          badge.textContent = "Scheduled";
+        }else{
+          badge.textContent = "Open";
+        }
+
+        slot.appendChild(top);
+        slot.appendChild(selRow);
+        slot.appendChild(inline);
+        slot.appendChild(countControls);
+        slot.appendChild(badge);
+
+        td.appendChild(slot);
+        tr.appendChild(td);
+      }
+
+      tbody.appendChild(tr);
+    }
+
+    table.appendChild(tbody);
+    wrapEl.innerHTML = "";
+    wrapEl.appendChild(table);
+  }
+
+  function renderAll(){
+    renderTop();
+    renderContext("ABC", ui.gridWrapABC);
+    renderContext("HF", ui.gridWrapHF);
+    renderSummary();
+    setView(activeView);
+  }
+
+  // =============================
+  // Backend-backed ops (unchanged)
+  // =============================
+  async function loadNamesFromBackend(){
+    const data = await apiPost("listNames", {});
+    state.names = Array.isArray(data.names) ? data.names : [];
+    saveCache();
+  }
+
+  async function addNameToBackend(nameRaw){
+    const name = String(nameRaw || "").trim().replace(/\s+/g," ");
+    if(!name) return;
+    await apiPost("addName", { name });
+    await loadNamesFromBackend();
+    markUpdated("Saved");
+    toast(`Added <strong>${name}</strong>`, "good");
+    renderAll();
+  }
+
+  async function loadWeekFromBackend({ silent=false } = {}){
+    const { year, term, weekStartISO } = state.settings;
+    const data = await apiPost("loadWeek", { year, term, weekStartISO });
+    setBackendStatus(true);
+    applyWeekFromBackend(data.data);
+    renderAll();
+    markUpdated("Loaded");
+    if(!silent) toast("Refreshed from shared Sheet.", "good");
+  }
+
+  async function saveSlotToBackend(slot, { optimistic } = { optimistic: true }){
+    const { year, term, weekStartISO, yourName } = state.settings;
+    const payload = {
+      year, term, weekStartISO,
+      range: slot.range,
+      context: slot.context,
+      day: slot.day,
+      time: slot.time,
+      person: slot.person || "",
+      participantScheduled: !!slot.participantScheduled,
+      participantCount: Number(slot.participantCount || 0),
+      updatedBy: (yourName || "").trim()
+    };
+
+    if(optimistic){
+      const s = currentLocalSlots();
+      s[slot.range][slot.context][slot.day][slot.time] = {
+        person: payload.person,
+        participantScheduled: payload.participantScheduled,
+        participantCount: payload.participantCount
+      };
+      saveCache();
+      renderAll();
+    }
+
+    pendingSaves++;
+    try{
+      await apiPost("saveSlot", payload);
+      setBackendStatus(true);
+      markUpdated("Saved");
+    }catch(e){
+      setBackendStatus(false);
+      toast(`Save failed: ${e.message}. (Hit Refresh after unblocking.)`, "bad");
+    }finally{
+      pendingSaves = Math.max(0, pendingSaves - 1);
+    }
+  }
+
+  // =============================
+  // Week navigation & admin wiring
+  // =============================
+  function shiftWeek(deltaWeeks){
+    const { year, term } = state.settings;
+    let ws = parseISODate(state.settings.weekStartISO);
+    ws = addDays(ws, deltaWeeks * 7);
+    ws = clampWeekStartToTerm(mondayOfWeek(ws), year, term);
+    state.settings.weekStartISO = toISODate(ws);
+    saveCache();
+    loadWeekFromBackend().catch(e => toast(`Load failed: ${e.message}`, "bad"));
+  }
+
+  function jumpToCurrentWeek(){
+    const now = new Date();
+    const { year, term } = state.settings;
+    const wsNow = clampWeekStartToTerm(mondayOfWeek(now), year, term);
+    state.settings.weekStartISO = toISODate(wsNow);
+    saveCache();
+    loadWeekFromBackend().catch(e => toast(`Load failed: ${e.message}`, "bad"));
+  }
+
+  function toggleAdminMenu(force){
+    const show = (typeof force === "boolean") ? force : !ui.adminMenu.classList.contains("show");
+    ui.adminMenu.classList.toggle("show", show);
+  }
+
+  function populateYearSelect(){
+    const now = new Date().getFullYear();
+    ui.yearSelect.innerHTML = "";
+    for(let y = now - 2; y <= now + 4; y++){
+      const opt = document.createElement("option");
+      opt.value = String(y);
+      opt.textContent = String(y);
+      ui.yearSelect.appendChild(opt);
+    }
+  }
+
+  function syncAdminFields(){
+    ui.yearSelect.value = String(state.settings.year);
+    ui.termSelect.value = state.settings.term;
+    ui.adminKeyInput.value = state.settings.adminKey || "";
+    ui.yourNameInput.value = state.settings.yourName || "";
+
+    // admin settings
+    ui.backendUrlInput.value = adminSettings.backendUrl || "";
+    ui.formUrlInput.value = adminSettings.formUrl || "";
+    ui.useProxyCheckbox.checked = !!adminSettings.useProxy;
+  }
+
+  function applyYearTerm(){
+    const year = Number(ui.yearSelect.value);
+    const term = ui.termSelect.value;
+
+    state.settings.year = year;
+    state.settings.term = term;
+    state.settings.adminKey = ui.adminKeyInput.value || "";
+    state.settings.yourName = ui.yourNameInput.value || "";
+
+    let ws = parseISODate(state.settings.weekStartISO);
+    ws = clampWeekStartToTerm(mondayOfWeek(ws), year, term);
+    state.settings.weekStartISO = toISODate(ws);
+
+    saveCache();
+    renderAll();
+    loadWeekFromBackend().catch(e => toast(`Load failed: ${e.message}`, "bad"));
+    toast(`Applied <strong>${year}</strong> • <strong>${term}</strong>.`, "good");
+  }
+
+  async function resetWeek(){
+    const ok = confirm("Reset ONLY the current week for this Year/Term (both contexts, weekdays + weekend) in the shared Sheet?");
+    if(!ok) return;
+
+    const { year, term, weekStartISO } = state.settings;
+    const adminKey = ui.adminKeyInput.value || state.settings.adminKey || "";
+    try{
+      await apiPost("resetWeek", { year, term, weekStartISO, adminKey });
+      await loadWeekFromBackend({ silent:true });
+      toast("Reset current week (shared).", "good");
+    }catch(e){
+      toast(`Reset failed: ${e.message}`, "bad");
+    }
+  }
+
+  async function resetAll(){
+    const ok = confirm("Reset ALL data (names + all schedules) in the shared Sheet?");
+    if(!ok) return;
+
+    const adminKey = ui.adminKeyInput.value || state.settings.adminKey || "";
+    try{
+      await apiPost("resetAll", { adminKey });
+      await loadNamesFromBackend();
+      await loadWeekFromBackend({ silent:true });
+      toast("Reset ALL data (shared).", "good");
+    }catch(e){
+      toast(`Reset failed: ${e.message}`, "bad");
+    }
+  }
+
+  // =============================
+  // Export / Import (unchanged)
+  // =============================
+  function downloadText(filename, text){
+    const blob = new Blob([text], {type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  function exportLocal(){
+    const payload = {
+      exportedAt: new Date().toISOString(),
+      names: state.names,
+      settings: state.settings,
+      meta: state.meta,
+      cachedScope: scopeKey(),
+      cachedSlots: currentLocalSlots()
+    };
+    downloadText("abc-lab-schedule-local-export.json", JSON.stringify(payload, null, 2));
+    toast("Exported local snapshot.", "good");
+  }
+
+  async function importLocal(){
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "application/json";
+    input.addEventListener("change", async () => {
+      const file = input.files && input.files[0];
+      if(!file) return;
+      try{
+        const text = await file.text();
+        const parsed = JSON.parse(text);
+        if(!parsed || typeof parsed !== "object") throw new Error("Invalid JSON.");
+        if(!Array.isArray(parsed.names) || !parsed.settings) throw new Error("Missing names/settings.");
+
+        state.names = parsed.names;
+        state.settings = { ...state.settings, ...parsed.settings };
+        state.meta = { ...state.meta, ...(parsed.meta || {}) };
+        if(parsed.cachedScope && parsed.cachedSlots){
+          state.cacheSlotsByScope[parsed.cachedScope] = parsed.cachedSlots;
+        }
+        saveCache();
+        renderAll();
+
+        await loadNamesFromBackend();
+        await loadWeekFromBackend({ silent:true });
+        toast("Imported local snapshot and refreshed from backend.", "good");
+      }catch(e){
+        toast(`Import failed: ${e.message}`, "bad");
+      }
     });
-  </script>
+    input.click();
+  }
+
+  // =============================
+  // Auto-refresh
+  // =============================
+  function startAutoRefresh(){
+    if(autoTimer) clearInterval(autoTimer);
+    ui.autoRefreshLabel.textContent = `${Math.round(AUTO_REFRESH_MS/1000)}s`;
+    autoTimer = setInterval(async () => {
+      if(!backendOk) return;
+      if(pendingSaves > 0) return;
+      try{
+        await loadWeekFromBackend({ silent:true });
+      }catch{
+        setBackendStatus(false);
+      }
+    }, AUTO_REFRESH_MS);
+  }
+
+  // =============================
+  // Wire UI
+  // =============================
+  ui.tabWeekdays.addEventListener("click", () => setRange("weekdays"));
+  ui.tabWeekend.addEventListener("click",  () => setRange("weekend"));
+
+  ui.viewBoth.addEventListener("click", () => setView("both"));
+  ui.viewABC.addEventListener("click",  () => setView("ABC"));
+  ui.viewHF.addEventListener("click",   () => setView("HF"));
+  ui.currentWeekBtn.addEventListener("click", jumpToCurrentWeek);
+  ui.prevWeekBtn.addEventListener("click", () => shiftWeek(-1));
+  ui.nextWeekBtn.addEventListener("click", () => shiftWeek(1));
+  ui.refreshBtn.addEventListener("click", () => loadWeekFromBackend().catch(e => toast(`Refresh failed: ${e.message}`, "bad")));
+
+  ui.addNameBtn.addEventListener("click", async () => {
+    const v = ui.nameInput.value;
+    ui.nameInput.value = "";
+    ui.nameInput.focus();
+    try { await addNameToBackend(v); }
+    catch(e){ toast(`Add failed: ${e.message}`, "bad"); }
+  });
+
+  ui.nameInput.addEventListener("keydown", async (e) => {
+    if(e.key === "Enter"){
+      const v = ui.nameInput.value;
+      ui.nameInput.value = "";
+      try { await addNameToBackend(v); }
+      catch(err){ toast(`Add failed: ${err.message}`, "bad"); }
+    }
+  });
+
+  ui.exportBtn.addEventListener("click", exportLocal);
+  ui.importBtn.addEventListener("click", importLocal);
+
+  ui.adminBtn.addEventListener("click", () => {
+    syncAdminFields();
+    toggleAdminMenu();
+  });
+
+  ui.applyTermBtn.addEventListener("click", () => applyYearTerm());
+  ui.resetWeekBtn.addEventListener("click", () => resetWeek());
+  ui.resetAllBtn.addEventListener("click", () => resetAll());
+
+  ui.yourNameInput.addEventListener("input", () => {
+    state.settings.yourName = ui.yourNameInput.value || "";
+    saveCache();
+  });
+
+  document.addEventListener("click", (e) => {
+    const inside = ui.adminMenu.contains(e.target) || ui.adminBtn.contains(e.target);
+    if(!inside) toggleAdminMenu(false);
+  });
+
+  ui.blockerHelpBtn?.addEventListener("click", () => {
+    const isShown = ui.blockerHelp.style.display === "block";
+    ui.blockerHelp.style.display = isShown ? "none" : "block";
+  });
+
+  // =============================
+  // Admin fields interactions
+  // =============================
+  ui.saveAdminSettingsBtn?.addEventListener("click", () => {
+    adminSettings.backendUrl = (ui.backendUrlInput.value || "").trim();
+    adminSettings.formUrl = (ui.formUrlInput.value || "").trim();
+    adminSettings.useProxy = !!ui.useProxyCheckbox.checked;
+    saveAdminSettings(adminSettings);
+    // update displayed backend url
+    ui.backendUrlText.textContent = getEffectiveApiUrl();
+    toast("Admin settings saved.", "good");
+    // re-ping with new settings
+    backendPing().catch(() => {});
+  });
+
+  ui.openFormBtn?.addEventListener("click", () => {
+    const url = (ui.formUrlInput.value || adminSettings.formUrl || "").trim();
+    if(!url){
+      toast("No form/Sheets URL configured.", "bad");
+      return;
+    }
+    window.open(url, "_blank", "noopener");
+  });
+
+  // =============================
+  // Init
+  // =============================
+  populateYearSelect();
+
+  // normalize settings weekStart to term bounds
+  {
+    const { year, term } = state.settings;
+    let ws = parseISODate(state.settings.weekStartISO);
+    ws = clampWeekStartToTerm(mondayOfWeek(ws), year, term);
+    state.settings.weekStartISO = toISODate(ws);
+    saveCache();
+  }
+
+  // load persisted admin settings into UI state
+  (function initAdminSettingsAndUI(){
+    ui.backendUrlText.textContent = getEffectiveApiUrl();
+    syncAdminFields();
+  })();
+
+  renderAll();
+  startAutoRefresh();
+
+  (async () => {
+    try{
+      await backendPing();
+      await loadNamesFromBackend();
+      await loadWeekFromBackend({ silent:true });
+      markUpdated("Loaded");
+      toast("Connected. Loaded shared data.", "good");
+    }catch(e){
+      toast(`Backend not reachable: ${e.message}. Showing local cache.`, "bad");
+      renderAll();
+    }
+  })();
+})();
+</script>
 </body>
 </html>
