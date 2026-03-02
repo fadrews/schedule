@@ -769,26 +769,57 @@ tbody th {
   // -----------------------
   // Robust API helper
   // -----------------------
+// Defensive apiPost wrapper — paste/replace in index.html
   async function apiPost(action, payload = {}) {
-    const bodyObj = { action, ...payload };
-    const res = await fetch(API_URL, {
+    // Ensure state/settings exist
+    window.state = window.state || {};
+    state.settings = state.settings || {};
+  
+    // Ensure minimal identifying fields (try multiple fallbacks)
+    let { year, term, weekStartISO, yourName } = state.settings;
+  
+    // If payload contains a slot with a scopeKey, try parse
+    const maybeScopeKey = (payload && payload.slot && payload.slot.scopeKey) || state.settings.scopeKey || state.scopeKey;
+    if ((!year || !term || !weekStartISO) && maybeScopeKey) {
+      const parts = String(maybeScopeKey).split("::");
+      if (parts.length >= 3) {
+        year = year || parts[0];
+        term = term || parts[1];
+        weekStartISO = weekStartISO || parts.slice(2).join("::");
+      }
+    }
+  
+    // Final fallback: synthesize from today's date (prevents hard throws)
+    if (!year || !term || !weekStartISO) {
+      const d = new Date();
+      year = year || String(d.getFullYear());
+      term = term || "Unknown";
+      weekStartISO = weekStartISO || d.toISOString().slice(0,10);
+      console.warn("apiPost: missing year/term/weekStartISO, synthesizing fallback", { action, year, term, weekStartISO });
+      // Also write back safe defaults so subsequent calls use them
+      state.settings.year = year;
+      state.settings.term = term;
+      state.settings.weekStartISO = weekStartISO;
+    }
+  
+    // Attach the identifying fields to payload where required by backend
+    if (!payload.year) payload.year = year;
+    if (!payload.term) payload.term = term;
+    if (!payload.weekStartISO) payload.weekStartISO = weekStartISO;
+  
+    // Standard fetch to proxy
+    const res = await fetch("/api/exec", {
       method: "POST",
-      headers: { "Content-Type": "application/json; charset=utf-8" },
-      body: JSON.stringify(bodyObj)
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(Object.assign({ action }, payload))
     });
-
-    const txt = await res.text();
-    let data;
+  
+    const text = await res.text();
     try {
-      data = JSON.parse(txt);
-    } catch (err) {
-      throw new Error("Non-JSON response from backend: " + txt);
+      return JSON.parse(text);
+    } catch (e) {
+      throw new Error("Invalid JSON from API: " + text);
     }
-
-    if (!data || data.ok === false) {
-      throw new Error(data && data.error ? data.error : "Unknown backend error");
-    }
-    return data;
   }
 
   let backendOk = false;
@@ -1211,6 +1242,11 @@ tbody th {
 
         function commitPeople(newP1, newP2){
           const combined = joinPeople([newP1, newP2]);
+          // At top of commitPeople function:
+          if (!window.appReady || !window.appReady.loaded) {
+            console.warn("commitPeople called before app ready — ignoring");
+            return;
+          }
           return saveSlotToBackend({
             range: activeRange, context: ctxId, day, time,
             person: combined,
@@ -1418,18 +1454,52 @@ async function loadWeekFromBackend({ silent = false } = {}) {
   // Single correct saveSlotToBackend
   // -----------------------
 async function saveSlotToBackend(slot, opts) {
+  // Defensive beginning of saveSlotToBackend — paste at start of that function
   // normalize opts and default optimistic = true
   opts = (typeof opts === "object" && opts !== null) ? opts : { optimistic: true };
   const optimistic = (opts.optimistic === undefined) ? true : !!opts.optimistic;
-
-  const { year, term, weekStartISO, yourName } = state.settings;
-
-  // Defensive normalization for participantCount
-  const normalizedParticipantCount = Math.max(0, Number(slot.participantCount || 0));
-
-  // Normalize time *to the internal canonical key* (preserve en-dash)
-  const timeKey = normalizeToInternalTimeKey(slot.time) || String(slot.time || "").trim();
-
+  
+  // ensure state/settings
+  window.state = window.state || {};
+  state.settings = state.settings || {};
+  let { year, term, weekStartISO, yourName } = state.settings || {};
+  
+  // try slot.scopeKey if available
+  if ((!year || !term || !weekStartISO) && slot && slot.scopeKey) {
+    const parts = String(slot.scopeKey).split("::");
+    if (parts.length >= 3) {
+      year = year || parts[0];
+      term = term || parts[1];
+      weekStartISO = weekStartISO || parts.slice(2).join("::");
+    }
+  }
+  
+  // try global fallback
+  if ((!year || !term || !weekStartISO) && (state && state.scopeKey)) {
+    const parts = String(state.scopeKey).split("::");
+    if (parts.length >= 3) {
+      year = year || parts[0];
+      term = term || parts[1];
+      weekStartISO = weekStartISO || parts.slice(2).join("::");
+    }
+  }
+  
+  // final fallback (today)
+  if (!year || !term || !weekStartISO) {
+    const d = new Date();
+    year = year || String(d.getFullYear());
+    term = term || "Unknown";
+    weekStartISO = weekStartISO || d.toISOString().slice(0,10);
+    console.warn("saveSlotToBackend: missing year/term/weekStartISO — using fallback", { year, term, weekStartISO });
+  }
+  
+  // ensure state.settings updated so subsequent calls see same values
+  state.settings.year = year;
+  state.settings.term = term;
+  state.settings.weekStartISO = weekStartISO;
+  state.settings.yourName = state.settings.yourName || yourName || "";
+  
+  // then proceed to build payloadSlot as before
   const payloadSlot = {
     scopeKey: `${year}::${term}::${weekStartISO}`,
     range: slot.range || "",
@@ -1697,6 +1767,7 @@ async function saveSlotToBackend(slot, opts) {
 </body>
 
 </html>
+
 
 
 
