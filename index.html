@@ -1330,37 +1330,38 @@ tbody th {
     renderAll();
   }
 
-  async function loadWeekFromBackend({ silent=false } = {}) {
-    const { year, term, weekStartISO } = state.settings;
-    let raw;
-    try { raw = await apiPost("loadWeek", { year, term, weekStartISO }); }
-    catch (e) { setBackendStatus(false); toast(`Load failed: ${e.message}`, "bad"); return; }
-    setBackendStatus(true);
-    let payload = (raw && raw.data) ? raw.data : raw;
-    if (!payload || typeof payload !== "object" || !payload.scopeKey) {
-      const fallbackScopeKey = `${year}::${term}::${weekStartISO}`;
-      payload = { scopeKey: fallbackScopeKey, slots: {} };
-    }
-    applyWeekFromBackend(payload);
-    renderAll();
-    markUpdated("Loaded");
-    if (!silent) toast("Refreshed from shared Sheet.", "good");
+// Load week from backend (single canonical implementation)
+async function loadWeekFromBackend({ silent = false } = {}) {
+  const { year, term, weekStartISO } = state.settings;
+  let raw;
+  try {
+    raw = await apiPost("loadWeek", { year, term, weekStartISO });
+  } catch (e) {
+    setBackendStatus(false);
+    toast(`Load failed: ${e.message}`, "bad");
+    return;
   }
 
-    // Support both shapes: { data: {...} } or top-level {...}
-    let payload = (raw && raw.data) ? raw.data : raw;
+  setBackendStatus(true);
 
-    // If backend returned empty object or malformed response, synthesize an empty week payload
-    if (!payload || typeof payload !== "object" || !payload.scopeKey) {
-      const fallbackScopeKey = `${year}::${term}::${weekStartISO}`;
-      console.warn("loadWeekFromBackend: backend returned empty/malformed payload; using empty fallback", { raw, fallbackScopeKey });
-      payload = { scopeKey: fallbackScopeKey, slots: {} };
-      // (Optional) persist this empty-week to the sheet by calling a create-week endpoint if you want
-    }
+  // Support both shapes: { data: {...} } or top-level {...}
+  let payload = (raw && raw.data) ? raw.data : raw;
+
+  // If backend returned empty object or malformed response, synthesize an empty week payload
+  if (!payload || typeof payload !== "object" || !payload.scopeKey) {
+    const fallbackScopeKey = `${year}::${term}::${weekStartISO}`;
+    console.warn(
+      "loadWeekFromBackend: backend returned empty/malformed payload; using empty fallback",
+      { raw, fallbackScopeKey }
+    );
+    payload = { scopeKey: fallbackScopeKey, slots: {} };
+    // optional: persist this empty-week to the sheet by calling a create-week endpoint
+  }
 
   applyWeekFromBackend(payload);
   renderAll();
   markUpdated("Loaded");
+
   if (!silent) toast("Refreshed from shared Sheet.", "good");
 }
 
@@ -1647,5 +1648,6 @@ async function saveSlotToBackend(slot, opts) {
 </body>
 
 </html>
+
 
 
