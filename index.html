@@ -688,6 +688,55 @@ tbody th {
     blockerHelp: el("blockerHelp"),
   };
 
+
+    // Minimal loader shim — inserts state.settings and applies backend payload
+  async function loadWeekFromBackend({ silent = false } = {}) {
+    // Ensure state exists
+    window.state = window.state || {};
+    state.settings = state.settings || { year: null, term: null, weekStartISO: null, yourName: "" };
+  
+    const { year, term, weekStartISO } = state.settings;
+    if (!year || !term || !weekStartISO) {
+      // nothing to load for — caller should set state.settings first
+      console.warn("loadWeekFromBackend: missing year/term/weekStartISO; skipping fetch");
+      return null;
+    }
+  
+    try {
+      const res = await fetch("/api/exec", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "loadWeek", year, term, weekStartISO })
+      });
+      const text = await res.text();
+      const parsed = JSON.parse(text);
+      const payload = (parsed && parsed.data) ? parsed.data : parsed;
+      if (!payload || typeof payload !== "object") {
+        console.warn("loadWeekFromBackend: invalid payload", parsed);
+        return null;
+      }
+  
+      // Set canonical settings.scopeKey if present
+      if (!state.settings.scopeKey && payload.scopeKey) state.settings.scopeKey = payload.scopeKey;
+  
+      // Apply to UI
+      if (typeof applyWeekFromBackend === "function") {
+        applyWeekFromBackend(payload);
+      } else {
+        console.warn("applyWeekFromBackend not found; payload received but not applied");
+      }
+  
+      if (typeof renderAll === "function") renderAll();
+      if (!silent && typeof toast === "function") toast("Refreshed from shared Sheet.", "good");
+      return payload;
+    } catch (err) {
+      console.error("loadWeekFromBackend fetch error:", err);
+      if (typeof setBackendStatus === "function") setBackendStatus(false);
+      if (!silent && typeof toast === "function") toast("Load failed: " + String(err), "bad");
+      throw err;
+    }
+  }
+  
   function toast(msg, kind="info"){
     ui.toast.innerHTML = msg;
     ui.toast.classList.add("show");
@@ -1648,6 +1697,7 @@ async function saveSlotToBackend(slot, opts) {
 </body>
 
 </html>
+
 
 
 
