@@ -1300,19 +1300,27 @@ async function apiPost(action, payload = {}) {
     input.click();
   }
 
-  // =============================
-  // Auto-refresh
-  // =============================
   function startAutoRefresh(){
     if(autoTimer) clearInterval(autoTimer);
     ui.autoRefreshLabel.textContent = `${Math.round(AUTO_REFRESH_MS/1000)}s`;
     autoTimer = setInterval(async () => {
       if(!backendOk) return;
       if(pendingSaves > 0) return;
-      try{
+  
+      try {
+        // attempt to load once
         await loadWeekFromBackend({ silent:true });
-      }catch{
-        setBackendStatus(false);
+      } catch (err) {
+        // transient failure -> try a quick ping + one retry before declaring offline
+        try {
+          await backendPing();                 // re-check backend in a lightweight way
+          await loadWeekFromBackend({ silent:true }); // retry the load
+        } catch (err2) {
+          // still failing -> mark offline
+          setBackendStatus(false);
+          // optional: provide a gentle non-intrusive hint in console for diagnostics
+          console.warn("Auto-refresh retry failed:", err2 && err2.message);
+        }
       }
     }, AUTO_REFRESH_MS);
   }
@@ -1438,6 +1446,7 @@ async function apiPost(action, payload = {}) {
 </script>
 </body>
 </html>
+
 
 
 
