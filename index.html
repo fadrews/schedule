@@ -1153,7 +1153,7 @@ async function apiPost(action, payload = {}) {
       setBackendStatus(false);
       throw e;
     }
-
+  }
   async function saveSlotToBackend(slot, { optimistic } = { optimistic: true }){
     const { year, term, weekStartISO, yourName } = state.settings;
     const scopeKeyVal = `${year}::${term}::${weekStartISO}`;
@@ -1498,6 +1498,7 @@ async function apiPost(action, payload = {}) {
 </script>
 </body>
 </html>
+
 
 
 
