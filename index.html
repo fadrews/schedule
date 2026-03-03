@@ -6,22 +6,22 @@
   <title>ABC Lab Schedule 2 (Sheets)</title>
   <style>
     :root{
-      /* Brighter palette */
-      --bg:#0a0f1f;
-      --text:#f3f6ff;
-      --muted:#c9d3f2;
-      --accent:#8fb2ff;
-      --accent2:#9df2c6;
-      --good:#4be29b;
-      --bad:#ff6b93;
+      /* Light palette (swapped from dark -> light) */
+      --bg: #f7f9fc;
+      --text: #0b1320;
+      --muted: #556074;
+      --accent: #2b6cff;
+      --accent2: #16a34a;
+      --good: #16a34a;
+      --bad: #ef4444;
 
-      --panel: rgba(255,255,255,.08);
-      --panel2: rgba(255,255,255,.04);
-      --border: rgba(255,255,255,.14);
-      --border2: rgba(255,255,255,.10);
+      --panel: rgba(11,19,32,.04);
+      --panel2: rgba(11,19,32,.02);
+      --border: rgba(11,19,32,.08);
+      --border2: rgba(11,19,32,.06);
 
-      --shadow: 0 12px 30px rgba(0,0,0,.32);
-      --radius:16px;
+      --shadow: 0 8px 20px rgba(11,19,32,.06);
+      --radius:14px;
       --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
       --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
     }
@@ -30,21 +30,23 @@
       margin:0;
       font-family:var(--sans);
       background:
-        radial-gradient(1100px 800px at 18% 0%, rgba(143,178,255,.55) 0%, rgba(10,15,31,.0) 60%),
-        radial-gradient(900px 700px at 92% 18%, rgba(157,242,198,.30) 0%, rgba(10,15,31,.0) 55%),
-        linear-gradient(180deg, #0a0f1f 0%, #070b16 100%);
+        radial-gradient(1000px 700px at 18% 0%, rgba(43,108,255,.06) 0%, rgba(247,249,252,0) 60%),
+        radial-gradient(700px 600px at 92% 18%, rgba(22,163,74,.04) 0%, rgba(247,249,252,0) 55%),
+        linear-gradient(180deg, var(--bg) 0%, #ffffff 100%);
       color:var(--text);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
     }
 
     header{padding:16px 16px 0;max-width:none;margin:0;}
     main{padding:12px 16px 24px;max-width:none;margin:0;}
 
     .topbar{
-      background: linear-gradient(180deg, rgba(255,255,255,.09), rgba(255,255,255,.04));
-      border-bottom:1px solid rgba(255,255,255,.10);
-      box-shadow: 0 10px 26px rgba(0,0,0,.22);
+      background: linear-gradient(180deg, rgba(255,255,255,.95), rgba(255,255,255,.98));
+      border-bottom:1px solid rgba(11,19,32,.06);
+      box-shadow: 0 8px 18px rgba(11,19,32,.04);
       padding:14px 16px;
-      border-radius: 0 0 18px 18px;
+      border-radius: 0 0 12px 12px;
     }
 
     .titlebar{
@@ -64,27 +66,34 @@
 
     .panel{ background: linear-gradient(180deg, var(--panel), var(--panel2)); border:1px solid var(--border2); box-shadow:var(--shadow); border-radius:var(--radius); padding:14px; }
 
-    #panelABC{ border-color: rgba(255,255,255,.12); }
-    #panelHF{ border-color: rgba(255,255,255,.20); background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.05)); }
+	#panelABC {
+	  background: linear-gradient(180deg, #eef1f6 0%, #e6e9ee 100%);
+	  border-color: rgba(11,19,32,.28);
+	}
 
+	/* Stronger blue frame for HF Project */
+	#panelHF {
+	  background: linear-gradient(180deg, rgba(43,108,255,.10) 0%, rgba(43,108,255,.04) 100%);
+	  border-color: rgba(43,108,255,.40);
+	}
     .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;}
     .leftControls,.rightControls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
 
-    .tabs{ display:inline-flex; background:rgba(0,0,0,.20); border:1px solid rgba(255,255,255,.12); border-radius:999px; padding:4px; gap:4px; }
+    .tabs{ display:inline-flex; background:rgba(11,19,32,.03); border:1px solid rgba(11,19,32,.06); border-radius:999px; padding:4px; gap:4px; }
     .tab{ border:0;color:var(--muted);background:transparent; padding:7px 10px;border-radius:999px;font-size:12px;cursor:pointer;user-select:none; }
-    .tab.active{ background:rgba(143,178,255,.20); color:var(--text); box-shadow: inset 0 0 0 1px rgba(143,178,255,.32); }
+    .tab.active{ background:rgba(43,108,255,.12); color:var(--text); box-shadow: inset 0 0 0 1px rgba(43,108,255,.16); }
 
-    .btn{ border:1px solid rgba(255,255,255,.14); background:rgba(0,0,0,.14); color:var(--text); padding:8px 10px; border-radius:12px; cursor:pointer; font-size:12px; }
-    .btn:hover{border-color:rgba(255,255,255,.22)}
-    .btn.primary{ background:rgba(143,178,255,.22); border-color:rgba(143,178,255,.34); }
-    .btn.danger{ background:rgba(255,107,147,.14); border-color:rgba(255,107,147,.30); }
+    .btn{ border:1px solid rgba(11,19,32,.06); background:rgba(255,255,255,.98); color:var(--text); padding:8px 10px; border-radius:12px; cursor:pointer; font-size:12px; }
+    .btn:hover{border-color:rgba(11,19,32,.12)}
+    .btn.primary{ background:linear-gradient(180deg, rgba(43,108,255,.12), rgba(43,108,255,.08)); border-color:rgba(43,108,255,.28); color:var(--text); }
+    .btn.danger{ background:linear-gradient(180deg, rgba(239,68,68,.06), rgba(239,68,68,.03)); border-color:rgba(239,68,68,.16); color:var(--text); }
 
     .field{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
-    input[type="text"], input[type="password"]{ background:rgba(0,0,0,.18); color:var(--text); border:1px solid rgba(255,255,255,.14); border-radius:12px; padding:8px 10px; font-size:12px; min-width:220px; outline:none; }
-    input[type="text"]::placeholder, input[type="password"]::placeholder{color:rgba(201,211,242,.78)}
+    input[type="text"], input[type="password"]{ background:rgba(255,255,255,.98); color:var(--text); border:1px solid rgba(11,19,32,.06); border-radius:12px; padding:8px 10px; font-size:12px; min-width:220px; outline:none; }
+    input[type="text"]::placeholder, input[type="password"]::placeholder{color:rgba(85,96,116,.6)}
     .compactInput{min-width:180px}
 
-    .chip{ display:inline-flex; align-items:center; gap:8px; background:rgba(0,0,0,.14); border:1px solid rgba(255,255,255,.12); border-radius:999px; padding:6px 10px; font-size:12px; color:var(--muted); white-space:nowrap; }
+    .chip{ display:inline-flex; align-items:center; gap:8px; background:rgba(255,255,255,.98); border:1px solid rgba(11,19,32,.04); border-radius:999px; padding:6px 10px; font-size:12px; color:var(--muted); white-space:nowrap; }
     .chip strong{color:var(--text); font-weight:800}
 
     .note{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.35;}
@@ -93,7 +102,19 @@
     @media (max-width: 1100px){.twoCol{grid-template-columns:1fr}}
     .twoCol.single #panelABC, .twoCol.single #panelHF{ grid-column: 1 / -1; }
 
-    .gridWrap{ overflow-x:auto; overflow-y:hidden; border-radius:14px; border:1px solid rgba(255,255,255,.12); margin-top:12px; background:rgba(0,0,0,.12); width:100%; }
+    .gridWrap{ overflow-x:auto; overflow-y:hidden; border-radius:14px; border:1px solid rgba(11,19,32,.06); margin-top:12px; background:rgba(255,255,255,.98); width:100%; }
+
+	/* darker inner area for ABC panel */
+	#panelABC .gridWrap {
+	  background: #f1f4f8;              /* slightly darker than the default */
+	  border-color: rgba(11,19,32,.10);
+	}
+
+	/* bluish inner area for HF panel */
+	#panelHF .gridWrap {
+	  background: linear-gradient(180deg, rgba(240,248,255,1), rgba(250,254,255,1));
+	  border-color: rgba(43,108,255,.12);
+	}
 
     table{ border-collapse:separate; border-spacing:0; width:100%; font-size:12px; table-layout: fixed; min-width: 0; }
     thead th:first-child, tbody th{ width: 120px; }
@@ -104,15 +125,15 @@
     td:last-child{border-right:0}
 
     .slot{display:flex;flex-direction:column;gap:6px;min-height:92px;}
-    select{ width:100%; background:rgba(0,0,0,.18); color:var(--text); border:1px solid rgba(255,255,255,.14); border-radius:12px; padding:7px 8px; font-size:12px; outline:none; }
+    select{ width:100%; background:rgba(255,255,255,.98); color:var(--text); border:1px solid rgba(11,19,32,.06); border-radius:12px; padding:7px 8px; font-size:12px; outline:none; }
     .slotTop{display:flex;gap:8px;align-items:center;justify-content:space-between;}
     .who{font-weight:900;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:140px;}
-    .smallBtn{ border:1px solid rgba(255,255,255,.14); background:rgba(0,0,0,.14); color:var(--text); padding:6px 8px; border-radius:12px; font-size:11px; cursor:pointer; }
-    .smallBtn:hover{border-color:rgba(255,255,255,.22)}
+    .smallBtn{ border:1px solid rgba(11,19,32,.06); background:rgba(255,255,255,.98); color:var(--text); padding:6px 8px; border-radius:12px; font-size:11px; cursor:pointer; }
+    .smallBtn:hover{border-color:rgba(11,19,32,.12)}
 
-    .badge{ display:inline-flex; align-items:center; gap:6px; border-radius:999px; padding:5px 8px; font-size:11px; background:rgba(0,0,0,.14); border:1px solid rgba(255,255,255,.12); color:var(--muted); width:max-content; }
-    .badge.bad{ background:rgba(255,107,147,.16); border-color:rgba(255,107,147,.34); color:var(--text) }
-    .badge.good{ background:rgba(75,226,155,.14); border-color:rgba(75,226,155,.28); color:var(--text) }
+    .badge{ display:inline-flex; align-items:center; gap:6px; border-radius:999px; padding:5px 8px; font-size:11px; background:rgba(255,255,255,.98); border:1px solid rgba(11,19,32,.06); color:var(--muted); width:max-content; }
+    .badge.bad{ background:rgba(239,68,68,.10); border-color:rgba(239,68,68,.16); color:var(--text) }
+    .badge.good{ background:rgba(22,163,74,.08); border-color:rgba(22,163,74,.14); color:var(--text) }
 
     .inline{display:flex; gap:8px; align-items:center; flex-wrap:wrap;}
     label{display:flex; gap:8px; align-items:center; cursor:pointer; user-select:none; color:var(--muted);}
@@ -125,29 +146,29 @@
 
     .hidden{display:none !important}
 
-    .toast{ position:fixed;bottom:16px;right:16px; background:rgba(0,0,0,.30); border:1px solid rgba(255,255,255,.16); backdrop-filter: blur(10px); box-shadow:var(--shadow); padding:10px 12px; border-radius:14px; font-size:12px; color:var(--text); max-width:min(560px, calc(100vw - 32px)); display:none; }
+    .toast{ position:fixed;bottom:16px;right:16px; background:rgba(11,19,32,.04); border:1px solid rgba(11,19,32,.06); backdrop-filter: blur(6px); box-shadow:var(--shadow); padding:10px 12px; border-radius:12px; font-size:12px; color:var(--text); max-width:min(560px, calc(100vw - 32px)); display:none; }
     .toast.show{display:block}
 
     .menuWrap{position:relative; display:inline-block;}
-    .menu{ position:absolute; right:0; top:42px; width:min(520px, calc(100vw - 24px)); background:rgba(12,16,32,.96); border:1px solid rgba(255,255,255,.16); border-radius:16px; box-shadow:var(--shadow); padding:12px; z-index:50; display:none; }
+    .menu{ position:absolute; right:0; top:42px; width:min(520px, calc(100vw - 24px)); background:rgba(255,255,255,.98); border:1px solid rgba(11,19,32,.06); border-radius:12px; box-shadow:var(--shadow); padding:12px; z-index:50; display:none; }
     .menu.show{display:block}
     .menu h3{margin:0 0 10px 0;font-size:13px;color:var(--text);}
     .menuRow{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:10px;}
     .menuRow > div{flex:1;min-width:160px;}
     .menu small{color:var(--muted); display:block; line-height:1.35;}
 
-    .statusDot{ display:inline-block;width:9px;height:9px;border-radius:999px;background:rgba(255,255,255,.25); box-shadow:0 0 0 2px rgba(0,0,0,.18) inset; margin-right:6px; }
-    .dotGood{background:rgba(75,226,155,.92)}
-    .dotBad{background:rgba(255,107,147,.92)}
+    .statusDot{ display:inline-block;width:9px;height:9px;border-radius:999px;background:rgba(11,19,32,.12); box-shadow:0 0 0 2px rgba(255,255,255,.92) inset; margin-right:6px; }
+    .dotGood{background:var(--good)}
+    .dotBad{background:var(--bad)}
 
-    #blockerBanner{ border-color: rgba(255,107,147,.34); background: linear-gradient(180deg, rgba(255,107,147,.12), rgba(255,255,255,.03)); }
+    #blockerBanner{ border-color: rgba(239,68,68,.24); background: linear-gradient(180deg, rgba(239,68,68,.06), rgba(255,255,255,.98)); }
 
-    .slot.participant{ border: 1px solid rgba(255,107,147,.55); background: linear-gradient(180deg, rgba(255,107,147,.18), rgba(0,0,0,.10)); border-radius: 14px; padding: 10px; box-shadow: 0 0 0 1px rgba(255,107,147,.25) inset; }
-    .slot.participant label{ color: var(--text); font-weight: 900; }
-    .slot.participant input[type="checkbox"]{ transform: scale(1.15); }
+    .slot.participant{ border: 1px solid rgba(239,68,68,.22); background: linear-gradient(180deg, rgba(239,68,68,.04), rgba(255,255,255,.98)); border-radius: 12px; padding: 10px; box-shadow: 0 0 0 1px rgba(239,68,68,.08) inset; }
+    .slot.participant label{ color: var(--text); font-weight: 700; }
+    .slot.participant input[type="checkbox"]{ transform: scale(1.05); }
 
-    #panelABC .chip strong{ color: var(--accent); text-shadow: 0 0 10px rgba(143,178,255,.35); }
-    #panelHF .chip strong{ color: var(--accent2); text-shadow: 0 0 10px rgba(157,242,198,.30); }
+    #panelABC .chip strong{ color: var(--accent); text-shadow: 0 0 6px rgba(43,108,255,.06); }
+    #panelHF .chip strong{ color: var(--accent2); text-shadow: 0 0 6px rgba(22,163,74,.06); }
 
     /* count controls */
     .countControls { display:inline-flex; gap:6px; align-items:center; margin-left:6px; }
@@ -422,10 +443,10 @@
     ui.toast.innerHTML = msg;
     ui.toast.classList.add("show");
     ui.toast.style.borderColor = kind === "bad"
-      ? "rgba(255,107,147,.40)"
+      ? "rgba(239,68,68,.22)"
       : kind === "good"
-        ? "rgba(75,226,155,.34)"
-        : "rgba(255,255,255,.18)";
+        ? "rgba(22,163,74,.14)"
+        : "rgba(11,19,32,.06)";
     clearTimeout(toast._t);
     toast._t = setTimeout(() => ui.toast.classList.remove("show"), 3000);
   }
@@ -749,8 +770,8 @@ async function apiPost(action, payload = {}) {
   function setView(view){
     activeView = view;
     ui.viewBoth.classList.toggle("active", view === "both");
-    ui.viewABC.classList.toggle("active",  view === "ABC");
-    ui.viewHF.classList.toggle("active",   view === "HF");
+    ui.viewABC.classList.toggle("active", view === "ABC");
+    ui.viewHF.classList.toggle("active", view === "HF");
     ui.panelABC.classList.toggle("hidden", view === "HF");
     ui.panelHF.classList.toggle("hidden",  view === "ABC");
     document.querySelector(".twoCol")?.classList.toggle("single", view !== "both");
@@ -1508,16 +1529,3 @@ async function apiPost(action, payload = {}) {
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
