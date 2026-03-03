@@ -1132,7 +1132,11 @@ async function apiPost(action, payload = {}) {
     // Build the canonical slots map expected by applyWeekFromBackend
     const slots = {};
     for (const r of rows) {
-      const key = `${r.range || ""}::${r.context || ""}::${r.day || ""}::${r.time || ""}`;
+// normalize time glyphs to the en-dash used in TIMES so keys match client slot keys
+      const rawTime = String(r.time || "").trim();
+      const normalizedTime = rawTime.replace(/[-–—]/g, "–"); // replace hyphen or em-dash with en-dash
+      
+      const key = `${r.range || ""}::${r.context || ""}::${r.day || ""}::${normalizedTime}`;
       slots[key] = {
         person: r.person || "",
         participantScheduled: !!r.participantScheduled,
@@ -1498,6 +1502,7 @@ async function apiPost(action, payload = {}) {
 </script>
 </body>
 </html>
+
 
 
 
