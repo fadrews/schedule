@@ -1076,8 +1076,12 @@ async function apiPost(action, payload = {}) {
         badge.className = "badge";
         const partCount = Number(s.participantCount || 0);
         if(partCount > 0){
-          badge.classList.add("bad");
-          badge.textContent = `⚠ ${partCount} participant${partCount === 1 ? "" : "s"} scheduled`;
+		  badge.classList.add("bad");
+		  // visually: "⚠ 1 participant" or "⚠ 2 participants"
+		  badge.textContent = `⚠ ${partCount} participant${partCount === 1 ? "" : "s"}`;
+		  // accessibility: screen-readers will announce the same phrase
+		  badge.setAttribute('aria-label', `${partCount} participant${partCount === 1 ? "" : "s"}`);
+		  badge.setAttribute('role', 'status');
         }else if(s.person){
           badge.classList.add("good");
           badge.textContent = "Scheduled";
