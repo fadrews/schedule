@@ -1189,6 +1189,12 @@ async function apiPost(action, payload = {}) {
       await apiPost("saveSlot", payload);
       setBackendStatus(true);
       markUpdated("Saved");
+    // Immediately reload authoritative data for this week
+    try {
+      await loadWeekFromBackend({ silent: true });
+    } catch (e) {
+      console.warn("Post-save refresh failed:", e);
+    }  
     }catch(e){
       setBackendStatus(false);
       toast(`Save failed: ${e.message}. (Hit Refresh after unblocking.)`, "bad");
@@ -1502,6 +1508,7 @@ async function apiPost(action, payload = {}) {
 </script>
 </body>
 </html>
+
 
 
 
