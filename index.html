@@ -1093,54 +1093,43 @@ async function apiPost(action, payload = {}) {
   }
 
   async function loadWeekFromBackend({ silent=false } = {}) {
-  const { year, term, weekStartISO } = state.settings;
-  let raw;
-  try {
-    raw = await apiPost("loadWeek", { year, term, weekStartISO });
-  } catch (err) {
-    // apiPost should already log useful info; mark offline and surface toast
-    setBackendStatus(false);
-    if (!silent) toast(`Load failed: ${err.message}`, "bad");
-    throw err;
-  }
-
-  // Helpful debug: inspect the top-level structure in the console so you can
-  // copy/paste it when debugging server-side.
-  console.info("loadWeek: raw response shape:", raw);
-
-  // Normalize possible server shapes into expected object: { scopeKey: "...", slots: {...} }
-  // Cases handled:
-  //  - { ok: true, data: { ... } }                -> raw.data
-  //  - { rows: [...] } or { data: { rows: [...] } } -> convert rows -> slots map
-  //  - direct { scopeKey: ..., slots: ... }        -> raw or raw.data
-  let payload = null;
-
-  if (raw && typeof raw === "object" && raw.data && typeof raw.data === "object") {
-    payload = raw.data;
-  } else if (raw && typeof raw === "object" && raw.scopeKey && raw.slots) {
-    // already the expected shape
-    payload = raw;
-  } else if (raw && typeof raw === "object" && Array.isArray(raw.rows)) {
-    // convert rows array -> expected map shape used by applyWeekFromBackend
-    // rows look like: { scopeKey, range, context, day, time, person, participantScheduled, participantCount }
-    const rows = raw.rows;
-    // choose scopeKey from first row where present, otherwise construct from request
-    const scopeKey = rows.length ? rows[0].scopeKey || `${year}::${term}::${weekStartISO}` : `${year}::${term}::${weekStartISO}`;
-    const slots = {};
-    for (const r of rows) {
-      // key in client code expected to be `${range}::${context}::${day}::${time}`
-      const key = `${r.range || ""}::${r.context || ""}::${r.day || ""}::${r.time || ""}`;
-      slots[key] = {
-        person: r.person || "",
-        participantScheduled: !!r.participantScheduled,
-        participantCount: Number(r.participantCount || 0)
-      };
+    const { year, term, weekStartISO } = state.settings;
+    const requestedScopeKey = `${year}::${term}::${weekStartISO}`;
+  
+    let raw;
+    try {
+      raw = await apiPost("loadWeek", { year, term, weekStartISO });
+      setBackendStatus(true);
+    } catch (e) {
+      setBackendStatus(false);
+      throw e;
     }
-    payload = { scopeKey, slots };
-  } else if (raw && typeof raw === "object" && raw.data && Array.isArray(raw.data.rows)) {
-    // same conversion for raw.data.rows
-    const rows = raw.data.rows;
-    const scopeKey = rows.length ? rows[0].scopeKey || `${year}::${term}::${weekStartISO}` : `${year}::${term}::${weekStartISO}`;
+  
+    // Normalize rows regardless of backend shape
+    let rows = [];
+    if (raw && Array.isArray(raw.rows)) {
+      rows = raw.rows;
+    } else if (raw && raw.data && Array.isArray(raw.data.rows)) {
+      rows = raw.data.rows;
+    } else if (raw && raw.data && raw.data.slots && typeof raw.data.slots === "object") {
+      // if backend returned slot map already, convert to rows
+      rows = Object.keys(raw.data.slots).map(k => {
+        const [range, context, day, time] = k.split("::");
+        const v = raw.data.slots[k] || {};
+        return {
+          scopeKey: raw.data.scopeKey || requestedScopeKey,
+          range, context, day, time,
+          person: v.person || "",
+          participantScheduled: !!v.participantScheduled,
+          participantCount: Number(v.participantCount || 0)
+        };
+      });
+    }
+  
+    // Defensive: keep only rows for the requested scope
+    rows = (rows || []).filter(r => String(r.scopeKey || '').trim() === requestedScopeKey);
+  
+    // Build the canonical slots map expected by applyWeekFromBackend
     const slots = {};
     for (const r of rows) {
       const key = `${r.range || ""}::${r.context || ""}::${r.day || ""}::${r.time || ""}`;
@@ -1150,15 +1139,20 @@ async function apiPost(action, payload = {}) {
         participantCount: Number(r.participantCount || 0)
       };
     }
-    payload = { scopeKey, slots };
-  }
-
-  if (!payload || !payload.scopeKey || !payload.slots) {
-    setBackendStatus(false);
-    const msg = "Backend returned unexpected payload for loadWeek (unable to normalize).";
-    console.error(msg, { raw });
-    if (!silent) toast(msg, "bad");
-    throw new Error(msg);
+  
+    // Apply into the current client scope (overwrite this scope's slots)
+    const payload = { scopeKey: requestedScopeKey, slots };
+    try {
+      applyWeekFromBackend(payload);
+      renderAll();
+      markUpdated("Loaded");
+      if (!silent) toast("Refreshed from shared Sheet.", "good");
+    } catch (e) {
+      // Something went wrong while applying / rendering
+      console.error('loadWeekFromBackend: apply/render failed', e);
+      setBackendStatus(false);
+      throw e;
+    }
   }
 
   // success path
@@ -1512,6 +1506,7 @@ async function apiPost(action, payload = {}) {
 </script>
 </body>
 </html>
+
 
 
 
