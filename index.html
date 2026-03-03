@@ -1092,16 +1092,82 @@ async function apiPost(action, payload = {}) {
     renderAll();
   }
 
-  async function loadWeekFromBackend({ silent=false } = {}){
-    const { year, term, weekStartISO } = state.settings;
-    const data = await apiPost("loadWeek", { year, term, weekStartISO });
-    setBackendStatus(true);
-    applyWeekFromBackend(data.data);
-    renderAll();
-    markUpdated("Loaded");
-    if(!silent) toast("Refreshed from shared Sheet.", "good");
+  async function loadWeekFromBackend({ silent=false } = {}) {
+  const { year, term, weekStartISO } = state.settings;
+  let raw;
+  try {
+    raw = await apiPost("loadWeek", { year, term, weekStartISO });
+  } catch (err) {
+    // apiPost should already log useful info; mark offline and surface toast
+    setBackendStatus(false);
+    if (!silent) toast(`Load failed: ${err.message}`, "bad");
+    throw err;
   }
 
+  // Helpful debug: inspect the top-level structure in the console so you can
+  // copy/paste it when debugging server-side.
+  console.info("loadWeek: raw response shape:", raw);
+
+  // Normalize possible server shapes into expected object: { scopeKey: "...", slots: {...} }
+  // Cases handled:
+  //  - { ok: true, data: { ... } }                -> raw.data
+  //  - { rows: [...] } or { data: { rows: [...] } } -> convert rows -> slots map
+  //  - direct { scopeKey: ..., slots: ... }        -> raw or raw.data
+  let payload = null;
+
+  if (raw && typeof raw === "object" && raw.data && typeof raw.data === "object") {
+    payload = raw.data;
+  } else if (raw && typeof raw === "object" && raw.scopeKey && raw.slots) {
+    // already the expected shape
+    payload = raw;
+  } else if (raw && typeof raw === "object" && Array.isArray(raw.rows)) {
+    // convert rows array -> expected map shape used by applyWeekFromBackend
+    // rows look like: { scopeKey, range, context, day, time, person, participantScheduled, participantCount }
+    const rows = raw.rows;
+    // choose scopeKey from first row where present, otherwise construct from request
+    const scopeKey = rows.length ? rows[0].scopeKey || `${year}::${term}::${weekStartISO}` : `${year}::${term}::${weekStartISO}`;
+    const slots = {};
+    for (const r of rows) {
+      // key in client code expected to be `${range}::${context}::${day}::${time}`
+      const key = `${r.range || ""}::${r.context || ""}::${r.day || ""}::${r.time || ""}`;
+      slots[key] = {
+        person: r.person || "",
+        participantScheduled: !!r.participantScheduled,
+        participantCount: Number(r.participantCount || 0)
+      };
+    }
+    payload = { scopeKey, slots };
+  } else if (raw && typeof raw === "object" && raw.data && Array.isArray(raw.data.rows)) {
+    // same conversion for raw.data.rows
+    const rows = raw.data.rows;
+    const scopeKey = rows.length ? rows[0].scopeKey || `${year}::${term}::${weekStartISO}` : `${year}::${term}::${weekStartISO}`;
+    const slots = {};
+    for (const r of rows) {
+      const key = `${r.range || ""}::${r.context || ""}::${r.day || ""}::${r.time || ""}`;
+      slots[key] = {
+        person: r.person || "",
+        participantScheduled: !!r.participantScheduled,
+        participantCount: Number(r.participantCount || 0)
+      };
+    }
+    payload = { scopeKey, slots };
+  }
+
+  if (!payload || !payload.scopeKey || !payload.slots) {
+    setBackendStatus(false);
+    const msg = "Backend returned unexpected payload for loadWeek (unable to normalize).";
+    console.error(msg, { raw });
+    if (!silent) toast(msg, "bad");
+    throw new Error(msg);
+  }
+
+  // success path
+  setBackendStatus(true);
+  applyWeekFromBackend(payload);
+  renderAll();
+  markUpdated("Loaded");
+  if (!silent) toast("Refreshed from shared Sheet.", "good");
+}
   async function saveSlotToBackend(slot, { optimistic } = { optimistic: true }){
     const { year, term, weekStartISO, yourName } = state.settings;
     const scopeKeyVal = `${year}::${term}::${weekStartISO}`;
@@ -1446,6 +1512,7 @@ async function apiPost(action, payload = {}) {
 </script>
 </body>
 </html>
+
 
 
 
