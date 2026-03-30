@@ -519,12 +519,9 @@
   let adminSettings = loadAdminSettings();
 
   // compute effective API URL based on admin settings
-  function getEffectiveApiUrl(){
-    // If useProxy is true, use relative path so Vercel proxy handles it.
-    if(adminSettings.useProxy) return "/api/exec";
-    // otherwise, use the configured backendUrl (Apps Script)
-    return adminSettings.backendUrl || FALLBACK_APPS_SCRIPT_URL;
-  }
+function getEffectiveApiUrl(){
+  return "https://schedule-two-teal.vercel.app/api/exec";
+}
 
 // =============================
 // API (use JSON; credentials only for same-origin proxy)
